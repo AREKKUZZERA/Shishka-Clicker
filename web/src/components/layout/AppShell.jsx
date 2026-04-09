@@ -46,7 +46,7 @@ export function AppShell() {
       <div className="noise-overlay" />
 
       <div className="app-content">
-        <Header user={user} />
+        <Header />
         <main className="app-main">
           {activeTab !== 'clicker' && <StatsBar />}
           <Suspense fallback={<ScreenFallback />}>

@@ -1,48 +1,20 @@
-import { useGameContext } from '../../context/GameContext'
-import { formatNumber } from '../../lib/format'
+const CHANGELOG_URL = 'https://github.com/AREKKUZZERA/Shishka-Clicker/releases'
 
-export function Header({ user }) {
-  const { state } = useGameContext()
-
+export function Header() {
   return (
     <header className="app-header">
       <div className="app-header__glow" />
       <div className="app-header__inner">
-        <div className="app-header__brand">
-          <div className="app-header__kicker">Шишка кликер · v3 rebirth</div>
-          <h1 className="app-header__title">Шишки онлайн!</h1>
-          <p className="app-header__sub">Добывай шишки, качай AI, лови мега-клики и уходи в престиж</p>
-        </div>
+        <h1 className="app-header__title">Шишки онлайн!</h1>
 
-        <div className="app-header__side">
-          <div className="app-header__session">
-            {user ? (
-              <>
-                <div className="session-badge">
-                  <span className="session-badge__dot session-badge__dot--live" />
-                  Discord Activity
-                </div>
-                <div className="session-badge__name">{user.username}</div>
-              </>
-            ) : (
-              <>
-                <div className="session-badge">
-                  <span className="session-badge__dot" />
-                  Локальная сессия
-                </div>
-                <div className="session-badge__hint">Браузер · autosave</div>
-              </>
-            )}
-          </div>
-
-          <div className="app-header__session">
-            <div className="session-badge">
-              <span className="session-badge__dot session-badge__dot--live" />
-              Престиж
-            </div>
-            <div className="session-badge__name">x{formatNumber(state.prestigeMultiplier)} · {formatNumber(state.prestigeShards)} оск.</div>
-          </div>
-        </div>
+        <a
+          className="app-header__link"
+          href={CHANGELOG_URL}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Последние changelog-и
+        </a>
       </div>
     </header>
   )
