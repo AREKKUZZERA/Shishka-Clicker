@@ -60,7 +60,13 @@
 
   /* Layout */
   --max-w: 82rem;
-  --nav-h: 80px;
+  --nav-h: 112px;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --nav-h: 124px;
+  }
 }
 
 /* ─── Reset & Base ──────────────────────────────────────────── */
@@ -113,17 +119,17 @@ img { display: block; }
 .app-content {
   max-width: var(--max-w);
   margin: 0 auto;
-  padding: 1.5rem 1rem calc(var(--nav-h) + 2rem);
+  padding: 1.5rem 1rem calc(var(--nav-h) + 2.5rem + env(safe-area-inset-bottom, 0px));
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
 
 @media (min-width: 768px) {
-  .app-content { padding: 2rem 1.5rem calc(var(--nav-h) + 2rem); }
+  .app-content { padding: 2rem 1.5rem calc(var(--nav-h) + 2.5rem + env(safe-area-inset-bottom, 0px)); }
 }
 @media (min-width: 1280px) {
-  .app-content { padding: 2.5rem 2rem calc(var(--nav-h) + 2rem); }
+  .app-content { padding: 2.5rem 2rem calc(var(--nav-h) + 2.5rem + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ─── Ambient Background ────────────────────────────────────── */
@@ -989,9 +995,14 @@ img { display: block; }
   position: fixed;
   bottom: 0; left: 0; right: 0;
   z-index: 100;
-  padding: 0.75rem 1rem 1rem;
+  padding: 0.65rem 1rem calc(0.95rem + env(safe-area-inset-bottom, 0px));
   display: flex;
   justify-content: center;
+  pointer-events: none;
+}
+.bottom-nav__track,
+.bottom-nav__btn {
+  pointer-events: auto;
 }
 .bottom-nav__track {
   display: flex;
