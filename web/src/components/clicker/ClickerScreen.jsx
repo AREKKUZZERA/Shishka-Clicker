@@ -29,18 +29,20 @@ export function ClickerScreen() {
           <div className="clicker-panel">
             <div className="clicker-panel__head">
               <span className="clicker-panel__kicker">Текущие показатели</span>
-              <h3 className="clicker-panel__title">Все ключевые stat-card под рукой</h3>
+              <h3 className="clicker-panel__title">Все ключевые stat-card рядом с кликером</h3>
             </div>
 
             <div className="clicker-stats-stack">
               {stats.map((item, index) => (
-                <StatCard key={item.label} {...item} delay={index} />
+                <StatCard key={item.label} {...item} delay={index} compact />
               ))}
             </div>
           </div>
-
-          <ProgressOverview />
         </div>
+      </div>
+
+      <div className="clicker-below">
+        <ProgressOverview />
       </div>
     </section>
   )
