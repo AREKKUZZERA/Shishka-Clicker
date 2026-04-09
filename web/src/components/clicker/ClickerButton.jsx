@@ -34,7 +34,7 @@ export function ClickerButton() {
 
   return (
     <div ref={containerRef} className="clicker-wrap">
-      <button
+      <div
         className="clicker-btn"
         onClick={handleClick}
         onKeyDown={preventKeyboard}
@@ -51,7 +51,7 @@ export function ClickerButton() {
         />
         <div className="clicker-btn__label">Кликни и добудь вышку</div>
         <div className="clicker-btn__sub">За клик: +{formatNumber(state.clickPower)} 🌰</div>
-      </button>
+      </div>
 
       <ClickBurst bursts={bursts} />
     </div>
