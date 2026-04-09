@@ -342,8 +342,7 @@ function App() {
                   <div className="metric-pill">Всего шишек: {formatNumber(state.totalShishkiEarned)}</div>
                   <div className="metric-pill">Всего денег: {formatNumber(state.totalMoneyEarned)}</div>
                   <div className="metric-pill">Всего знаний: {formatNumber(state.totalKnowledgeEarned)}</div>
-                  <div className="metric-pill metric-pill--accent">Баланс вынесен в <b>BALANCE</b> и управляется из одного места.</div>
-                </div>
+                 </div>
 
                 <button className="danger-button mt-5" onClick={resetGame}>
                   Сбросить прогресс

@@ -12,9 +12,6 @@ export function StatCard({ label, value, hint, contributions, delay = 0 }) {
     <div className="stat-card glass-panel rounded-3xl p-4 text-left shadow-sm backdrop-blur-sm" style={{ animationDelay: `${delay * DESIGN_SYSTEM.motion.cardStaggerMs}ms` }}>
       <div className="flex items-start justify-between gap-3">
         <div className="stat-card__label text-sm text-white/60">{label}</div>
-        <div className="stat-card__live rounded-full border border-white/10 bg-white/6 px-2.5 py-1 text-[10px] font-semibold uppercase text-white/50">
-          {DESIGN_SYSTEM.content.statLiveLabel}
-        </div>
       </div>
 
       <div className="stat-card__value mt-3 text-3xl font-black text-white">{formatNumber(value)}</div>
