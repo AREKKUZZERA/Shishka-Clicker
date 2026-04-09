@@ -6,11 +6,11 @@ export function useBursts() {
   useEffect(() => {
     if (!bursts.length) return
 
-    const timeout = window.setTimeout(() => {
+    const timeout = setTimeout(() => {
       setBursts((current) => current.slice(1))
-    }, 650)
+    }, 1000)
 
-    return () => window.clearTimeout(timeout)
+    return () => clearTimeout(timeout)
   }, [bursts])
 
   function addBurst(x, y, value) {

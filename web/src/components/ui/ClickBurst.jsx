@@ -2,7 +2,7 @@ export function ClickBurst({ bursts }) {
   if (!bursts.length) return null
 
   return (
-    <div className="bursts-layer">
+    <div className="bursts-layer fixed">
       {bursts.map((burst) => (
         <span
           key={burst.id}

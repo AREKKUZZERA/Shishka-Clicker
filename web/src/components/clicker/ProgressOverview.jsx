@@ -61,7 +61,7 @@ export function ProgressOverview() {
         <div className="progress-loop__title">Петля прогресса</div>
         <div className="progress-loop__steps">
           <div className="loop-step"><b>1.</b> Кликаешь → добываешь <b>🌰 шишки</b></div>
-          <div className="loop-step"><b>2.</b> Подписки генерируют <b>💵 деньги</b> и знания</div>
+          <div className="loop-step"><b>2.</b> Подписки генерируют <b>💵 деньги</b> и <b>📚 знания</b></div>
           <div className="loop-step"><b>3.</b> AI открывает поздние тиры через <b>📚 знания</b></div>
         </div>
       </div>
