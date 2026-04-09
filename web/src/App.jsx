@@ -3,6 +3,7 @@ import { setupDiscord } from './discord'
 import { useGame } from './game/useGame'
 import { StatCard } from './components/StatCard'
 import { ShopCard } from './components/ShopCard'
+import { ShopSection } from './components/ShopSection'
 import hero from './assets/hero.png'
 import { formatNumber } from './lib/format'
 import {
@@ -19,32 +20,19 @@ import {
 const THEME_OVERRIDES_STORAGE_KEY = 'shishka-theme-overrides-v1'
 const THEME_PRESET_STORAGE_KEY = 'shishka-theme-custom-presets-v1'
 
-function getStorageItem(key) {
-  if (typeof window === 'undefined') return null
-  return window.localStorage.getItem(key)
-}
-
 function readJsonStorage(key, fallback) {
   try {
-    const raw = getStorageItem(key)
+    const raw = window.localStorage.getItem(key)
     return raw ? JSON.parse(raw) : fallback
   } catch {
     return fallback
   }
 }
 
-function clonePlainObject(value) {
-  if (typeof structuredClone === 'function') {
-    return structuredClone(value)
-  }
-
-  return JSON.parse(JSON.stringify(value))
-}
-
 function App() {
   const [user, setUser] = useState(null)
   const [bursts, setBursts] = useState([])
-  const [themeId, setThemeId] = useState(() => getStorageItem('shishka-theme') || DEFAULT_THEME_ID)
+  const [themeId, setThemeId] = useState(() => window.localStorage.getItem('shishka-theme') || DEFAULT_THEME_ID)
   const [themeOverrides, setThemeOverrides] = useState(() => readJsonStorage(THEME_OVERRIDES_STORAGE_KEY, {}))
   const [customPresets, setCustomPresets] = useState(() => readJsonStorage(THEME_PRESET_STORAGE_KEY, []))
   const [presetName, setPresetName] = useState('')
@@ -53,17 +41,7 @@ function App() {
   const { state, economy, contributions, mineShishki, buySubscription, buyUpgrade, resetGame } = useGame()
 
   useEffect(() => {
-    let isMounted = true
-
-    setupDiscord().then((discordUser) => {
-      if (isMounted) {
-        setUser(discordUser)
-      }
-    })
-
-    return () => {
-      isMounted = false
-    }
+    setupDiscord().then(setUser)
   }, [])
 
   useEffect(() => {
@@ -77,12 +55,10 @@ function App() {
   }, [bursts])
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
     window.localStorage.setItem(THEME_OVERRIDES_STORAGE_KEY, JSON.stringify(themeOverrides))
   }, [themeOverrides])
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
     window.localStorage.setItem(THEME_PRESET_STORAGE_KEY, JSON.stringify(customPresets))
   }, [customPresets])
 
@@ -111,9 +87,7 @@ function App() {
   }, [isThemeSectionOpen])
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem('shishka-theme', themeId)
-    }
+    window.localStorage.setItem('shishka-theme', themeId)
 
     const root = document.documentElement
     const vars = buildDesignVars(activeTheme)
@@ -143,14 +117,19 @@ function App() {
   )
 
   function handleMine(event) {
+    if (event.detail === 0) {
+      event.preventDefault()
+      return
+    }
+
     mineShishki()
 
     const container = clickerRef.current
     if (!container) return
 
     const rect = container.getBoundingClientRect()
-    const relativeX = event.clientX - rect.left
-    const relativeY = event.clientY - rect.top
+    const relativeX = Number.isFinite(event.clientX) ? event.clientX - rect.left : rect.width / 2
+    const relativeY = Number.isFinite(event.clientY) ? event.clientY - rect.top : rect.height / 2
 
     setBursts((current) => [
       ...current,
@@ -161,6 +140,12 @@ function App() {
         value: `+${formatNumber(state.clickPower)}`,
       },
     ])
+  }
+
+  function preventMineKeyboardExploit(event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+    }
   }
 
   function updateThemeField(path, rawValue) {
@@ -190,7 +175,7 @@ function App() {
       id: `custom-${Date.now()}`,
       name: normalizedName,
       baseThemeId: themeId,
-      overrides: clonePlainObject(currentOverride),
+      overrides: currentOverride,
     }
 
     setCustomPresets((current) => [preset, ...current])
@@ -201,7 +186,7 @@ function App() {
     setThemeId(preset.baseThemeId)
     setThemeOverrides((current) => ({
       ...current,
-      [preset.baseThemeId]: clonePlainObject(preset.overrides || {}),
+      [preset.baseThemeId]: preset.overrides || {},
     }))
   }
 
@@ -316,7 +301,7 @@ function App() {
 
             <div className="relative grid gap-6 md:grid-cols-[0.95fr_1.05fr] md:items-center">
               <div ref={clickerRef} className="relative">
-                <button type="button" className="clicker-button group" onClick={handleMine}>
+                <button type="button" className="clicker-button group" onClick={handleMine} onKeyDown={preventMineKeyboardExploit}>
                   <div className="clicker-button__halo" />
                   <div className="clicker-button__ring clicker-button__ring--outer" />
                   <div className="clicker-button__ring clicker-button__ring--inner" />
@@ -571,56 +556,47 @@ function App() {
         </section>
 
         <section className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr]">
-          <div className="glass-panel rounded-[2rem] p-5 shadow-2xl">
-            <div className="text-left">
-              <div className="section-kicker text-sm uppercase text-fuchsia-200/80">Подписки</div>
-              <h2 className="mt-2 text-2xl font-bold">AI-сервисы</h2>
-              <p className="mt-2 text-sm text-white/60">
-                Новые сервисы открываются по суммарно добытым шишкам и знаниям, чтобы экономику не разгоняло слишком рано.
-              </p>
-            </div>
+          <ShopSection
+            kicker="Подписки"
+            title="AI-сервисы"
+            description="Новые сервисы открываются по суммарно добытым шишкам и знаниям, чтобы экономику не разгоняло слишком рано."
+            accent="fuchsia"
+          >
+            {economy.subscriptions.map((item, index) => (
+              <ShopCard
+                key={item.id}
+                item={item}
+                level={item.level}
+                cost={item.cost}
+                canBuy={state.money >= item.cost}
+                onBuy={() => buySubscription(item.id)}
+                delay={index}
+              />
+            ))}
+          </ShopSection>
 
-            <div className="mt-4 grid gap-4">
-              {economy.subscriptions.map((item, index) => (
+          <ShopSection
+            kicker="Апгрейды"
+            title="Инвестиции и исследования"
+            description="Часть улучшений живет в поздних тирах и открывается только после реального прогресса по шишкам и знаниям."
+            accent="cyan"
+            columns="double"
+          >
+            {economy.upgrades.map((item, index) => {
+              const balance = state[item.currency]
+              return (
                 <ShopCard
                   key={item.id}
                   item={item}
                   level={item.level}
                   cost={item.cost}
-                  canBuy={state.money >= item.cost}
-                  onBuy={() => buySubscription(item.id)}
+                  canBuy={balance >= item.cost}
+                  onBuy={() => buyUpgrade(item.id)}
                   delay={index}
                 />
-              ))}
-            </div>
-          </div>
-
-          <section className="glass-panel rounded-[2rem] p-5 shadow-2xl">
-            <div className="text-left">
-              <div className="section-kicker text-sm uppercase text-cyan-200/80">Апгрейды</div>
-              <h2 className="mt-2 text-2xl font-bold">Инвестиции и исследования</h2>
-              <p className="mt-2 text-sm text-white/60">
-                Часть улучшений живет в поздних тирах и открывается только после реального прогресса по шишкам и знаниям.
-              </p>
-            </div>
-
-            <div className="mt-4 grid gap-4 lg:grid-cols-2">
-              {economy.upgrades.map((item, index) => {
-                const balance = state[item.currency]
-                return (
-                  <ShopCard
-                    key={item.id}
-                    item={item}
-                    level={item.level}
-                    cost={item.cost}
-                    canBuy={balance >= item.cost}
-                    onBuy={() => buyUpgrade(item.id)}
-                    delay={index}
-                  />
-                )
-              })}
-            </div>
-          </section>
+              )
+            })}
+          </ShopSection>
         </section>
       </div>
     </div>

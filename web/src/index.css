@@ -357,6 +357,36 @@ a {
   opacity: 1;
 }
 
+.shop-card__content {
+  flex: 1;
+  align-content: start;
+}
+
+.shop-card__info,
+.shop-card__status,
+.shop-card__lock {
+  min-height: 5.75rem;
+}
+
+.shop-card__category,
+.shop-card__currency {
+  letter-spacing: 0.12em;
+}
+
+.shop-card__footer {
+  margin-top: auto;
+}
+
+.shop-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shop-section__header {
+  min-height: 6.5rem;
+}
+
 .shop-button {
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.08);
