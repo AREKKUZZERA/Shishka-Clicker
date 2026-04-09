@@ -1,0 +1,27 @@
+import { useNav } from '../../context/NavContext'
+
+export function BottomNav() {
+  const { activeTab, setActiveTab, tabs } = useNav()
+
+  return (
+    <nav className="bottom-nav" aria-label="Разделы игры">
+      <div className="bottom-nav__track">
+        {tabs.map((tab) => {
+          const isActive = tab.id === activeTab
+          return (
+            <button
+              key={tab.id}
+              className={`bottom-nav__btn ${isActive ? 'bottom-nav__btn--active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+              aria-pressed={isActive}
+            >
+              <span className="bottom-nav__icon">{tab.icon}</span>
+              <span className="bottom-nav__label">{tab.label}</span>
+              {isActive && <span className="bottom-nav__pip" />}
+            </button>
+          )
+        })}
+      </div>
+    </nav>
+  )
+}
