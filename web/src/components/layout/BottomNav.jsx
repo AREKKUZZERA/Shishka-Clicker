@@ -4,7 +4,7 @@ import switchSound from '../../assets/wpn_select.mp3'
 
 export function BottomNav() {
   const { activeTab, setActiveTab, tabs } = useNav()
-  const { play } = useSound(switchSound)
+  const { play } = useSound(switchSound, { volume: 0.1 })
 
   const handleTabChange = (tabId) => {
     if (tabId !== activeTab) {
