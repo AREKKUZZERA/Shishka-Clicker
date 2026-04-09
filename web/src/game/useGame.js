@@ -86,6 +86,9 @@ function unlockAchievements(current) {
         id: achievement.id,
         title: achievement.title,
         description: achievement.description,
+        category: achievement.category,
+        tier: achievement.tier,
+        secret: achievement.secret,
       })
     }
   })
@@ -182,7 +185,7 @@ export function useGame() {
     const isMega = Math.random() < megaClickChance
     const isEmojiBurst = isMega && Math.random() < getMegaEmojiChance(state)
     const emoji = isEmojiBurst ? getRandomMegaEmoji() : '🌰'
-
+    const emojiExplosionPool = ['🤡', '🌸', '🤖', '👾', '💥', '🛸', '🎉', '🦄', '🪩', '⚡']
     let burstValue = ''
 
     setState((current) => {
@@ -210,9 +213,10 @@ export function useGame() {
 
     return {
       amount: burstValue,
-      particleCount: Math.max(2, Math.min(24, Math.ceil((state.clickPower * (isMega ? 2.4 : 1)) / 1.8))),
-      symbol: emoji,
+      particleCount: Math.max(4, Math.min(isEmojiBurst ? 40 : 28, Math.ceil((state.clickPower * (isMega ? 2.8 : 1.2)) / 1.4))),
+      symbols: isEmojiBurst ? emojiExplosionPool : isMega ? [emoji, '⚡', '🌰', '✨'] : [emoji, '🌰'],
       isMega,
+      isEmojiExplosion: isEmojiBurst,
     }
   }
 

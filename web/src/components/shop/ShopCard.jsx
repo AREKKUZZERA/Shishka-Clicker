@@ -34,10 +34,12 @@ export function ShopCard({ item, canBuy, onBuy, delay = 0 }) {
 
   return (
     <article
-      className={`shop-card ${isLocked ? 'shop-card--locked' : ''} ${canBuy && !isLocked ? 'shop-card--can-buy' : ''}`}
+      className={`shop-card ${item.currency === 'money' ? 'shop-card--money' : item.currency === 'knowledge' ? 'shop-card--knowledge' : 'shop-card--shishki'} ${isLocked ? 'shop-card--locked' : ''} ${canBuy && !isLocked ? 'shop-card--can-buy' : ''}`}
       style={{ animationDelay: `${delay * 50}ms` }}
+      tabIndex={0}
     >
       <div className="shop-card__glow" />
+      <div className="shop-card__shine" />
 
       <div className="shop-card__head">
         <div className="shop-card__meta">

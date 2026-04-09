@@ -21,11 +21,13 @@ export function AchievementToast() {
   if (!current) return null
 
   return (
-    <div className="achievement-toast" role="status" aria-live="polite">
-      <div className="achievement-toast__steam">ACHIEVEMENT UNLOCKED</div>
-      <div className="achievement-toast__icon">🏆</div>
+    <div className={`achievement-toast ${current.secret ? 'achievement-toast--secret' : ''}`} role="status" aria-live="polite">
+      <div className="achievement-toast__steam">{current.secret ? 'SECRET ACHIEVEMENT' : 'ACHIEVEMENT UNLOCKED'}</div>
+      <div className="achievement-toast__icon">{current.secret ? '🕵️' : '🏆'}</div>
       <div className="achievement-toast__body">
-        <div className="achievement-toast__label">Достижение получено</div>
+        <div className="achievement-toast__label">
+          {current.category ?? 'Достижение'} · ур. {current.tier ?? 1}
+        </div>
         <div className="achievement-toast__title">{current.title}</div>
         <div className="achievement-toast__desc">{current.description}</div>
       </div>

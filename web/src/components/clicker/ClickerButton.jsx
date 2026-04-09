@@ -9,45 +9,51 @@ import vityaImage from '../../assets/v4.png'
 import coneImage from '../../assets/cone.png'
 import shishkaSound from '../../assets/audio/ui/shishka.mp3'
 
-function createParticles(localX, localY, amount, symbol, isMega) {
+function pickRandom(pool) {
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
+function createParticles(localX, localY, amount, symbols, isMega, isEmojiExplosion) {
   const now = Date.now()
-  const capped = Math.min(28, amount)
+  const capped = Math.min(isEmojiExplosion ? 44 : 32, amount)
+  const pool = Array.isArray(symbols) ? symbols : [symbols]
 
   return Array.from({ length: capped }, (_, index) => {
-    const angle = (Math.PI * 2 * index) / capped + Math.random() * 0.45
-    const distance = 20 + Math.random() * (isMega ? 120 : 70)
+    const angle = (Math.PI * 2 * index) / capped + Math.random() * 0.55
+    const distance = (isEmojiExplosion ? 80 : 22) + Math.random() * (isMega ? 165 : 92)
 
     return {
       id: `${now}-${index}-${Math.random().toString(36).slice(2)}`,
       x: localX,
       y: localY,
       dx: Math.cos(angle) * distance,
-      dy: Math.sin(angle) * distance - (isMega ? 25 : 10),
-      rotate: Math.round((Math.random() - 0.5) * 180),
-      scale: 0.75 + Math.random() * (isMega ? 0.9 : 0.45),
-      symbol,
+      dy: Math.sin(angle) * distance - (isMega ? 38 : 14),
+      rotate: Math.round((Math.random() - 0.5) * (isEmojiExplosion ? 440 : 240)),
+      scale: 0.82 + Math.random() * (isEmojiExplosion ? 1.2 : isMega ? 0.9 : 0.45),
+      symbol: pickRandom(pool),
       isMega,
+      isEmojiExplosion,
     }
   })
 }
 
 function createConeSprites(localX, localY, amount, isMega) {
   const now = Date.now()
-  const total = isMega ? amount + 2 : amount
+  const total = isMega ? amount + 3 : amount + 1
 
   return Array.from({ length: total }, (_, index) => {
-    const angle = (-Math.PI / 2) + (Math.random() - 0.5) * 1.8
-    const distance = 42 + Math.random() * (isMega ? 120 : 72)
+    const angle = (-Math.PI / 2) + (Math.random() - 0.5) * 2.2
+    const distance = 56 + Math.random() * (isMega ? 165 : 84)
 
     return {
       id: `cone-${now}-${index}-${Math.random().toString(36).slice(2)}`,
       x: localX,
       y: localY,
       dx: Math.cos(angle) * distance,
-      dy: -18 - Math.abs(Math.sin(angle) * distance),
+      dy: -24 - Math.abs(Math.sin(angle) * distance),
       rotateStart: Math.round(Math.random() * 180),
-      rotateEnd: Math.round((Math.random() - 0.5) * 560),
-      scale: 0.5 + Math.random() * (isMega ? 0.8 : 0.45),
+      rotateEnd: Math.round((Math.random() - 0.5) * 720),
+      scale: 0.6 + Math.random() * (isMega ? 0.95 : 0.5),
       isMega,
     }
   })
@@ -60,7 +66,7 @@ export function ClickerButton() {
   const { bursts, addBurst } = useBursts()
   const { play } = useSound(shishkaSound, { volume: 0.42 })
 
-  const particleLimitHint = useMemo(() => Math.min(28, Math.ceil(state.clickPower * 1.2)), [state.clickPower])
+  const particleLimitHint = useMemo(() => Math.min(44, Math.ceil(state.clickPower * 1.2)), [state.clickPower])
 
   function handleClick(e) {
     if (e.detail === 0) {
@@ -77,12 +83,12 @@ export function ClickerButton() {
 
     addBurst(localX, localY, result.isMega ? `⚡ ${result.amount}` : `+${formatNumber(state.clickPower)}`)
 
-    const spawned = createParticles(localX, localY, result.particleCount, result.symbol, result.isMega)
-    setParticles((current) => [...current.slice(-40), ...spawned])
+    const spawned = createParticles(localX, localY, result.particleCount, result.symbols, result.isMega, result.isEmojiExplosion)
+    setParticles((current) => [...current.slice(-70), ...spawned])
 
-    const coneBurstCount = result.isMega ? 2 : 1
+    const coneBurstCount = result.isEmojiExplosion ? 4 : result.isMega ? 3 : 1
     const cones = createConeSprites(localX, localY, coneBurstCount, result.isMega)
-    setConeSprites((current) => [...current.slice(-18), ...cones])
+    setConeSprites((current) => [...current.slice(-28), ...cones])
   }
 
   function preventKeyboard(e) {
@@ -103,7 +109,7 @@ export function ClickerButton() {
           {particles.map((particle) => (
             <span
               key={particle.id}
-              className={`clicker-particle ${particle.isMega ? 'clicker-particle--mega' : ''}`}
+              className={`clicker-particle ${particle.isMega ? 'clicker-particle--mega' : ''} ${particle.isEmojiExplosion ? 'clicker-particle--emoji-explosion' : ''}`}
               style={{
                 left: `${particle.x}px`,
                 top: `${particle.y}px`,

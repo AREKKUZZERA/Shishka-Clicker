@@ -57,15 +57,6 @@ export function SettingsScreen() {
     setVolume('musicVolume', value)
   }
 
-  const handleProgressReset = () => {
-    resetGame()
-  }
-
-  const handleFactoryReset = () => {
-    resetGame()
-    resetSettings()
-  }
-
   return (
     <section className="screen settings-screen">
       <div className="screen__glow" />
@@ -125,15 +116,11 @@ export function SettingsScreen() {
         <article className="settings-card settings-card--danger">
           <h3 className="settings-card__title">Игра</h3>
           <p className="settings-card__hint settings-card__hint--block">
-            Быстрый сброс очищает только сохранение игры. Заводской сброс дополнительно возвращает аудио-настройки к значениям по умолчанию.
+            Кнопка ниже очищает только игровое сохранение. Аудио и остальные локальные настройки останутся как есть.
           </p>
 
-          <button type="button" className="reset-btn" onClick={handleProgressReset}>
+          <button type="button" className="reset-btn" onClick={resetGame}>
             Сбросить весь прогресс
-          </button>
-
-          <button type="button" className="settings-ghost-btn settings-ghost-btn--danger" onClick={handleFactoryReset}>
-            Заводской сброс
           </button>
         </article>
       </div>

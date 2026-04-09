@@ -1,14 +1,21 @@
+import { useMemo } from 'react'
 import { useGameContext } from '../../context/GameContext'
 import { formatNumber } from '../../lib/format'
 
 function AchievementCard({ achievement }) {
   return (
-    <article className={`meta-card achievement-card ${achievement.unlocked ? 'achievement-card--done' : ''}`}>
+    <article className={`meta-card achievement-card ${achievement.unlocked ? 'achievement-card--done' : ''} ${achievement.secret ? 'achievement-card--secret' : ''}`}>
       <div className="achievement-card__head">
-        <span>{achievement.unlocked ? '🏆 Открыто' : '🔒 В процессе'}</span>
+        <span>{achievement.category}</span>
+        <span>ур. {achievement.tier}</span>
       </div>
-      <h3 className="achievement-card__title">{achievement.title}</h3>
-      <p className="achievement-card__desc">{achievement.description}</p>
+      <h3 className="achievement-card__title">{achievement.unlocked ? achievement.title : achievement.secret ? '??? Секретное достижение' : achievement.title}</h3>
+      <p className="achievement-card__desc">
+        {achievement.unlocked || !achievement.secret ? achievement.description : 'Откроется только после выполнения скрытого условия.'}
+      </p>
+      <div className="achievement-card__status">
+        {achievement.unlocked ? '🏆 Открыто' : achievement.secret ? '🕶️ Скрыто' : '🔒 В процессе'}
+      </div>
     </article>
   )
 }
@@ -33,9 +40,21 @@ export function MetaScreen() {
   const { state, achievements, prestige, prestigeReset, resetGame } = useGameContext()
   const unlockedCount = achievements.filter((entry) => entry.unlocked).length
 
-  const handleFullReset = () => {
-    resetGame()
-  }
+  const grouped = useMemo(() => {
+    const groups = achievements.reduce((acc, achievement) => {
+      const key = achievement.category ?? 'Разное'
+      if (!acc[key]) acc[key] = []
+      acc[key].push(achievement)
+      return acc
+    }, {})
+
+    return Object.entries(groups).map(([category, items]) => ({
+      category,
+      unlocked: items.filter((entry) => entry.unlocked).length,
+      total: items.length,
+      items: items.sort((a, b) => Number(a.secret) - Number(b.secret) || a.tier - b.tier),
+    }))
+  }, [achievements])
 
   return (
     <section className="screen meta-screen">
@@ -126,18 +145,32 @@ export function MetaScreen() {
           </div>
 
           <div className="meta-card__hint">
-            Добавлено {achievements.length} достижений — теперь мета-прогресс растёт заметно дольше и разнообразнее.
+            Достижения теперь разбиты по категориям и уровням, а секретные цели скрываются до открытия.
           </div>
 
-          <button type="button" className="reset-btn" onClick={handleFullReset}>
+          <button type="button" className="reset-btn" onClick={resetGame}>
             Стереть весь прогресс
           </button>
         </article>
       </div>
 
-      <div className="achievement-grid">
-        {achievements.map((achievement) => (
-          <AchievementCard key={achievement.id} achievement={achievement} />
+      <div className="achievement-category-grid">
+        {grouped.map((group) => (
+          <article key={group.category} className="achievement-category">
+            <div className="achievement-category__head">
+              <div>
+                <div className="achievement-category__kicker">Категория</div>
+                <h3 className="achievement-category__title">{group.category}</h3>
+              </div>
+              <div className="achievement-category__count">{group.unlocked}/{group.total}</div>
+            </div>
+
+            <div className="achievement-grid">
+              {group.items.map((achievement) => (
+                <AchievementCard key={achievement.id} achievement={achievement} />
+              ))}
+            </div>
+          </article>
         ))}
       </div>
     </section>
