@@ -437,14 +437,14 @@ img { display: block; }
     border-color var(--dur-mid) ease;
   user-select: none;
   -webkit-user-select: none;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .clicker-particles {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  overflow: hidden;
+  overflow: visible;
   z-index: 3;
 }
 
@@ -452,7 +452,7 @@ img { display: block; }
   position: absolute;
   inset: 0;
   pointer-events: none;
-  overflow: hidden;
+  overflow: visible;
   border-radius: var(--r-xl);
   z-index: 4;
 }
