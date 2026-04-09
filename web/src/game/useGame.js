@@ -3,6 +3,7 @@ import {
   STARTING_STATE,
   SUBSCRIPTIONS,
   UPGRADES,
+  deriveContributionBreakdown,
   deriveEconomy,
   formatUnlockText,
   getItemEffectPreview,
@@ -75,6 +76,8 @@ export function useGame() {
   useEffect(() => {
     saveGame(state)
   }, [state])
+
+  const contributions = useMemo(() => deriveContributionBreakdown(state), [state])
 
   const economy = useMemo(() => {
     const subscriptions = SUBSCRIPTIONS.map((item) => {
@@ -150,6 +153,7 @@ export function useGame() {
       ...derived,
     },
     economy,
+    contributions,
     mineShishki,
     buySubscription,
     buyUpgrade,

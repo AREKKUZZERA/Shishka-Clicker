@@ -112,9 +112,7 @@ export const BALANCE = {
       tier: 1,
       effectLabel: 'Пассивные шишки/сек',
       unlock: { shishki: 0, knowledge: 0 },
-      effects: [
-        { stat: 'shishkiPerSecond', firstGain: 0.9, decay: 0.97 },
-      ],
+      effects: [{ stat: 'shishkiPerSecond', firstGain: 0.9, decay: 0.97 }],
     },
     internship: {
       id: 'internship',
@@ -126,9 +124,7 @@ export const BALANCE = {
       tier: 2,
       effectLabel: 'Деньги/сек',
       unlock: { shishki: 60, knowledge: 0 },
-      effects: [
-        { stat: 'moneyPerSecond', firstGain: 1.4, decay: 0.97, baseBonus: 1 },
-      ],
+      effects: [{ stat: 'moneyPerSecond', firstGain: 1.4, decay: 0.97, baseBonus: 1 }],
     },
     promptEngineering: {
       id: 'promptEngineering',
@@ -140,9 +136,7 @@ export const BALANCE = {
       tier: 2,
       effectLabel: 'Мягкий множитель AI',
       unlock: { shishki: 0, knowledge: 20 },
-      effects: [
-        { stat: 'clickPower', firstGain: 0.18, decay: 0.94 },
-      ],
+      effects: [{ stat: 'clickPower', firstGain: 0.18, decay: 0.94 }],
     },
     researchLab: {
       id: 'researchLab',
@@ -164,7 +158,6 @@ export const BALANCE = {
 }
 
 export const STARTING_STATE = BALANCE.start
-
 export const SUBSCRIPTIONS = Object.values(BALANCE.subscriptions)
 export const UPGRADES = Object.values(BALANCE.upgrades)
 
@@ -174,6 +167,15 @@ const STAT_META = {
   moneyPerSecond: { label: 'деньги/сек', prefix: '+', suffix: '' },
   knowledgePerSecond: { label: 'знания/сек', prefix: '+', suffix: '' },
   aiMultiplier: { label: 'AI множитель', prefix: 'x', suffix: '' },
+  aiPower: { label: 'AI мощности', prefix: '+', suffix: '' },
+}
+
+const CONTRIBUTION_META = {
+  clickPower: { unit: '/ клик' },
+  shishkiPerSecond: { unit: '/ сек' },
+  moneyPerSecond: { unit: '/ сек' },
+  knowledgePerSecond: { unit: '/ сек' },
+  aiPower: { unit: '' },
 }
 
 function getUnlockRule(id) {
@@ -187,10 +189,8 @@ export function getUnlockStatus(state, id) {
     knowledge: state.totalKnowledgeEarned ?? 0,
   }
 
-  const unlocked = progress.shishki >= rule.shishki && progress.knowledge >= rule.knowledge
-
   return {
-    unlocked,
+    unlocked: progress.shishki >= rule.shishki && progress.knowledge >= rule.knowledge,
     rule,
     progress,
   }
@@ -224,35 +224,33 @@ function applySoftcap(name, value) {
   return softcap(value, cap.threshold, cap.power)
 }
 
-function accumulateEffects(items, levels, aiMultiplier = 1) {
-  return items.reduce(
-    (totals, item) => {
-      const level = levels[item.id] ?? 0
-      if (level <= 0) return totals
-
-      item.effects.forEach((effect) => {
-        const gain = geometricGain(level, effect.firstGain, effect.decay)
-        const scaledGain = effect.aiScaled ? gain * aiMultiplier : gain
-        totals[effect.stat] = (totals[effect.stat] ?? 0) + scaledGain + (effect.baseBonus ?? 0)
-      })
-
-      return totals
-    },
-    {
-      clickPower: 0,
-      shishkiPerSecond: 0,
-      moneyPerSecond: 0,
-      knowledgePerSecond: 0,
-    },
-  )
+function buildBaseTotals() {
+  return {
+    clickPower: 0,
+    shishkiPerSecond: 0,
+    moneyPerSecond: 0,
+    knowledgePerSecond: 0,
+  }
 }
-
 
 function getEffectTotalAtLevel(effect, level, aiMultiplier = 1) {
   if (level <= 0) return 0
   const gain = geometricGain(level, effect.firstGain, effect.decay)
   const scaledGain = effect.aiScaled ? gain * aiMultiplier : gain
   return scaledGain + (effect.baseBonus ?? 0)
+}
+
+function accumulateEffects(items, levels, aiMultiplier = 1) {
+  return items.reduce((totals, item) => {
+    const level = levels[item.id] ?? 0
+    if (level <= 0) return totals
+
+    item.effects.forEach((effect) => {
+      totals[effect.stat] = (totals[effect.stat] ?? 0) + getEffectTotalAtLevel(effect, level, aiMultiplier)
+    })
+
+    return totals
+  }, buildBaseTotals())
 }
 
 function getEffectIncrement(effect, level, aiMultiplier = 1) {
@@ -311,29 +309,143 @@ function deriveAiPower(state) {
   return applySoftcap('aiPower', raw)
 }
 
-export function deriveEconomy(state) {
-  const aiMultiplier = deriveAiMultiplier(state)
-
+function getRawStatTotals(state, aiMultiplier) {
   const upgradeTotals = accumulateEffects(UPGRADES, state.upgrades ?? {}, aiMultiplier)
   const subscriptionTotals = accumulateEffects(SUBSCRIPTIONS, state.subscriptions ?? {}, aiMultiplier)
 
-  const clickPowerRaw = upgradeTotals.clickPower || 1
-  const shishkiPerSecondRaw = upgradeTotals.shishkiPerSecond + subscriptionTotals.shishkiPerSecond
-  const moneyPerSecondRaw = upgradeTotals.moneyPerSecond || 1
-  const knowledgePerSecondRaw = upgradeTotals.knowledgePerSecond + subscriptionTotals.knowledgePerSecond
+  return {
+    clickPower: upgradeTotals.clickPower || 1,
+    shishkiPerSecond: upgradeTotals.shishkiPerSecond + subscriptionTotals.shishkiPerSecond,
+    moneyPerSecond: upgradeTotals.moneyPerSecond || 1,
+    knowledgePerSecond: upgradeTotals.knowledgePerSecond + subscriptionTotals.knowledgePerSecond,
+  }
+}
 
-  const clickPower = applySoftcap('clickPower', clickPowerRaw)
-  const shishkiPerSecond = applySoftcap('shishkiPerSecond', shishkiPerSecondRaw)
-  const moneyPerSecond = applySoftcap('moneyPerSecond', moneyPerSecondRaw)
-  const knowledgePerSecond = applySoftcap('knowledgePerSecond', knowledgePerSecondRaw)
-  const aiPower = deriveAiPower(state)
+function getItemStatTotals(item, level, aiMultiplier) {
+  const totals = buildBaseTotals()
+  if (level <= 0) return totals
+
+  item.effects.forEach((effect) => {
+    totals[effect.stat] = (totals[effect.stat] ?? 0) + getEffectTotalAtLevel(effect, level, aiMultiplier)
+  })
+
+  return totals
+}
+
+function getBaseContributionEntries(rawTotals, finalTotals) {
+  return [
+    {
+      stat: 'clickPower',
+      entry: {
+        id: 'base-click',
+        title: 'Базовый клик',
+        sourceType: 'base',
+        value: rawTotals.clickPower > 0 ? finalTotals.clickPower / rawTotals.clickPower : 0,
+      },
+    },
+    {
+      stat: 'moneyPerSecond',
+      entry: {
+        id: 'base-money',
+        title: 'Базовый доход',
+        sourceType: 'base',
+        value: rawTotals.moneyPerSecond > 0 ? finalTotals.moneyPerSecond / rawTotals.moneyPerSecond : 0,
+      },
+    },
+  ]
+}
+
+export function deriveContributionBreakdown(state) {
+  const aiMultiplier = deriveAiMultiplier(state)
+  const rawTotals = getRawStatTotals(state, aiMultiplier)
+  const rawAiPower = SUBSCRIPTIONS.reduce((sum, item) => {
+    const level = state.subscriptions[item.id] ?? 0
+    return sum + level * (item.aiPowerWeight ?? 0)
+  }, 0)
+
+  const finalTotals = {
+    clickPower: applySoftcap('clickPower', rawTotals.clickPower),
+    shishkiPerSecond: applySoftcap('shishkiPerSecond', rawTotals.shishkiPerSecond),
+    moneyPerSecond: applySoftcap('moneyPerSecond', rawTotals.moneyPerSecond),
+    knowledgePerSecond: applySoftcap('knowledgePerSecond', rawTotals.knowledgePerSecond),
+    aiPower: applySoftcap('aiPower', rawAiPower),
+  }
+
+  const groups = {
+    clickPower: [],
+    shishkiPerSecond: [],
+    moneyPerSecond: [],
+    knowledgePerSecond: [],
+    aiPower: [],
+  }
+
+  const items = [
+    ...UPGRADES.map((item) => ({ ...item, sourceType: 'upgrade', level: state.upgrades?.[item.id] ?? 0 })),
+    ...SUBSCRIPTIONS.map((item) => ({ ...item, sourceType: 'subscription', level: state.subscriptions?.[item.id] ?? 0 })),
+  ]
+
+  items.forEach((item) => {
+    if (item.level <= 0) return
+    const totals = getItemStatTotals(item, item.level, aiMultiplier)
+
+    Object.keys(groups).forEach((stat) => {
+      const rawValue = totals[stat] ?? 0
+      if (rawValue <= 0) return
+      const rawTotal = rawTotals[stat] ?? 0
+      const finalTotal = finalTotals[stat] ?? 0
+      const scaledValue = rawTotal > 0 ? (rawValue / rawTotal) * finalTotal : 0
+
+      groups[stat].push({
+        id: item.id,
+        title: item.title,
+        sourceType: item.sourceType,
+        value: Number(scaledValue.toFixed(2)),
+      })
+    })
+
+    if ((item.aiPowerWeight ?? 0) > 0) {
+      const rawValue = item.level * item.aiPowerWeight
+      const scaledValue = rawAiPower > 0 ? (rawValue / rawAiPower) * finalTotals.aiPower : 0
+      groups.aiPower.push({
+        id: item.id,
+        title: item.title,
+        sourceType: item.sourceType,
+        value: Number(scaledValue.toFixed(2)),
+      })
+    }
+  })
+
+  getBaseContributionEntries(rawTotals, finalTotals).forEach(({ stat, entry }) => {
+    groups[stat].push({ ...entry, value: Number(entry.value.toFixed(2)) })
+  })
+
+  return Object.fromEntries(
+    Object.entries(groups).map(([stat, entries]) => {
+      const top = entries.sort((a, b) => b.value - a.value).slice(0, 3)
+      const leader = top[0] ?? null
+      return [
+        stat,
+        {
+          leader,
+          items: top,
+          total: Number((finalTotals[stat] ?? 0).toFixed(2)),
+          unit: CONTRIBUTION_META[stat]?.unit ?? '',
+        },
+      ]
+    }),
+  )
+}
+
+export function deriveEconomy(state) {
+  const aiMultiplier = deriveAiMultiplier(state)
+  const rawTotals = getRawStatTotals(state, aiMultiplier)
 
   return {
-    clickPower: Number(clickPower.toFixed(1)),
-    shishkiPerSecond: Number(shishkiPerSecond.toFixed(1)),
-    moneyPerSecond: Number(moneyPerSecond.toFixed(1)),
-    knowledgePerSecond: Number(knowledgePerSecond.toFixed(1)),
-    aiPower: Number(aiPower.toFixed(1)),
+    clickPower: Number(applySoftcap('clickPower', rawTotals.clickPower).toFixed(1)),
+    shishkiPerSecond: Number(applySoftcap('shishkiPerSecond', rawTotals.shishkiPerSecond).toFixed(1)),
+    moneyPerSecond: Number(applySoftcap('moneyPerSecond', rawTotals.moneyPerSecond).toFixed(1)),
+    knowledgePerSecond: Number(applySoftcap('knowledgePerSecond', rawTotals.knowledgePerSecond).toFixed(1)),
+    aiPower: Number(deriveAiPower(state).toFixed(1)),
     aiMultiplier: Number(aiMultiplier.toFixed(2)),
   }
 }
