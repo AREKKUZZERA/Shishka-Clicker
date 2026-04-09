@@ -6,6 +6,7 @@ import { ShopCard } from './components/ShopCard'
 import { ShopSection } from './components/ShopSection'
 import buttonImage from './assets/disco.gif'
 import vityaImage from './assets/v4.png'
+import shishkaSound from './assets/shishka.mp3'
 import { formatNumber } from './lib/format'
 import {
   DEFAULT_THEME_ID,
@@ -68,8 +69,11 @@ function App() {
   const clickerRef = useRef(null)
   const { state, economy, contributions, mineShishki, buySubscription, buyUpgrade, resetGame } = useGame()
 
+  const shishkaAudioRef = useRef(null)
+
   useEffect(() => {
     setupDiscord().then(setUser)
+    shishkaAudioRef.current.volume = 0.5
   }, [])
 
   useEffect(() => {
@@ -139,7 +143,7 @@ function App() {
   }, [isThemeSectionOpen])
 
   useEffect(() => {
-    window.localStorage.setItem('shishka-theme', themeId)
+    localStorage.setItem('shishka-theme', themeId)
 
     const root = document.documentElement
     const vars = buildDesignVars(activeTheme)
@@ -158,11 +162,20 @@ function App() {
     }
   }, [themeId, activeTheme])
 
+  const getRandomPitch = () => {
+    const min = 0.5
+    const max = 1.5
+
+    return Math.random() * max + min
+  }
+
   function handleMine(event) {
     if (event.detail === 0) {
       event.preventDefault()
       return
     }
+
+    shishkaAudioRef.current?.play()
 
     mineShishki()
 
@@ -298,14 +311,15 @@ function App() {
         <div className="section-screen__body relative mt-6 grid gap-6 xl:grid-cols-[1.04fr_0.96fr]">
           <div className="clicker-stage">
             <div ref={clickerRef} className="relative">
-              <button type="button" className="clicker-button group" onClick={handleMine} onKeyDown={preventMineKeyboardExploit}>
+              <audio ref={shishkaAudioRef} src={shishkaSound} />
+              <div className="clicker-button group" onClick={handleMine} onKeyDown={preventMineKeyboardExploit}>
                 <div className="clicker-button__halo" />
                 <div className="clicker-button__ring clicker-button__ring--outer" />
                 <div className="clicker-button__ring clicker-button__ring--inner" />
                 <img src={state.shishkiPerSecond <= 0 ? vityaImage : buttonImage} alt="Шишка" className="clicker-hero" />
                 <div className="mt-4 text-xl font-bold text-white md:text-2xl">Кликни и добудь вышку</div>
                 <div className="mt-2 text-sm text-white/60">За клик: +{formatNumber(state.clickPower)} шишки</div>
-              </button>
+              </div>
 
               <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[2rem]">
                 {bursts.map((burst) => (
@@ -414,14 +428,16 @@ function App() {
         <header className="glass-panel dashboard-header relative overflow-hidden rounded-[2rem] p-5 text-left shadow-2xl">
           <div className="hero-panel__glow" />
           <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-            <div className="max-w-3xl">
-              <div className="hero-kicker text-sm uppercase text-fuchsia-200/80">Шишка кликер</div>
-              <h1 className="hero-title mt-2 text-3xl font-black md:text-5xl xl:text-6xl">Шишки онлайн!</h1>
-              <p className="mt-3 max-w-2xl text-sm text-white/72 md:text-base">
-                Главный экран теперь держит один фокус за раз: снизу переключаешься между кликером, подписками и апгрейдами без визуального шума.
-              </p>
+            <div className="flex flex-col justify-between h-max max-w-3xl">
+              <div>
+                <div className="hero-kicker text-sm uppercase text-fuchsia-200/80">Шишка кликер</div>
+                <h1 className="hero-title mt-2 text-3xl font-black md:text-5xl xl:text-6xl">Шишки онлайн!</h1>
+                <p className="mt-3 max-w-2xl text-sm text-white/72 md:text-base">
+                  Добывай шишки и прокачивайся!
+                </p>
+              </div>
 
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2">
                 {activeTheme.content.heroTags.map((tag) => (
                   <span
                     key={tag}
