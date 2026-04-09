@@ -240,7 +240,7 @@ function App() {
       return (
         <div className="overview-card">
           <div className="overview-card__label">{title}</div>
-          <div className="overview-card__value">Все тири уже открыты</div>
+          <div className="overview-card__value">Все тиры уже открыты</div>
           <div className="overview-card__text">Можно спокойно фокусироваться на прокачке уровней.</div>
         </div>
       )
