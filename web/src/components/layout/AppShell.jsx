@@ -5,6 +5,7 @@ import { useBackgroundMusic } from '../../hooks/useBackgroundMusic'
 import { Header } from './Header'
 import { BottomNav } from './BottomNav'
 import { AchievementToast } from '../ui/AchievementToast'
+import { StatsBar } from '../stats/StatsBar'
 import backgroundMusic from '../../assets/audio/music/background.mp3'
 
 const ClickerScreen = lazy(() => import('../clicker/ClickerScreen').then((module) => ({ default: module.ClickerScreen })))
@@ -47,6 +48,7 @@ export function AppShell() {
       <div className="app-content">
         <Header user={user} />
         <main className="app-main">
+          {activeTab !== 'clicker' && <StatsBar />}
           <Suspense fallback={<ScreenFallback />}>
             {activeTab === 'clicker' && <ClickerScreen />}
             {activeTab === 'subscriptions' && <ShopScreen type="subscriptions" />}

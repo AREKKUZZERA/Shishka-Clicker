@@ -24,12 +24,21 @@ export function ClickerScreen() {
         <div className="clicker-layout__left">
           <ClickerButton />
         </div>
+
         <div className="clicker-layout__right">
-          <div className="clicker-stats-stack">
-            {stats.map((item, index) => (
-              <StatCard key={item.label} {...item} delay={index} />
-            ))}
+          <div className="clicker-panel">
+            <div className="clicker-panel__head">
+              <span className="clicker-panel__kicker">Текущие показатели</span>
+              <h3 className="clicker-panel__title">Все ключевые stat-card под рукой</h3>
+            </div>
+
+            <div className="clicker-stats-stack">
+              {stats.map((item, index) => (
+                <StatCard key={item.label} {...item} delay={index} />
+              ))}
+            </div>
           </div>
+
           <ProgressOverview />
         </div>
       </div>
