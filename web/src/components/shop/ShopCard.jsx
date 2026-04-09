@@ -1,4 +1,6 @@
 import { formatNumber } from '../../lib/format'
+import { useSound } from '../../hooks/useSound'
+import buySound from '../../assets/blip1.mp3'
 
 const CURRENCY_META = {
   money: { icon: '💵', label: 'деньги' },
@@ -22,6 +24,13 @@ function LockBadge({ item }) {
 export function ShopCard({ item, canBuy, onBuy, delay = 0 }) {
   const isLocked = !item.unlocked
   const currency = CURRENCY_META[item.currency] ?? { icon: '✨', label: 'ресурс' }
+  const { play } = useSound(buySound, { volume: 0.2 })
+
+  const handleBuy = () => {
+    if (isLocked || !canBuy) return
+    play()
+    onBuy()
+  }
 
   return (
     <article
@@ -66,7 +75,7 @@ export function ShopCard({ item, canBuy, onBuy, delay = 0 }) {
         <button
           className="shop-card__btn"
           disabled={!canBuy || isLocked}
-          onClick={onBuy}
+          onClick={handleBuy}
         >
           {isLocked ? 'Сначала открой тир' : canBuy ? 'Купить уровень' : 'Не хватает ресурса'}
         </button>
