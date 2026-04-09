@@ -1,5 +1,5 @@
 import { useGameContext } from '../../context/GameContext'
-import {MainStore} from "../../MainStore.js";
+import { formatNumber } from '../../lib/format'
 
 export function Header({ user }) {
   const { state } = useGameContext()
@@ -40,7 +40,7 @@ export function Header({ user }) {
               <span className="session-badge__dot session-badge__dot--live" />
               Престиж
             </div>
-            <div className="session-badge__name">x{MainStore.formatShortNumber(state.prestigeMultiplier)} · {MainStore.formatShortNumber(state.prestigeShards)} оск.</div>
+            <div className="session-badge__name">x{formatNumber(state.prestigeMultiplier)} · {formatNumber(state.prestigeShards)} оск.</div>
           </div>
         </div>
       </div>

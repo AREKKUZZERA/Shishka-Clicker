@@ -18,7 +18,7 @@ import {
 import { loadGame, saveGame, clearGame } from '../lib/storage'
 
 function mergeState(saved) {
-  if (!saved) return STARTING_STATE
+  if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return STARTING_STATE
 
   return {
     ...STARTING_STATE,

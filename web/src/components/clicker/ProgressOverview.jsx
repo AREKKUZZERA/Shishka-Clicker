@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { useGameContext } from '../../context/GameContext'
-import {MainStore} from "../../MainStore.js"
-
+import { formatNumber } from '../../lib/format'
 
 function UnlockCard({ title, item, accentClass }) {
   if (!item) {
@@ -26,7 +25,7 @@ function UnlockCard({ title, item, accentClass }) {
       <div className="unlock-progress">
         <div className="unlock-progress__row">
           <span>🌰 Шишки</span>
-          <span>{MainStore.formatShortNumber(item.unlockProgress.shishki)} / {MainStore.formatShortNumber(item.unlockRule.shishki)}</span>
+          <span>{formatNumber(item.unlockProgress.shishki)} / {formatNumber(item.unlockRule.shishki)}</span>
         </div>
         <div className="unlock-progress__track">
           <div className="unlock-progress__fill" style={{ width: `${shishkiPct}%` }} />
@@ -34,7 +33,7 @@ function UnlockCard({ title, item, accentClass }) {
 
         <div className="unlock-progress__row">
           <span>📚 Знания</span>
-          <span>{MainStore.formatShortNumber(item.unlockProgress.knowledge)} / {MainStore.formatShortNumber(item.unlockRule.knowledge)}</span>
+          <span>{formatNumber(item.unlockProgress.knowledge)} / {formatNumber(item.unlockRule.knowledge)}</span>
         </div>
         <div className="unlock-progress__track">
           <div className="unlock-progress__fill unlock-progress__fill--alt" style={{ width: `${knowledgePct}%` }} />
@@ -64,28 +63,28 @@ export function ProgressOverview() {
 
       <div className="progress-stats">
         <div className="progress-stat">
-          <span className="progress-stat__num">{MainStore.formatShortNumber(state.lifetimeShishkiEarned)}</span>
+          <span className="progress-stat__num">{formatNumber(state.lifetimeShishkiEarned)}</span>
           <span className="progress-stat__lbl">всего шишек</span>
         </div>
         <div className="progress-stat">
-          <span className="progress-stat__num">{MainStore.formatShortNumber(state.totalMoneyEarned)}</span>
+          <span className="progress-stat__num">{formatNumber(state.totalMoneyEarned)}</span>
           <span className="progress-stat__lbl">денег в этом цикле</span>
         </div>
         <div className="progress-stat">
-          <span className="progress-stat__num">{MainStore.formatShortNumber(state.totalKnowledgeEarned)}</span>
+          <span className="progress-stat__num">{formatNumber(state.totalKnowledgeEarned)}</span>
           <span className="progress-stat__lbl">знаний в этом цикле</span>
         </div>
         <div className="progress-stat">
-          <span className="progress-stat__num">{MainStore.formatShortNumber(state.megaClicks)}</span>
+          <span className="progress-stat__num">{formatNumber(state.megaClicks)}</span>
           <span className="progress-stat__lbl">мега-кликов</span>
         </div>
       </div>
 
       <div className="meta-lifetime-grid progress-overview__mini-grid">
-        <div><span>Ребёрсы</span><b>{MainStore.formatShortNumber(state.rebirths)}</b></div>
-        <div><span>Осколки</span><b>{MainStore.formatShortNumber(state.prestigeShards)}</b></div>
+        <div><span>Ребёрсы</span><b>{formatNumber(state.rebirths)}</b></div>
+        <div><span>Осколки</span><b>{formatNumber(state.prestigeShards)}</b></div>
         <div><span>Достижения</span><b>{unlockedAchievements}/{achievements.length}</b></div>
-        <div><span>До ребёрса</span><b>{prestige.canRebirth ? 'готово' : MainStore.formatShortNumber(prestige.nextGoal)}</b></div>
+        <div><span>До ребёрса</span><b>{prestige.canRebirth ? 'готово' : formatNumber(prestige.nextGoal)}</b></div>
       </div>
 
       {(nextSub || nextUpgrade) && (

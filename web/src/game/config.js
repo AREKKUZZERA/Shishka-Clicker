@@ -783,35 +783,35 @@ export function getItemEffectPreview(item, level, aiMultiplier, prestigeMultipli
   return describeItemEffects(item, level, aiMultiplier, prestigeMultiplier)
 }
 
-function deriveAiMultiplier(state) {
+function deriveAiMultiplier(state = STARTING_STATE) {
   const source = BALANCE.growth.aiMultiplier
-  const level = state.upgrades?.[source.source] ?? 0
+  const level = state?.upgrades?.[source.source] ?? 0
   return source.base + geometricGain(level, source.firstGain, source.decay)
 }
 
-export function derivePrestigeMultiplier(state) {
+export function derivePrestigeMultiplier(state = STARTING_STATE) {
   const cfg = BALANCE.growth.prestigeMultiplier
-  return 1 + (state.rebirths ?? 0) * cfg.rebirthGain + (state.prestigeShards ?? 0) * cfg.shardGain
+  return 1 + (state?.rebirths ?? 0) * cfg.rebirthGain + (state?.prestigeShards ?? 0) * cfg.shardGain
 }
 
-function deriveAiPower(state) {
+function deriveAiPower(state = STARTING_STATE) {
   const raw = SUBSCRIPTIONS.reduce((sum, item) => {
-    const level = state.subscriptions?.[item.id] ?? 0
+    const level = state?.subscriptions?.[item.id] ?? 0
     return sum + level * (item.aiPowerWeight ?? 0)
   }, 0)
 
   return applySoftcap('aiPower', raw)
 }
 
-export function getMegaClickChance(state) {
+export function getMegaClickChance(state = STARTING_STATE) {
   const cfg = BALANCE.growth.megaClick
-  const focusLevel = state.upgrades?.focusMode ?? 0
+  const focusLevel = state?.upgrades?.focusMode ?? 0
   return Math.min(0.45, cfg.chanceBase + focusLevel * cfg.chancePerFocus)
 }
 
-export function getMegaEmojiChance(state) {
+export function getMegaEmojiChance(state = STARTING_STATE) {
   const cfg = BALANCE.growth.megaClick
-  const memeLevel = state.upgrades?.memeMarketing ?? 0
+  const memeLevel = state?.upgrades?.memeMarketing ?? 0
   return Math.min(0.9, cfg.emojiChance + memeLevel * cfg.emojiChancePerMeme)
 }
 
@@ -872,7 +872,7 @@ export function deriveContributionBreakdown(state) {
   const prestigeMultiplier = derivePrestigeMultiplier(state)
   const rawTotals = getRawStatTotals(state, aiMultiplier, prestigeMultiplier)
   const rawAiPower = SUBSCRIPTIONS.reduce((sum, item) => {
-    const level = state.subscriptions?.[item.id] ?? 0
+    const level = state?.subscriptions?.[item.id] ?? 0
     return sum + level * (item.aiPowerWeight ?? 0)
   }, 0)
 
@@ -974,10 +974,10 @@ export function getPrestigeUnlockStatus(state) {
   }
 }
 
-export function getPrestigePreview(state) {
+export function getPrestigePreview(state = STARTING_STATE) {
   const unlock = getPrestigeUnlockStatus(state)
-  const earnedShishki = state.lifetimeShishkiEarned ?? 0
-  const earnedKnowledge = state.lifetimeKnowledgeEarned ?? 0
+  const earnedShishki = state?.lifetimeShishkiEarned ?? 0
+  const earnedKnowledge = state?.lifetimeKnowledgeEarned ?? 0
   const unlockedAchievements = unlock.progress.achievements
   const shardCfg = BALANCE.prestige.shards
   const rebirthRule = BALANCE.prestige.rebirth
@@ -1008,14 +1008,14 @@ export function getPrestigePreview(state) {
   }
 }
 
-export function deriveAchievements(state) {
+export function deriveAchievements(state = STARTING_STATE) {
   return ACHIEVEMENTS.map((achievement) => ({
     ...achievement,
-    unlocked: Boolean(state.achievements?.[achievement.id]) || Boolean(achievement.check(state)),
+    unlocked: Boolean(state?.achievements?.[achievement.id]) || Boolean(achievement.check(state ?? STARTING_STATE)),
   }))
 }
 
-export function deriveEconomy(state) {
+export function deriveEconomy(state = STARTING_STATE) {
   const aiMultiplier = deriveAiMultiplier(state)
   const prestigeMultiplier = derivePrestigeMultiplier(state)
   const rawTotals = getRawStatTotals(state, aiMultiplier, prestigeMultiplier)
