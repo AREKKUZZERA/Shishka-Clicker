@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useGameContext } from '../../context/GameContext'
 import { useBursts } from '../../hooks/useBursts'
 import { useSound } from '../../hooks/useSound'
@@ -62,11 +62,61 @@ function createConeSprites(localX, localY, amount, isMega) {
 export function ClickerButton() {
   const [particles, setParticles] = useState([])
   const [coneSprites, setConeSprites] = useState([])
+  const [isPressed, setIsPressed] = useState(false)
+  const [isMegaPressed, setIsMegaPressed] = useState(false)
+
+  const pressTimeoutRef = useRef(null)
+  const megaPressTimeoutRef = useRef(null)
+
   const { state, mineShishki } = useGameContext()
   const { bursts, addBurst } = useBursts()
   const { play } = useSound(shishkaSound, { volume: 0.42 })
 
   const particleLimitHint = useMemo(() => Math.min(44, Math.ceil(state.clickPower * 1.2)), [state.clickPower])
+
+  useEffect(() => {
+    return () => {
+      if (pressTimeoutRef.current) {
+        window.clearTimeout(pressTimeoutRef.current)
+      }
+
+      if (megaPressTimeoutRef.current) {
+        window.clearTimeout(megaPressTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  function triggerPressAnimation() {
+    setIsPressed(false)
+
+    requestAnimationFrame(() => {
+      setIsPressed(true)
+
+      if (pressTimeoutRef.current) {
+        window.clearTimeout(pressTimeoutRef.current)
+      }
+
+      pressTimeoutRef.current = window.setTimeout(() => {
+        setIsPressed(false)
+      }, 220)
+    })
+  }
+
+  function triggerMegaPressAnimation() {
+    setIsMegaPressed(false)
+
+    requestAnimationFrame(() => {
+      setIsMegaPressed(true)
+
+      if (megaPressTimeoutRef.current) {
+        window.clearTimeout(megaPressTimeoutRef.current)
+      }
+
+      megaPressTimeoutRef.current = window.setTimeout(() => {
+        setIsMegaPressed(false)
+      }, 320)
+    })
+  }
 
   function handleClick(e) {
     if (e.detail === 0) {
@@ -77,13 +127,26 @@ export function ClickerButton() {
     play()
     const result = mineShishki()
 
+    if (result.isMega) {
+      triggerMegaPressAnimation()
+    } else {
+      triggerPressAnimation()
+    }
+
     const rect = e.currentTarget.getBoundingClientRect()
     const localX = e.clientX - rect.left
     const localY = e.clientY - rect.top
 
     addBurst(localX, localY, result.isMega ? `⚡ ${result.amount}` : `+${formatNumber(state.clickPower)}`)
 
-    const spawned = createParticles(localX, localY, result.particleCount, result.symbols, result.isMega, result.isEmojiExplosion)
+    const spawned = createParticles(
+      localX,
+      localY,
+      result.particleCount,
+      result.symbols,
+      result.isMega,
+      result.isEmojiExplosion,
+    )
     setParticles((current) => [...current.slice(-70), ...spawned])
 
     const coneBurstCount = result.isEmojiExplosion ? 4 : result.isMega ? 3 : 1
@@ -100,7 +163,7 @@ export function ClickerButton() {
   return (
     <div className="clicker-wrap">
       <div
-        className={`clicker-btn ${particles.length ? 'clicker-btn--active' : ''}`}
+        className={`clicker-btn ${isPressed ? 'clicker-btn--pressed' : ''} ${isMegaPressed ? 'clicker-btn--mega-pressed' : ''} ${particles.length ? 'clicker-btn--active' : ''}`}
         onClick={handleClick}
         onKeyDown={preventKeyboard}
         aria-label="Добыть шишки"
