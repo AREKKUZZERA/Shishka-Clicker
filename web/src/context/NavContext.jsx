@@ -17,7 +17,13 @@ export const TABS = [
     id: 'upgrades',
     icon: '⚙️',
     label: 'Апгрейды',
-    description: 'Инвестиции и исследования',
+    description: 'Инвестиции, автоматизация и мемы',
+  },
+  {
+    id: 'meta',
+    icon: '🏆',
+    label: 'Мета',
+    description: 'Достижения, ребёрс и престиж',
   },
   {
     id: 'settings',

@@ -8,7 +8,7 @@ function UnlockCard({ title, item, accentClass }) {
       <div className="unlock-card">
         <div className="unlock-card__label">{title}</div>
         <div className="unlock-card__value unlock-card__value--done">✓ Всё открыто</div>
-        <div className="unlock-card__text">Фокус на прокачке уровней.</div>
+        <div className="unlock-card__text">Фокус на прокачке уровней и престиже.</div>
       </div>
     )
   }
@@ -44,16 +44,11 @@ function UnlockCard({ title, item, accentClass }) {
 }
 
 export function ProgressOverview() {
-  const { economy, state } = useGameContext()
+  const { economy, state, prestige, achievements } = useGameContext()
 
-  const nextSub = useMemo(
-    () => economy.subscriptions.find((i) => !i.unlocked),
-    [economy.subscriptions]
-  )
-  const nextUpgrade = useMemo(
-    () => economy.upgrades.find((i) => !i.unlocked),
-    [economy.upgrades]
-  )
+  const nextSub = useMemo(() => economy.subscriptions.find((i) => !i.unlocked), [economy.subscriptions])
+  const nextUpgrade = useMemo(() => economy.upgrades.find((i) => !i.unlocked), [economy.upgrades])
+  const unlockedAchievements = achievements.filter((entry) => entry.unlocked).length
 
   return (
     <div className="progress-overview">
@@ -61,36 +56,43 @@ export function ProgressOverview() {
         <div className="progress-loop__title">Петля прогресса</div>
         <div className="progress-loop__steps">
           <div className="loop-step"><b>1.</b> Кликаешь → добываешь <b>🌰 шишки</b></div>
-          <div className="loop-step"><b>2.</b> Подписки генерируют <b>💵 деньги</b> и <b>📚 знания</b></div>
-          <div className="loop-step"><b>3.</b> AI открывает поздние тиры через <b>📚 знания</b></div>
+          <div className="loop-step"><b>2.</b> Подписки и апгрейды делают <b>💵 деньги</b> и <b>📚 знания</b></div>
+          <div className="loop-step"><b>3.</b> Мега-клики и престиж ускоряют позднюю игру</div>
         </div>
       </div>
 
       <div className="progress-stats">
         <div className="progress-stat">
-          <span className="progress-stat__num">{formatNumber(state.totalShishkiEarned)}</span>
+          <span className="progress-stat__num">{formatNumber(state.lifetimeShishkiEarned)}</span>
           <span className="progress-stat__lbl">всего шишек</span>
         </div>
         <div className="progress-stat">
           <span className="progress-stat__num">{formatNumber(state.totalMoneyEarned)}</span>
-          <span className="progress-stat__lbl">всего денег</span>
+          <span className="progress-stat__lbl">денег в этом цикле</span>
         </div>
         <div className="progress-stat">
           <span className="progress-stat__num">{formatNumber(state.totalKnowledgeEarned)}</span>
-          <span className="progress-stat__lbl">всего знаний</span>
+          <span className="progress-stat__lbl">знаний в этом цикле</span>
         </div>
         <div className="progress-stat">
-          <span className="progress-stat__num">{formatNumber(state.manualClicks)}</span>
-          <span className="progress-stat__lbl">ручных кликов</span>
+          <span className="progress-stat__num">{formatNumber(state.megaClicks)}</span>
+          <span className="progress-stat__lbl">мега-кликов</span>
         </div>
       </div>
 
-      {(nextSub || nextUpgrade) &&
+      <div className="meta-lifetime-grid progress-overview__mini-grid">
+        <div><span>Ребёрсы</span><b>{formatNumber(state.rebirths)}</b></div>
+        <div><span>Осколки</span><b>{formatNumber(state.prestigeShards)}</b></div>
+        <div><span>Достижения</span><b>{unlockedAchievements}/{achievements.length}</b></div>
+        <div><span>До ребёрса</span><b>{prestige.canRebirth ? 'готово' : formatNumber(prestige.nextGoal)}</b></div>
+      </div>
+
+      {(nextSub || nextUpgrade) && (
         <div className="unlock-grid">
-          {nextSub && <UnlockCard title="Следующая подписка" item={nextSub} accentClass="text-fuchsia"/>}
-          {nextUpgrade && <UnlockCard title="Следующий апгрейд" item={nextUpgrade} accentClass="text-cyan"/>}
+          {nextSub && <UnlockCard title="Следующая подписка" item={nextSub} accentClass="text-fuchsia" />}
+          {nextUpgrade && <UnlockCard title="Следующий апгрейд" item={nextUpgrade} accentClass="text-cyan" />}
         </div>
-      }
+      )}
     </div>
   )
 }

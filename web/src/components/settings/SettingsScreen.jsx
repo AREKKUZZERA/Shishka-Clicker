@@ -44,8 +44,18 @@ function RangeRow({ label, hint, value, onChange }) {
 }
 
 export function SettingsScreen() {
-  const { resetGame } = useGameContext()
+  const { resetGame, markSilenceLover } = useGameContext()
   const { settings, setVolume, toggle, resetSettings } = useSettingsContext()
+
+  const handleMusicToggle = () => {
+    if (settings.musicEnabled) markSilenceLover()
+    toggle('musicEnabled')
+  }
+
+  const handleMusicVolume = (value) => {
+    if (value <= 5) markSilenceLover()
+    setVolume('musicVolume', value)
+  }
 
   return (
     <section className="screen settings-screen">
@@ -72,9 +82,9 @@ export function SettingsScreen() {
 
           <ToggleRow
             label="Фоновая музыка"
-            hint="Отдельный канал громкости для фонового трека"
+            hint="Выключение откроет секретное достижение для любителей тишины"
             checked={settings.musicEnabled}
-            onChange={() => toggle('musicEnabled')}
+            onChange={handleMusicToggle}
           />
 
           <RangeRow
@@ -93,9 +103,9 @@ export function SettingsScreen() {
 
           <RangeRow
             label="Громкость музыки"
-            hint="Фоновая композиция"
+            hint="Опусти почти в ноль, если хочешь тишины"
             value={settings.musicVolume}
-            onChange={(value) => setVolume('musicVolume', value)}
+            onChange={handleMusicVolume}
           />
 
           <button type="button" className="settings-ghost-btn" onClick={resetSettings}>
@@ -106,7 +116,7 @@ export function SettingsScreen() {
         <article className="settings-card settings-card--danger">
           <h3 className="settings-card__title">Игра</h3>
           <p className="settings-card__hint settings-card__hint--block">
-            Полный сброс удалит текущий прогресс, но не затронет параметры звука.
+            Полный сброс удалит текущий прогресс, достижения и престиж тоже обнулятся. Используй ребёрс во вкладке «Мета», если хочешь начать заново с бонусом.
           </p>
 
           <button type="button" className="reset-btn" onClick={resetGame}>

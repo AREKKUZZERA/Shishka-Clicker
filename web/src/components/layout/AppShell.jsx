@@ -8,6 +8,7 @@ import { StatsBar } from '../stats/StatsBar'
 import { ClickerScreen } from '../clicker/ClickerScreen'
 import { ShopScreen } from '../shop/ShopScreen'
 import { SettingsScreen } from '../settings/SettingsScreen'
+import { MetaScreen } from '../meta/MetaScreen'
 import backgroundMusic from '../../assets/audio/music/background.mp3'
 
 export function AppShell() {
@@ -35,6 +36,7 @@ export function AppShell() {
           {activeTab === 'clicker' && <ClickerScreen />}
           {activeTab === 'subscriptions' && <ShopScreen type="subscriptions" />}
           {activeTab === 'upgrades' && <ShopScreen type="upgrades" />}
+          {activeTab === 'meta' && <MetaScreen />}
           {activeTab === 'settings' && <SettingsScreen />}
         </main>
       </div>

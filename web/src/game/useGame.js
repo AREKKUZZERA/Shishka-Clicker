@@ -1,14 +1,19 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   STARTING_STATE,
   SUBSCRIPTIONS,
   UPGRADES,
+  deriveAchievements,
   deriveContributionBreakdown,
   deriveEconomy,
   formatUnlockText,
   getItemEffectPreview,
+  getPrestigePreview,
+  getRandomMegaEmoji,
   getScaledCost,
   getUnlockStatus,
+  getMegaClickChance,
+  getMegaEmojiChance,
 } from './config'
 import { loadGame, saveGame, clearGame } from '../lib/storage'
 
@@ -18,6 +23,9 @@ function mergeState(saved) {
   return {
     ...STARTING_STATE,
     ...saved,
+    achievements: {
+      ...(saved.achievements ?? {}),
+    },
     subscriptions: {
       ...STARTING_STATE.subscriptions,
       ...(saved.subscriptions ?? {}),
@@ -32,7 +40,7 @@ function mergeState(saved) {
 function enrichItem(state, item, level) {
   const unlock = getUnlockStatus(state, item.id)
   const rates = deriveEconomy(state)
-  const effectPreview = getItemEffectPreview(item, level, rates.aiMultiplier)
+  const effectPreview = getItemEffectPreview(item, level, rates.aiMultiplier, rates.prestigeMultiplier)
 
   return {
     ...item,
@@ -46,38 +54,90 @@ function enrichItem(state, item, level) {
   }
 }
 
+function applyIncome(current, seconds) {
+  const rates = deriveEconomy(current)
+  const shishkiGain = rates.shishkiPerSecond * seconds
+  const moneyGain = rates.moneyPerSecond * seconds
+  const knowledgeGain = rates.knowledgePerSecond * seconds
+
+  return {
+    ...current,
+    shishki: current.shishki + shishkiGain,
+    money: current.money + moneyGain,
+    knowledge: current.knowledge + knowledgeGain,
+    totalShishkiEarned: current.totalShishkiEarned + shishkiGain,
+    totalMoneyEarned: current.totalMoneyEarned + moneyGain,
+    totalKnowledgeEarned: current.totalKnowledgeEarned + knowledgeGain,
+    lifetimeShishkiEarned: current.lifetimeShishkiEarned + shishkiGain,
+    lifetimeMoneyEarned: current.lifetimeMoneyEarned + moneyGain,
+    lifetimeKnowledgeEarned: current.lifetimeKnowledgeEarned + knowledgeGain,
+  }
+}
+
+function unlockAchievements(current) {
+  const derived = deriveAchievements(current)
+  const nextUnlocked = { ...(current.achievements ?? {}) }
+  let changed = false
+
+  derived.forEach((achievement) => {
+    if (achievement.unlocked && !nextUnlocked[achievement.id]) {
+      nextUnlocked[achievement.id] = true
+      changed = true
+    }
+  })
+
+  if (!changed) return current
+  return {
+    ...current,
+    achievements: nextUnlocked,
+  }
+}
+
 export function useGame() {
   const [state, setState] = useState(() => mergeState(loadGame()))
   const derived = useMemo(() => deriveEconomy(state), [state])
+  const saveTimeoutRef = useRef(null)
 
   useEffect(() => {
-    const interval = window.setInterval(() => {
-      setState((current) => {
-        const rates = deriveEconomy(current)
-        const nextShishki = current.shishki + rates.shishkiPerSecond
-        const nextMoney = current.money + rates.moneyPerSecond
-        const nextKnowledge = current.knowledge + rates.knowledgePerSecond
+    let mounted = true
+    let last = performance.now()
+    let accumulator = 0
+    let frame = 0
 
-        return {
-          ...current,
-          shishki: nextShishki,
-          money: nextMoney,
-          knowledge: nextKnowledge,
-          totalShishkiEarned: current.totalShishkiEarned + rates.shishkiPerSecond,
-          totalMoneyEarned: current.totalMoneyEarned + rates.moneyPerSecond,
-          totalKnowledgeEarned: current.totalKnowledgeEarned + rates.knowledgePerSecond,
-        }
-      })
-    }, 1000)
+    const tick = (now) => {
+      if (!mounted) return
+      const elapsed = Math.min(2.5, (now - last) / 1000)
+      last = now
+      accumulator += elapsed
 
-    return () => window.clearInterval(interval)
+      if (accumulator >= 0.25) {
+        const seconds = accumulator
+        accumulator = 0
+        setState((current) => unlockAchievements(applyIncome(current, seconds)))
+      }
+
+      frame = window.requestAnimationFrame(tick)
+    }
+
+    frame = window.requestAnimationFrame(tick)
+    return () => {
+      mounted = false
+      window.cancelAnimationFrame(frame)
+    }
   }, [])
 
   useEffect(() => {
-    saveGame(state)
+    window.clearTimeout(saveTimeoutRef.current)
+    saveTimeoutRef.current = window.setTimeout(() => {
+      saveGame(state)
+    }, 180)
+
+    return () => window.clearTimeout(saveTimeoutRef.current)
   }, [state])
 
+  const achievements = useMemo(() => deriveAchievements(state), [state])
   const contributions = useMemo(() => deriveContributionBreakdown(state), [state])
+  const prestige = useMemo(() => getPrestigePreview(state), [state])
 
   const economy = useMemo(() => {
     const subscriptions = SUBSCRIPTIONS.map((item) => {
@@ -94,15 +154,35 @@ export function useGame() {
   }, [state])
 
   function mineShishki() {
+    const megaClickChance = getMegaClickChance(state)
+    const isMega = Math.random() < megaClickChance
+    const isEmojiBurst = isMega && Math.random() < getMegaEmojiChance(state)
+    const emoji = isEmojiBurst ? getRandomMegaEmoji() : '🌰'
+
+    let burstValue = ''
+
     setState((current) => {
       const rates = deriveEconomy(current)
-      return {
+      const clickValue = isMega ? rates.clickPower * 5 : rates.clickPower
+      burstValue = `${isMega ? 'МЕГА ' : '+'}${Math.round(clickValue * 10) / 10}`
+
+      return unlockAchievements({
         ...current,
-        shishki: current.shishki + rates.clickPower,
+        shishki: current.shishki + clickValue,
         manualClicks: current.manualClicks + 1,
-        totalShishkiEarned: current.totalShishkiEarned + rates.clickPower,
-      }
+        megaClicks: current.megaClicks + (isMega ? 1 : 0),
+        emojiBursts: current.emojiBursts + (isEmojiBurst ? 1 : 0),
+        totalShishkiEarned: current.totalShishkiEarned + clickValue,
+        lifetimeShishkiEarned: current.lifetimeShishkiEarned + clickValue,
+      })
     })
+
+    return {
+      amount: burstValue,
+      particleCount: Math.max(2, Math.min(24, Math.ceil((state.clickPower * (isMega ? 2.4 : 1)) / 1.8))),
+      symbol: emoji,
+      isMega,
+    }
   }
 
   function buySubscription(id) {
@@ -117,14 +197,14 @@ export function useGame() {
       const cost = getScaledCost(item.baseCost, item.costScale, level)
       if (current.money < cost) return current
 
-      return {
+      return unlockAchievements({
         ...current,
         money: current.money - cost,
         subscriptions: {
           ...current.subscriptions,
           [id]: level + 1,
         },
-      }
+      })
     })
   }
 
@@ -141,14 +221,44 @@ export function useGame() {
       const balance = current[item.currency]
       if (balance < cost) return current
 
-      return {
+      return unlockAchievements({
         ...current,
         [item.currency]: current[item.currency] - cost,
         upgrades: {
           ...current.upgrades,
           [id]: level + 1,
         },
-      }
+      })
+    })
+  }
+
+  function markSilenceLover() {
+    setState((current) => unlockAchievements({
+      ...current,
+      achievements: {
+        ...current.achievements,
+        silence_lover_progress: true,
+      },
+    }))
+  }
+
+  function prestigeReset() {
+    setState((current) => {
+      const preview = getPrestigePreview(current)
+      if (!preview.canRebirth || preview.shards <= 0) return current
+
+      return unlockAchievements({
+        ...STARTING_STATE,
+        achievements: current.achievements,
+        prestigeShards: current.prestigeShards + preview.shards,
+        totalPrestigeShardsEarned: current.totalPrestigeShardsEarned + preview.shards,
+        rebirths: current.rebirths + 1,
+        lifetimeShishkiEarned: current.lifetimeShishkiEarned,
+        lifetimeMoneyEarned: current.lifetimeMoneyEarned,
+        lifetimeKnowledgeEarned: current.lifetimeKnowledgeEarned,
+        megaClicks: current.megaClicks,
+        emojiBursts: current.emojiBursts,
+      })
     })
   }
 
@@ -163,10 +273,14 @@ export function useGame() {
       ...derived,
     },
     economy,
+    achievements,
+    prestige,
     contributions,
     mineShishki,
     buySubscription,
     buyUpgrade,
+    markSilenceLover,
+    prestigeReset,
     resetGame,
   }
 }

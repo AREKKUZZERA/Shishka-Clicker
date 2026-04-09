@@ -7,10 +7,23 @@ export const BALANCE = {
     totalShishkiEarned: 0,
     totalMoneyEarned: 25,
     totalKnowledgeEarned: 0,
+    lifetimeShishkiEarned: 0,
+    lifetimeMoneyEarned: 25,
+    lifetimeKnowledgeEarned: 0,
+    prestigeShards: 0,
+    totalPrestigeShardsEarned: 0,
+    rebirths: 0,
+    megaClicks: 0,
+    emojiBursts: 0,
+    achievements: {},
     subscriptions: {
       gigachat: 0,
+      yandex_alisa: 0,
       gpt: 0,
       claude: 0,
+      perplexity: 0,
+      copilot: 0,
+      deepseek: 0,
     },
     upgrades: {
       textbooks: 0,
@@ -18,86 +31,148 @@ export const BALANCE = {
       internship: 0,
       promptEngineering: 0,
       researchLab: 0,
+      autoClicker: 0,
+      serverRack: 0,
+      focusMode: 0,
+      memeMarketing: 0,
+      ventureFund: 0,
     },
   },
   price: {
-    levelPenaltyStep: 0.06,
+    levelPenaltyStep: 0.05,
   },
   growth: {
     aiMultiplier: {
       base: 1,
       source: 'promptEngineering',
       firstGain: 0.08,
-      decay: 0.88,
+      decay: 0.9,
     },
-    aiPowerSoftcapSource: 'subscriptions',
+    prestigeMultiplier: {
+      rebirthGain: 0.15,
+      shardGain: 0.025,
+    },
+    megaClick: {
+      chanceBase: 0.08,
+      chancePerFocus: 0.015,
+      powerMultiplier: 5,
+      emojiChance: 0.28,
+      emojiChancePerMeme: 0.08,
+      pool: ['🔥', '✨', '💥', '🎉', '🧠', '🚀', '😎', '🪩', '⚡', '🍀'],
+    },
   },
   softcaps: {
-    clickPower: { threshold: 18, power: 0.7 },
-    shishkiPerSecond: { threshold: 90, power: 0.68 },
-    moneyPerSecond: { threshold: 45, power: 0.72 },
-    knowledgePerSecond: { threshold: 25, power: 0.7 },
-    aiPower: { threshold: 30, power: 0.75 },
+    clickPower: { threshold: 24, power: 0.72 },
+    shishkiPerSecond: { threshold: 130, power: 0.72 },
+    moneyPerSecond: { threshold: 68, power: 0.75 },
+    knowledgePerSecond: { threshold: 42, power: 0.74 },
+    aiPower: { threshold: 54, power: 0.8 },
   },
   subscriptions: {
     gigachat: {
       id: 'gigachat',
       title: 'Гига чат',
-      description: 'Дешевый AI-стажер. Хорошо стартует, но быстро уходит в мягкое насыщение.',
-      baseCost: 40,
-      costScale: 1.62,
+      description: 'Дешёвый AI-стажёр. Лучший старт, но быстро упирается в насыщение.',
+      baseCost: 32,
+      costScale: 1.55,
       tier: 1,
       effectLabel: 'Ранний буст к шишкам и знаниям',
       unlock: { shishki: 0, knowledge: 0 },
       aiPowerWeight: 1,
       effects: [
-        { stat: 'shishkiPerSecond', firstGain: 1.8, decay: 0.96, aiScaled: true },
-        { stat: 'knowledgePerSecond', firstGain: 0.16, decay: 0.97, aiScaled: true },
+        { stat: 'shishkiPerSecond', firstGain: 1.6, decay: 0.965, aiScaled: true },
+        { stat: 'knowledgePerSecond', firstGain: 0.16, decay: 0.975, aiScaled: true },
       ],
     },
     yandex_alisa: {
       id: 'yandex_alisa',
       title: 'Яндекс Алиса',
-      description: 'Жёсткая модель',
-      baseCost: 135,
-      costScale: 1.76,
+      description: 'Универсальный помощник с хорошим темпом на раннем и среднем этапе.',
+      baseCost: 110,
+      costScale: 1.68,
       tier: 2,
       effectLabel: 'Универсальный AI-майнер',
-      unlock: { shishki: 120, knowledge: 8 },
-      aiPowerWeight: 2.4,
+      unlock: { shishki: 100, knowledge: 8 },
+      aiPowerWeight: 2.1,
       effects: [
-        { stat: 'shishkiPerSecond', firstGain: 4.8, decay: 0.95, aiScaled: true },
-        { stat: 'knowledgePerSecond', firstGain: 0.5, decay: 0.96, aiScaled: true },
+        { stat: 'shishkiPerSecond', firstGain: 4.2, decay: 0.955, aiScaled: true },
+        { stat: 'knowledgePerSecond', firstGain: 0.48, decay: 0.965, aiScaled: true },
       ],
     },
     gpt: {
       id: 'gpt',
       title: 'Чат ГПТ помоги',
-      description: 'Середина игры: стабильный приток шишек и знаний без взрывного роста.',
-      baseCost: 320,
-      costScale: 1.8,
+      description: 'Стабильная середина игры: уверенный приток шишек и знаний.',
+      baseCost: 280,
+      costScale: 1.74,
       tier: 3,
-      effectLabel: 'Универсальный AI-майнер',
-      unlock: { shishki: 250, knowledge: 25 },
-      aiPowerWeight: 3.0,
+      effectLabel: 'Стабильный средний тир',
+      unlock: { shishki: 220, knowledge: 22 },
+      aiPowerWeight: 3,
       effects: [
-        { stat: 'shishkiPerSecond', firstGain: 8, decay: 0.94, aiScaled: true },
-        { stat: 'knowledgePerSecond', firstGain: 0.75, decay: 0.95, aiScaled: true },
+        { stat: 'shishkiPerSecond', firstGain: 7.5, decay: 0.95, aiScaled: true },
+        { stat: 'knowledgePerSecond', firstGain: 0.72, decay: 0.958, aiScaled: true },
       ],
     },
     claude: {
       id: 'claude',
       title: 'Клоуд АИ',
-      description: 'Дорогой и мощный инструмент, но с более строгой экономикой масштабирования.',
-      baseCost: 500,
-      costScale: 1.92,
+      description: 'Дорогой и мощный инструмент для поздней стадии экономики.',
+      baseCost: 470,
+      costScale: 1.82,
       tier: 4,
-      effectLabel: 'Поздний буст для сложной экономики',
-      unlock: { shishki: 650, knowledge: 55 },
+      effectLabel: 'Поздний буст экономики',
+      unlock: { shishki: 600, knowledge: 52 },
       aiPowerWeight: 4.5,
       effects: [
-        { stat: 'shishkiPerSecond', firstGain: 11, decay: 0.93, aiScaled: true },
-        { stat: 'knowledgePerSecond', firstGain: 1.2, decay: 0.94, aiScaled: true },
+        { stat: 'shishkiPerSecond', firstGain: 10.8, decay: 0.945, aiScaled: true },
+        { stat: 'knowledgePerSecond', firstGain: 1.15, decay: 0.952, aiScaled: true },
+      ],
+    },
+    perplexity: {
+      id: 'perplexity',
+      title: 'Perplexity Pro',
+      description: 'Добывает знания заметно лучше остальных и помогает выйти в престиж.',
+      baseCost: 900,
+      costScale: 1.86,
+      tier: 5,
+      effectLabel: 'Знания и деньги для поздней игры',
+      unlock: { shishki: 1200, knowledge: 115 },
+      aiPowerWeight: 5.8,
+      effects: [
+        { stat: 'knowledgePerSecond', firstGain: 2.8, decay: 0.95, aiScaled: true },
+        { stat: 'moneyPerSecond', firstGain: 2.4, decay: 0.955, aiScaled: true },
+      ],
+    },
+    copilot: {
+      id: 'copilot',
+      title: 'GitHub Copilot+',
+      description: 'Делает сборку конвейера быстрее и заметно ускоряет пассивные шишки.',
+      baseCost: 1450,
+      costScale: 1.9,
+      tier: 6,
+      effectLabel: 'Производственный буст',
+      unlock: { shishki: 2200, knowledge: 180 },
+      aiPowerWeight: 7.5,
+      effects: [
+        { stat: 'shishkiPerSecond', firstGain: 18, decay: 0.946, aiScaled: true },
+        { stat: 'moneyPerSecond', firstGain: 3, decay: 0.952, aiScaled: true },
+      ],
+    },
+    deepseek: {
+      id: 'deepseek',
+      title: 'DeepSeek Ultra',
+      description: 'Поздний экспериментальный монстр. Дорогой, но даёт лучший скейл.',
+      baseCost: 2600,
+      costScale: 1.95,
+      tier: 7,
+      effectLabel: 'Лейт-гейм AI-ускоритель',
+      unlock: { shishki: 4200, knowledge: 320 },
+      aiPowerWeight: 10,
+      effects: [
+        { stat: 'shishkiPerSecond', firstGain: 28, decay: 0.945, aiScaled: true },
+        { stat: 'knowledgePerSecond', firstGain: 3.4, decay: 0.95, aiScaled: true },
+        { stat: 'moneyPerSecond', firstGain: 4.2, decay: 0.95, aiScaled: true },
       ],
     },
   },
@@ -107,14 +182,14 @@ export const BALANCE = {
       title: 'Учебники и методички',
       description: 'Укрепляют ручной прогресс и понемногу повышают темп получения знаний.',
       currency: 'money',
-      baseCost: 22,
-      costScale: 1.48,
+      baseCost: 18,
+      costScale: 1.42,
       tier: 1,
       effectLabel: 'Клик + немного знаний/сек',
       unlock: { shishki: 0, knowledge: 0 },
       effects: [
-        { stat: 'clickPower', firstGain: 0.85, decay: 0.98, baseBonus: 1 },
-        { stat: 'knowledgePerSecond', firstGain: 0.12, decay: 0.98 },
+        { stat: 'clickPower', firstGain: 0.9, decay: 0.985, baseBonus: 1 },
+        { stat: 'knowledgePerSecond', firstGain: 0.12, decay: 0.985 },
       ],
     },
     coffee: {
@@ -122,51 +197,120 @@ export const BALANCE = {
       title: 'Кофе и дедлайны',
       description: 'Добавляют шишки в секунду, но без диких ускорений.',
       currency: 'money',
-      baseCost: 52,
-      costScale: 1.61,
+      baseCost: 46,
+      costScale: 1.52,
       tier: 1,
       effectLabel: 'Пассивные шишки/сек',
       unlock: { shishki: 0, knowledge: 0 },
-      effects: [{ stat: 'shishkiPerSecond', firstGain: 0.9, decay: 0.97 }],
+      effects: [{ stat: 'shishkiPerSecond', firstGain: 1, decay: 0.978 }],
     },
     internship: {
       id: 'internship',
       title: 'Работа на складе OZON',
       description: 'Превращает академический прогресс в стабильный денежный поток.',
       currency: 'shishki',
-      baseCost: 95,
-      costScale: 1.68,
+      baseCost: 90,
+      costScale: 1.58,
       tier: 2,
       effectLabel: 'Деньги/сек',
       unlock: { shishki: 60, knowledge: 0 },
-      effects: [{ stat: 'moneyPerSecond', firstGain: 1.4, decay: 0.97, baseBonus: 1 }],
+      effects: [{ stat: 'moneyPerSecond', firstGain: 1.5, decay: 0.975, baseBonus: 1 }],
     },
     promptEngineering: {
       id: 'promptEngineering',
       title: 'Промпт-инжиниринг',
-      description: 'Усиливает AI-экономику процентом, но с затухающей отдачей от каждого уровня.',
+      description: 'Усиливает AI-экономику процентом и немного улучшает силу клика.',
       currency: 'knowledge',
-      baseCost: 35,
-      costScale: 1.82,
+      baseCost: 30,
+      costScale: 1.72,
       tier: 2,
       effectLabel: 'Мягкий множитель AI',
-      unlock: { shishki: 0, knowledge: 20 },
-      effects: [{ stat: 'clickPower', firstGain: 0.18, decay: 0.94 }],
+      unlock: { shishki: 0, knowledge: 18 },
+      effects: [{ stat: 'clickPower', firstGain: 0.18, decay: 0.95 }],
     },
     researchLab: {
       id: 'researchLab',
       title: 'Лаба и научрук',
-      description: 'Укрепляет исследовательский контур: знания и деньги растут более устойчиво.',
+      description: 'Укрепляет исследовательский контур: знания и деньги растут устойчивее.',
       currency: 'knowledge',
       baseCost: 55,
-      costScale: 1.9,
+      costScale: 1.82,
       tier: 3,
       effectLabel: 'Знания/сек + деньги/сек',
-      unlock: { shishki: 300, knowledge: 45 },
+      unlock: { shishki: 280, knowledge: 40 },
       effects: [
-        { stat: 'shishkiPerSecond', firstGain: 0.25, decay: 0.96 },
-        { stat: 'moneyPerSecond', firstGain: 0.9, decay: 0.95 },
-        { stat: 'knowledgePerSecond', firstGain: 0.6, decay: 0.96 },
+        { stat: 'shishkiPerSecond', firstGain: 0.4, decay: 0.97 },
+        { stat: 'moneyPerSecond', firstGain: 0.9, decay: 0.96 },
+        { stat: 'knowledgePerSecond', firstGain: 0.65, decay: 0.97 },
+      ],
+    },
+    autoClicker: {
+      id: 'autoClicker',
+      title: 'Автокликер на парах',
+      description: 'Слегка поднимает клик и заметно улучшает пассивную добычу шишек.',
+      currency: 'money',
+      baseCost: 160,
+      costScale: 1.66,
+      tier: 3,
+      effectLabel: 'Клик + шишки/сек',
+      unlock: { shishki: 190, knowledge: 18 },
+      effects: [
+        { stat: 'clickPower', firstGain: 0.9, decay: 0.97 },
+        { stat: 'shishkiPerSecond', firstGain: 2.6, decay: 0.97 },
+      ],
+    },
+    focusMode: {
+      id: 'focusMode',
+      title: 'Режим фокуса',
+      description: 'Увеличивает шанс мега-клика и немного ускоряет добычу знаний.',
+      currency: 'knowledge',
+      baseCost: 120,
+      costScale: 1.74,
+      tier: 4,
+      effectLabel: 'Мега-клик и знания',
+      unlock: { shishki: 540, knowledge: 75 },
+      effects: [{ stat: 'knowledgePerSecond', firstGain: 1.2, decay: 0.965 }],
+    },
+    memeMarketing: {
+      id: 'memeMarketing',
+      title: 'Мемный маркетинг',
+      description: 'Учит игру любить эмодзи и приносит доход на хайпе.',
+      currency: 'money',
+      baseCost: 480,
+      costScale: 1.8,
+      tier: 4,
+      effectLabel: 'Деньги/сек + эмодзи-шанс',
+      unlock: { shishki: 760, knowledge: 90 },
+      effects: [{ stat: 'moneyPerSecond', firstGain: 2.8, decay: 0.965 }],
+    },
+    serverRack: {
+      id: 'serverRack',
+      title: 'Серверная стойка',
+      description: 'Поднимает все пассивные процессы, но стоит уже по-взрослому.',
+      currency: 'money',
+      baseCost: 780,
+      costScale: 1.84,
+      tier: 5,
+      effectLabel: 'Шишки/сек + знания/сек',
+      unlock: { shishki: 1200, knowledge: 120 },
+      effects: [
+        { stat: 'shishkiPerSecond', firstGain: 5, decay: 0.962 },
+        { stat: 'knowledgePerSecond', firstGain: 1.8, decay: 0.965 },
+      ],
+    },
+    ventureFund: {
+      id: 'ventureFund',
+      title: 'Венчурный фонд кафедры',
+      description: 'Поздняя инвестиция для рывка в престиж и ребёрс.',
+      currency: 'knowledge',
+      baseCost: 260,
+      costScale: 1.86,
+      tier: 6,
+      effectLabel: 'Деньги/сек + шишки/сек',
+      unlock: { shishki: 2000, knowledge: 180 },
+      effects: [
+        { stat: 'moneyPerSecond', firstGain: 4.4, decay: 0.96 },
+        { stat: 'shishkiPerSecond', firstGain: 6.5, decay: 0.962 },
       ],
     },
   },
@@ -176,6 +320,57 @@ export const STARTING_STATE = BALANCE.start
 export const SUBSCRIPTIONS = Object.values(BALANCE.subscriptions)
 export const UPGRADES = Object.values(BALANCE.upgrades)
 
+export const ACHIEVEMENTS = [
+  {
+    id: 'first_click',
+    title: 'Первый удар',
+    description: 'Сделай первый клик по шишке.',
+    check: (state) => state.manualClicks >= 1,
+  },
+  {
+    id: 'silence_lover',
+    title: 'Любитель тишины',
+    description: 'Зачем вы делаете музыку такой громкой?',
+    check: (state) => state.achievements?.silence_lover_progress,
+  },
+  {
+    id: 'collector',
+    title: 'Коллекционер шишек',
+    description: 'Накопи 1 000 шишек за всё время.',
+    check: (state) => state.lifetimeShishkiEarned >= 1000,
+  },
+  {
+    id: 'mega_clicker',
+    title: 'Мега-кликер',
+    description: 'Сделай 10 мега-кликов.',
+    check: (state) => state.megaClicks >= 10,
+  },
+  {
+    id: 'emoji_lord',
+    title: 'Повелитель эмодзи',
+    description: 'Поймай 15 эмодзи-взрывов.',
+    check: (state) => state.emojiBursts >= 15,
+  },
+  {
+    id: 'researcher',
+    title: 'Грызун науки',
+    description: 'Заработай 250 знаний за всё время.',
+    check: (state) => state.lifetimeKnowledgeEarned >= 250,
+  },
+  {
+    id: 'reborn',
+    title: 'Перерождение',
+    description: 'Выполни первый ребёрс.',
+    check: (state) => state.rebirths >= 1,
+  },
+  {
+    id: 'prestige_banker',
+    title: 'Осколочный магнат',
+    description: 'Накопи 25 осколков престижа.',
+    check: (state) => state.totalPrestigeShardsEarned >= 25,
+  },
+]
+
 const STAT_META = {
   clickPower: { label: 'клик', prefix: '+', suffix: '' },
   shishkiPerSecond: { label: 'шишки/сек', prefix: '+', suffix: '' },
@@ -183,6 +378,8 @@ const STAT_META = {
   knowledgePerSecond: { label: 'знания/сек', prefix: '+', suffix: '' },
   aiMultiplier: { label: 'AI множитель', prefix: 'x', suffix: '' },
   aiPower: { label: 'AI мощности', prefix: '+', suffix: '' },
+  prestigeMultiplier: { label: 'престиж', prefix: 'x', suffix: '' },
+  megaChance: { label: 'шанс мега-клика', prefix: '+', suffix: '%' },
 }
 
 const CONTRIBUTION_META = {
@@ -200,8 +397,8 @@ function getUnlockRule(id) {
 export function getUnlockStatus(state, id) {
   const rule = getUnlockRule(id)
   const progress = {
-    shishki: state.totalShishkiEarned ?? 0,
-    knowledge: state.totalKnowledgeEarned ?? 0,
+    shishki: state.lifetimeShishkiEarned ?? state.totalShishkiEarned ?? 0,
+    knowledge: state.lifetimeKnowledgeEarned ?? state.totalKnowledgeEarned ?? 0,
   }
 
   return {
@@ -277,13 +474,13 @@ function formatEffectStat(stat, value) {
   return `${meta.prefix}${Number(value.toFixed(2))} ${meta.label}${meta.suffix}`.trim()
 }
 
-function describeItemEffects(item, level, aiMultiplier) {
+function describeItemEffects(item, level, aiMultiplier, prestigeMultiplier) {
   const current = []
   const next = []
 
   item.effects.forEach((effect) => {
-    const total = getEffectTotalAtLevel(effect, level, aiMultiplier)
-    const delta = getEffectIncrement(effect, level, aiMultiplier)
+    const total = getEffectTotalAtLevel(effect, level, aiMultiplier) * (effect.stat === 'clickPower' || effect.stat.endsWith('PerSecond') ? prestigeMultiplier : 1)
+    const delta = (getEffectIncrement(effect, level, aiMultiplier)) * (effect.stat === 'clickPower' || effect.stat.endsWith('PerSecond') ? prestigeMultiplier : 1)
 
     if (total > 0) current.push(formatEffectStat(effect.stat, total))
     if (delta > 0) next.push(formatEffectStat(effect.stat, delta))
@@ -299,49 +496,79 @@ function describeItemEffects(item, level, aiMultiplier) {
     if (aiDelta > 0) next.push(formatEffectStat('aiMultiplier', aiDelta))
   }
 
+  if (item.id === 'focusMode') {
+    const currentChance = getMegaClickChance({ upgrades: { focusMode: level, memeMarketing: 0 } })
+    const nextChance = getMegaClickChance({ upgrades: { focusMode: level + 1, memeMarketing: 0 } })
+    current.push(formatEffectStat('megaChance', currentChance * 100))
+    next.push(formatEffectStat('megaChance', (nextChance - currentChance) * 100))
+  }
+
   return {
     currentText: current.length ? current.join(' · ') : item.effectLabel,
     nextText: next.length ? `След. ур.: ${next.join(' · ')}` : 'Максимум полезного эффекта достигнут',
   }
 }
 
-export function getItemEffectPreview(item, level, aiMultiplier) {
-  return describeItemEffects(item, level, aiMultiplier)
+export function getItemEffectPreview(item, level, aiMultiplier, prestigeMultiplier = 1) {
+  return describeItemEffects(item, level, aiMultiplier, prestigeMultiplier)
 }
 
 function deriveAiMultiplier(state) {
   const source = BALANCE.growth.aiMultiplier
-  const level = state.upgrades[source.source] ?? 0
+  const level = state.upgrades?.[source.source] ?? 0
   return source.base + geometricGain(level, source.firstGain, source.decay)
+}
+
+export function derivePrestigeMultiplier(state) {
+  const cfg = BALANCE.growth.prestigeMultiplier
+  return 1 + (state.rebirths ?? 0) * cfg.rebirthGain + (state.prestigeShards ?? 0) * cfg.shardGain
 }
 
 function deriveAiPower(state) {
   const raw = SUBSCRIPTIONS.reduce((sum, item) => {
-    const level = state.subscriptions[item.id] ?? 0
+    const level = state.subscriptions?.[item.id] ?? 0
     return sum + level * (item.aiPowerWeight ?? 0)
   }, 0)
 
   return applySoftcap('aiPower', raw)
 }
 
-function getRawStatTotals(state, aiMultiplier) {
+export function getMegaClickChance(state) {
+  const cfg = BALANCE.growth.megaClick
+  const focusLevel = state.upgrades?.focusMode ?? 0
+  return Math.min(0.45, cfg.chanceBase + focusLevel * cfg.chancePerFocus)
+}
+
+export function getMegaEmojiChance(state) {
+  const cfg = BALANCE.growth.megaClick
+  const memeLevel = state.upgrades?.memeMarketing ?? 0
+  return Math.min(0.9, cfg.emojiChance + memeLevel * cfg.emojiChancePerMeme)
+}
+
+export function getRandomMegaEmoji() {
+  const pool = BALANCE.growth.megaClick.pool
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
+function getRawStatTotals(state, aiMultiplier, prestigeMultiplier) {
   const upgradeTotals = accumulateEffects(UPGRADES, state.upgrades ?? {}, aiMultiplier)
   const subscriptionTotals = accumulateEffects(SUBSCRIPTIONS, state.subscriptions ?? {}, aiMultiplier)
 
   return {
-    clickPower: upgradeTotals.clickPower || 1,
-    shishkiPerSecond: upgradeTotals.shishkiPerSecond + subscriptionTotals.shishkiPerSecond,
-    moneyPerSecond: upgradeTotals.moneyPerSecond || 1,
-    knowledgePerSecond: upgradeTotals.knowledgePerSecond + subscriptionTotals.knowledgePerSecond,
+    clickPower: (upgradeTotals.clickPower || 1) * prestigeMultiplier,
+    shishkiPerSecond: (upgradeTotals.shishkiPerSecond + subscriptionTotals.shishkiPerSecond) * prestigeMultiplier,
+    moneyPerSecond: (upgradeTotals.moneyPerSecond || 1) * prestigeMultiplier,
+    knowledgePerSecond: (upgradeTotals.knowledgePerSecond + subscriptionTotals.knowledgePerSecond) * prestigeMultiplier,
   }
 }
 
-function getItemStatTotals(item, level, aiMultiplier) {
+function getItemStatTotals(item, level, aiMultiplier, prestigeMultiplier) {
   const totals = buildBaseTotals()
   if (level <= 0) return totals
 
   item.effects.forEach((effect) => {
-    totals[effect.stat] = (totals[effect.stat] ?? 0) + getEffectTotalAtLevel(effect, level, aiMultiplier)
+    const value = getEffectTotalAtLevel(effect, level, aiMultiplier)
+    totals[effect.stat] = (totals[effect.stat] ?? 0) + value * (effect.stat === 'clickPower' || effect.stat.endsWith('PerSecond') ? prestigeMultiplier : 1)
   })
 
   return totals
@@ -372,9 +599,10 @@ function getBaseContributionEntries(rawTotals, finalTotals) {
 
 export function deriveContributionBreakdown(state) {
   const aiMultiplier = deriveAiMultiplier(state)
-  const rawTotals = getRawStatTotals(state, aiMultiplier)
+  const prestigeMultiplier = derivePrestigeMultiplier(state)
+  const rawTotals = getRawStatTotals(state, aiMultiplier, prestigeMultiplier)
   const rawAiPower = SUBSCRIPTIONS.reduce((sum, item) => {
-    const level = state.subscriptions[item.id] ?? 0
+    const level = state.subscriptions?.[item.id] ?? 0
     return sum + level * (item.aiPowerWeight ?? 0)
   }, 0)
 
@@ -401,7 +629,7 @@ export function deriveContributionBreakdown(state) {
 
   items.forEach((item) => {
     if (item.level <= 0) return
-    const totals = getItemStatTotals(item, item.level, aiMultiplier)
+    const totals = getItemStatTotals(item, item.level, aiMultiplier, prestigeMultiplier)
 
     Object.keys(groups).forEach((stat) => {
       const rawValue = totals[stat] ?? 0
@@ -451,9 +679,28 @@ export function deriveContributionBreakdown(state) {
   )
 }
 
+export function getPrestigePreview(state) {
+  const earnedShishki = state.lifetimeShishkiEarned ?? 0
+  const earnedKnowledge = state.lifetimeKnowledgeEarned ?? 0
+  const shards = Math.max(0, Math.floor(Math.sqrt(earnedShishki / 600) + earnedKnowledge / 140) - (state.rebirths ?? 0) * 2)
+  return {
+    canRebirth: earnedShishki >= 2500,
+    shards,
+    nextGoal: Math.max(0, 2500 - earnedShishki),
+  }
+}
+
+export function deriveAchievements(state) {
+  return ACHIEVEMENTS.map((achievement) => ({
+    ...achievement,
+    unlocked: Boolean(state.achievements?.[achievement.id]) || Boolean(achievement.check(state)),
+  }))
+}
+
 export function deriveEconomy(state) {
   const aiMultiplier = deriveAiMultiplier(state)
-  const rawTotals = getRawStatTotals(state, aiMultiplier)
+  const prestigeMultiplier = derivePrestigeMultiplier(state)
+  const rawTotals = getRawStatTotals(state, aiMultiplier, prestigeMultiplier)
 
   return {
     clickPower: Number(applySoftcap('clickPower', rawTotals.clickPower).toFixed(1)),
@@ -462,5 +709,8 @@ export function deriveEconomy(state) {
     knowledgePerSecond: Number(applySoftcap('knowledgePerSecond', rawTotals.knowledgePerSecond).toFixed(1)),
     aiPower: Number(deriveAiPower(state).toFixed(1)),
     aiMultiplier: Number(aiMultiplier.toFixed(2)),
+    prestigeMultiplier: Number(prestigeMultiplier.toFixed(2)),
+    megaClickChance: Number((getMegaClickChance(state) * 100).toFixed(1)),
+    emojiMegaChance: Number((getMegaEmojiChance(state) * 100).toFixed(1)),
   }
 }

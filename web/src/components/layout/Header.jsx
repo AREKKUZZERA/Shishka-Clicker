@@ -1,12 +1,17 @@
+import { useGameContext } from '../../context/GameContext'
+import { formatNumber } from '../../lib/format'
+
 export function Header({ user }) {
+  const { state } = useGameContext()
+
   return (
     <header className="app-header">
       <div className="app-header__glow" />
       <div className="app-header__inner">
         <div className="app-header__brand">
-          <div className="app-header__kicker">Шишка кликер · v2</div>
+          <div className="app-header__kicker">Шишка кликер · v3 rebirth</div>
           <h1 className="app-header__title">Шишки онлайн!</h1>
-          <p className="app-header__sub">Добывай шишки, качай AI, захвати знания</p>
+          <p className="app-header__sub">Добывай шишки, качай AI, лови мега-клики и уходи в престиж</p>
         </div>
 
         <div className="app-header__side">
@@ -28,6 +33,14 @@ export function Header({ user }) {
                 <div className="session-badge__hint">Браузер · autosave</div>
               </>
             )}
+          </div>
+
+          <div className="app-header__session">
+            <div className="session-badge">
+              <span className="session-badge__dot session-badge__dot--live" />
+              Престиж
+            </div>
+            <div className="session-badge__name">x{formatNumber(state.prestigeMultiplier)} · {formatNumber(state.prestigeShards)} оск.</div>
           </div>
         </div>
       </div>
