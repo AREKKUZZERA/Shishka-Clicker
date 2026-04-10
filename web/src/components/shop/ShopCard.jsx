@@ -41,6 +41,21 @@ const ITEM_EMOJI = {
   quantFund: '📈',
 }
 
+function splitEffectLines(text, stripNextPrefix = false) {
+  if (!text) return []
+
+  let normalized = String(text).trim()
+
+  if (stripNextPrefix) {
+    normalized = normalized.replace(/^След\.\s*ур\.:\s*/i, '').trim()
+  }
+
+  return normalized
+    .split(' · ')
+    .map((line) => line.trim())
+    .filter(Boolean)
+}
+
 function LockBadge({ item }) {
   return (
     <div className="shop-card__lock">
@@ -200,6 +215,10 @@ export function ShopCard({ item, canBuy, balance = 0, onBuy, onInspect, delay = 
   }
 
   const missingAmount = Math.max(0, Number(item.cost) - Number(balance))
+  const currentEffectText = item.effectPreview?.currentText ?? item.effectLabel
+  const nextEffectText = item.effectPreview?.nextText ?? 'Следующий уровень усилит слот'
+  const currentEffectLines = splitEffectLines(currentEffectText)
+  const nextEffectLines = splitEffectLines(nextEffectText, true)
 
   return (
     <article
@@ -241,10 +260,18 @@ export function ShopCard({ item, canBuy, balance = 0, onBuy, onInspect, delay = 
             <div className="shop-card__effect-box">
               <div className="shop-card__effect-label">Эффект</div>
               <div className="shop-card__effect-val">
-                {item.effectPreview?.currentText ?? item.effectLabel}
+                {currentEffectLines.length > 0
+                  ? currentEffectLines.map((line) => (
+                    <div key={line} className="shop-card__effect-line">{line}</div>
+                  ))
+                  : currentEffectText}
               </div>
               <div className="shop-card__effect-next">
-                {item.effectPreview?.nextText ?? 'Следующий уровень усилит слот'}
+                {nextEffectLines.length > 0
+                  ? nextEffectLines.map((line) => (
+                    <div key={line} className="shop-card__effect-next-line">{line}</div>
+                  ))
+                  : nextEffectText}
               </div>
             </div>
 

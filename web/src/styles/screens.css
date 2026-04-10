@@ -43,7 +43,7 @@
     radial-gradient(circle at 50% 45%, rgb(var(--accent-emerald-rgb) / 0.08), transparent 52%),
     linear-gradient(180deg, rgb(var(--surface-strong-rgb) / 0.98), rgb(var(--surface-1-rgb) / 0.92));
   box-shadow: var(--shadow-lg);
-  overflow: hidden;
+  overflow: visible;
   isolation: isolate;
   user-select: none;
   touch-action: manipulation;
@@ -934,13 +934,18 @@
 .shop-card__effect-box,
 .shop-card__price-box,
 .shop-card__lock {
-  padding: 0.72rem 0.78rem;
+  padding: 0.78rem 0.82rem;
 }
 
 .shop-card__effect-box,
 .shop-card__price-box {
   position: relative;
   overflow: hidden;
+}
+
+.shop-card__effect-box {
+  display: grid;
+  gap: 0.42rem;
 }
 
 .shop-card__effect-box::after,
@@ -952,7 +957,13 @@
   height: 72px;
   border-radius: 50%;
   background: radial-gradient(circle, rgb(var(--card-tone-rgb) / 0.12), transparent 70%);
+  opacity: 0.8;
   pointer-events: none;
+}
+
+.shop-card__effect-label {
+  color: rgb(var(--card-tone-rgb) / 0.94);
+  letter-spacing: 0.1em;
 }
 
 .shop-card__effect-val,
@@ -961,6 +972,54 @@
 .meta-section-head__meta {
   color: var(--text-strong);
   font-weight: 700;
+}
+
+.shop-card__effect-val {
+  padding: 0.5rem 0.58rem;
+  border-radius: calc(var(--radius-md) - 0.2rem);
+  border: 1px solid rgb(var(--card-tone-rgb) / 0.22);
+  background: linear-gradient(180deg, rgb(var(--card-tone-rgb) / 0.13), rgb(var(--card-tone-rgb) / 0.05));
+  font-size: 0.9rem;
+  line-height: 1.38;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.shop-card__effect-line {
+  display: block;
+  line-height: 1.36;
+}
+
+.shop-card__effect-line + .shop-card__effect-line {
+  margin-top: 0.26rem;
+}
+
+.shop-card__effect-next {
+  margin-top: 0.1rem;
+  padding-top: 0.45rem;
+  border-top: 1px dashed rgb(var(--white-rgb) / 0.14);
+  color: rgb(var(--white-rgb) / 0.74);
+  font-size: 0.84rem;
+  line-height: 1.42;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.shop-card__effect-next-line {
+  display: block;
+}
+
+.shop-card__effect-next-line + .shop-card__effect-next-line {
+  margin-top: 0.2rem;
+}
+
+.shop-card__effect-next::before {
+  content: 'Дальше: ';
+  color: rgb(var(--card-tone-rgb) / 0.88);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .shop-card__price {
