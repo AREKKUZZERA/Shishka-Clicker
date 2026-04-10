@@ -1,43 +1,50 @@
 import {formatNumber} from "../../lib/format.js"
+import {StatCard} from "../stats/StatCard.jsx"
 
 
 export const UnlockCard = ({ title, item, accentClass }) => {
 	if (!item) {
 		return (
-			<div className="unlock-card">
-				<div className="unlock-card__label">{title}</div>
-				<div className="unlock-card__value unlock-card__value--done">✓ Всё открыто</div>
-				<div className="unlock-card__text">Фокус на прокачке уровней и престиже.</div>
-			</div>
+			<StatCard
+				label={title}
+				value="✓ Всё открыто"
+				hint="Фокус на прокачке уровней и престиже."
+				formatValue={false}
+				className="stat-card--shop-surface stat-card--unlock"
+				valueClassName="stat-card__value--done"
+			/>
 		)
 	}
 
 	const shishkiPct = Math.min(100, (item.unlockProgress.shishki / Math.max(1, item.unlockRule.shishki)) * 100)
-	const knowledgePct = Math.min(100, (item.unlockProgress.knowledge / Math.max(1, item.unlockRule.knowledge)) * 100)
+  const knowledgePct = Math.min(100, (item.unlockProgress.knowledge / Math.max(1, item.unlockRule.knowledge)) * 100)
 
-	return (
-		<div className="unlock-card">
-			<div className="unlock-card__label">{title}</div>
-			<div className={`unlock-card__value ${accentClass}`}>{item.title}</div>
-			<div className="unlock-card__text">{item.unlockText}</div>
+  return (
+    <StatCard
+      label={title}
+      value={item.title}
+      hint={item.unlockText}
+      formatValue={false}
+      className="stat-card--shop-surface stat-card--unlock"
+      valueClassName={accentClass}
+    >
+      <div className="unlock-progress">
+        <div className="unlock-progress__row">
+          <span>🌰 Шишки</span>
+          <span>{formatNumber(item.unlockProgress.shishki)} / {formatNumber(item.unlockRule.shishki)}</span>
+        </div>
+        <div className="unlock-progress__track">
+          <div className="unlock-progress__fill" style={{ width: `${shishkiPct}%` }} />
+        </div>
 
-			<div className="unlock-progress">
-				<div className="unlock-progress__row">
-					<span>🌰 Шишки</span>
-					<span>{formatNumber(item.unlockProgress.shishki)} / {formatNumber(item.unlockRule.shishki)}</span>
-				</div>
-				<div className="unlock-progress__track">
-					<div className="unlock-progress__fill" style={{ width: `${shishkiPct}%` }} />
-				</div>
-
-				<div className="unlock-progress__row">
-					<span>📚 Знания</span>
-					<span>{formatNumber(item.unlockProgress.knowledge)} / {formatNumber(item.unlockRule.knowledge)}</span>
-				</div>
-				<div className="unlock-progress__track">
-					<div className="unlock-progress__fill unlock-progress__fill--alt" style={{ width: `${knowledgePct}%` }} />
-				</div>
-			</div>
-		</div>
-	)
+        <div className="unlock-progress__row">
+          <span>📚 Знания</span>
+          <span>{formatNumber(item.unlockProgress.knowledge)} / {formatNumber(item.unlockRule.knowledge)}</span>
+        </div>
+        <div className="unlock-progress__track">
+          <div className="unlock-progress__fill unlock-progress__fill--alt" style={{ width: `${knowledgePct}%` }} />
+        </div>
+      </div>
+    </StatCard>
+  )
 }

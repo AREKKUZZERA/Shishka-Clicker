@@ -1,6 +1,6 @@
 import { formatNumber } from '../../lib/format'
 import {ContributionBar} from "./ContributionBar.jsx"
-import {memo} from "react";
+import {memo} from "react"
 
 
 export const StatCard = memo(function StatCard({
