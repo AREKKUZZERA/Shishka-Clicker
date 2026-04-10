@@ -6,7 +6,7 @@ import { useBursts } from '../../hooks/useBursts'
 import { useSound } from '../../hooks/useSound'
 import { ClickBurst } from '../ui/ClickBurst'
 import { formatNumber } from '../../lib/format'
-import vityaImage from '../../assets/v4.png'
+import discoImage from '../../assets/disco.gif'
 import coneImage from '../../assets/cone.png'
 import shishkaSound from '../../assets/audio/ui/shishka.mp3'
 
@@ -309,7 +309,7 @@ export function ClickerButton() {
         <div className="clicker-btn__ring clicker-btn__ring--inner" />
 
         <img
-          src={vityaImage}
+          src={discoImage}
           alt="Шишка"
           className="clicker-btn__hero"
           draggable={false}
