@@ -13,7 +13,7 @@ export function Header() {
           target="_blank"
           rel="noreferrer"
         >
-          Последние changelog-и
+          V1.5.37
         </a>
       </div>
     </header>
