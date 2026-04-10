@@ -1,30 +1,25 @@
 const formatter = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1 })
 
-const COMPACT_SUFFIXES = [
-  { value: 1e15, suffix: 'квд' },
-  { value: 1e12, suffix: 'трлн' },
-  { value: 1e9, suffix: 'млрд' },
-  { value: 1e6, suffix: 'м' },
-  { value: 1e3, suffix: 'к' },
-]
+const NUMBER_SUFFIXES = ["", "K", "M", "B", "T", "QD", "QN", "SX", "SP"]
 
-export function formatNumber(value) {
-  const numeric = Number(value ?? 0)
-  if (!Number.isFinite(numeric)) return '0'
+export function formatNumber(number) {
+  let k = 1000
+  let i = 0
 
-  const abs = Math.abs(numeric)
-  const compact = COMPACT_SUFFIXES.find((entry) => abs >= entry.value)
-
-  if (!compact) {
-    return formatter.format(abs >= 100 ? Math.round(numeric) : numeric)
+  while (number > k) {
+    number /= k
+    i++
   }
 
-  const scaled = numeric / compact.value
-  const fractionDigits = Math.abs(scaled) >= 100 ? 0 : Math.abs(scaled) >= 10 ? 1 : 2
-  const short = new Intl.NumberFormat('ru-RU', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: fractionDigits,
-  }).format(scaled)
+  let sym = ""
 
-  return `${short}${compact.suffix}`
+  if (i > 8) {
+    const zeros = i * 3
+    sym = `e${zeros}`
+  } else {
+    sym = NUMBER_SUFFIXES[i]
+  }
+
+  const shortNumber = formatter.format(number)
+  return `${shortNumber}${sym}`
 }
