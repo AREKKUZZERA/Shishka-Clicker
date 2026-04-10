@@ -30,6 +30,9 @@ function ScreenFallback() {
 
 export function AppShell() {
   const { activeTab } = useNav()
+  const statsBarClassName = activeTab === 'subscriptions' || activeTab === 'upgrades'
+    ? 'stats-bar--shop'
+    : ''
 
   useBackgroundMusic(backgroundMusic)
 
@@ -47,7 +50,7 @@ export function AppShell() {
       <div className="app-content">
         <Header />
         <main className="app-main">
-          {activeTab !== 'clicker' && <StatsBar />}
+          {activeTab !== 'clicker' && <StatsBar className={statsBarClassName} />}
           <Suspense fallback={<ScreenFallback />}>
             {activeTab === 'clicker' && <ClickerScreen />}
             {activeTab === 'subscriptions' && <ShopScreen type="subscriptions" />}

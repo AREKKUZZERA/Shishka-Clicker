@@ -816,11 +816,12 @@
 }
 
 .shop-card__chips {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, max-content));
-  gap: 0.45rem;
-  justify-content: end;
-  align-content: start;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.35rem;
+  justify-content: center;
+  align-items: center;
+  min-width: 0;
 }
 
 .shop-card__new-badge {
@@ -851,14 +852,15 @@
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  min-height: 1.8rem;
-  padding: 0.3rem 0.65rem;
+  min-height: 1.65rem;
+  padding: 0.24rem 0.55rem;
   border-radius: var(--radius-pill);
   border: 1px solid rgb(var(--card-tone-rgb) / 0.16);
   background: rgb(var(--card-tone-rgb) / 0.1);
   color: var(--text-base);
-  font-size: 0.75rem;
+  font-size: 0.69rem;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .shop-card__meta,
@@ -877,6 +879,9 @@
 .shop-card__tier,
 .shop-card__level {
   border-color: rgb(var(--card-tone-rgb) / 0.2);
+  white-space: nowrap;
+  font-size: 0.64rem;
+  padding: 0.24rem 0.52rem;
 }
 
 .shop-card__level {
@@ -941,6 +946,11 @@
 .shop-card__price-box {
   position: relative;
   overflow: hidden;
+}
+
+.shop-card__price-box {
+  display: grid;
+  gap: 0.2rem;
 }
 
 .shop-card__effect-box {
@@ -1027,6 +1037,19 @@
   align-items: center;
   gap: 0.45rem;
   flex-wrap: wrap;
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.shop-card__price-num,
+.shop-card__price-icon {
+  font-size: inherit;
+  line-height: 1;
+}
+
+.shop-card__price-num {
+  font-family: var(--font-body);
+  font-weight: 700;
 }
 
 .shop-card__price-cur,
@@ -1133,8 +1156,14 @@
 
   .shop-card__chips {
     width: 100%;
-    justify-content: start;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+  }
+
+  .shop-card__chips::-webkit-scrollbar {
+    display: none;
   }
 }
 

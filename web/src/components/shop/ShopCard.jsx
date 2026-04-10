@@ -248,7 +248,6 @@ export function ShopCard({ item, canBuy, balance = 0, onBuy, onInspect, delay = 
           {item.isBuyableNew && <span className="shop-card__new-badge shop-card__new-badge--ready">можно взять</span>}
           <span className="shop-card__tier">тир {item.tier}</span>
           {!isLocked && <span className="shop-card__level">ур. {item.level}</span>}
-          <span className="shop-card__currency-chip">{currency.icon} {currency.label}</span>
         </div>
       </div>
 
@@ -280,7 +279,6 @@ export function ShopCard({ item, canBuy, balance = 0, onBuy, onInspect, delay = 
               <div className="shop-card__price">
                 <span className="shop-card__price-num">{formatNumber(item.cost)}</span>
                 <span className="shop-card__price-icon">{currency.icon}</span>
-                <span className="shop-card__price-cur">{currency.label}</span>
               </div>
               {!canBuy && (
                 <div className="shop-card__shortage">
