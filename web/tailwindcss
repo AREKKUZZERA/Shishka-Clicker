@@ -1,0 +1,1 @@
+/* Local import target for @import "tailwindcss" to avoid ENOENT in Vite/PostCSS. */
