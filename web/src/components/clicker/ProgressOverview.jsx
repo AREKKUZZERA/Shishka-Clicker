@@ -86,9 +86,9 @@ export function ProgressOverview() {
       </div>
 
       <div className="meta-lifetime-grid progress-overview__mini-grid">
-        <div><span>Ребёрсы</span><b>{formatNumber(state.rebirths)}</b></div>
-        <div><span>Осколки</span><b>{formatNumber(state.prestigeShards)}</b></div>
         <div><span>Достижения</span><b>{unlockedAchievements}/{achievements.length}</b></div>
+        <div><span>Ребёрсы</span><b>{formatNumber(state.rebirths)}</b></div>
+        <div><span>Осколки</span><b>{prestige.isUnlocked ? `${formatNumber(state.prestigeShards)} 💎` : 'закрыто'}</b></div>
         <div><span>След. награда</span><b>{prestige.isUnlocked ? `${formatNumber(prestige.projectedShards)} 💎` : 'закрыто'}</b></div>
       </div>
 
