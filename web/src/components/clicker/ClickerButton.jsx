@@ -212,8 +212,8 @@ export function ClickerButton() {
     const burstValue = result.isEmojiExplosion
       ? `🌈 ${result.amount}`
       : result.isMega
-        ? `⚡ ${result.amount}`
-        : `+${formatNumber(result.amount)}`
+        ? `⚡ МЕГА ${result.amount}`
+        : `+${result.amount}`
 
     addBurst(localX, localY, burstValue)
 

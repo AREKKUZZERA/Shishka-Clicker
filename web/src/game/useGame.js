@@ -17,6 +17,7 @@ import {
 } from './config'
 import { getPrestigeUpgradeCards, PRESTIGE_UPGRADES, getPrestigeUpgradeCost } from './metaConfig'
 import { loadGame, saveGame, clearGame } from '../lib/storage'
+import {formatNumber} from "../lib/format.js"
 
 function buildSeenShopItems(snapshot = STARTING_STATE) {
   const safeSnapshot = snapshot ?? STARTING_STATE
@@ -237,7 +238,8 @@ export function useGame() {
       current = mergeState(current)
       const rates = deriveEconomy(current)
       const clickValue = isMega ? rates.clickPower * 5 : rates.clickPower
-      burstValue = `${isMega ? 'МЕГА ' : '+'}${Math.round(clickValue * 10) / 10}`
+
+      burstValue = formatNumber(clickValue)
 
       const result = unlockAchievements({
         ...current,

@@ -100,8 +100,8 @@ export function ShopCard({ item, canBuy, balance = 0, onBuy, onInspect, delay = 
   const deniedButtonLabelAnimationRef = useRef(null)
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => setIsEntering(false), delay * 50 + 600)
-    return () => window.clearTimeout(timeoutId)
+    const timeoutId = setTimeout(() => setIsEntering(false), delay * 50 + 600)
+    return () => clearTimeout(timeoutId)
   }, [delay])
 
   useEffect(() => () => {
