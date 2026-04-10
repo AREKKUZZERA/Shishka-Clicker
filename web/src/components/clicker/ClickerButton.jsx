@@ -20,12 +20,15 @@ function getRandomAngle() {
 
 function createParticles(localX, localY, amount, symbols, isMega, isEmojiExplosion, particleCap) {
   const now = Date.now()
-  const total = Math.max(1, Math.min(isEmojiExplosion ? particleCap : Math.min(particleCap, 16), amount))
+  const maxParticles = isEmojiExplosion ? Math.min(particleCap, 12) : Math.min(particleCap, 16)
+  const total = Math.max(1, Math.min(maxParticles, amount))
   const pool = Array.isArray(symbols) ? symbols : [symbols]
 
   return Array.from({ length: total }, (_, index) => {
     const angle = getRandomAngle()
-    const distance = (isEmojiExplosion ? 98 : 22) + Math.random() * (isMega ? 180 : 92)
+    const distance = isEmojiExplosion
+      ? 220 + Math.random() * 300
+      : (22 + Math.random() * (isMega ? 180 : 92))
 
     return {
       id: `${now}-${index}-${Math.random().toString(36).slice(2)}`,
@@ -64,47 +67,6 @@ function createConeSprites(localX, localY, amount, isMega, coneCap) {
   })
 }
 
-function createViewportFireworks(amount, symbols, particleCap) {
-  const now = Date.now()
-  const pool = Array.isArray(symbols) ? symbols : [symbols]
-  const total = Math.max(1, Math.min(Math.max(1, Math.round(particleCap * 0.5)), amount))
-
-  return Array.from({ length: total }, (_, index) => {
-    const lane = index / Math.max(1, total - 1)
-    const launchX = 4 + lane * 92 + (Math.random() - 0.5) * 8
-    const dx = (Math.random() - 0.5) * 36
-    const dy = -(160 + Math.random() * 260 + (index % 5) * 14)
-
-    return {
-      id: `fw-${now}-${index}-${Math.random().toString(36).slice(2)}`,
-      x: launchX,
-      dx,
-      dy,
-      rotate: Math.round((Math.random() - 0.5) * 520),
-      scale: 0.9 + Math.random() * 1.35,
-      delay: Math.round(Math.random() * 240),
-      symbol: pickRandom(pool),
-    }
-  })
-}
-
-function createFallingEmojis(amount, symbols, limit) {
-  const now = Date.now()
-  const pool = Array.isArray(symbols) ? symbols : [symbols]
-  const total = Math.max(1, Math.min(limit, amount))
-
-  return Array.from({ length: total }, (_, index) => ({
-    id: `rain-${now}-${index}-${Math.random().toString(36).slice(2)}`,
-    x: 2 + Math.random() * 96,
-    drift: (Math.random() - 0.5) * 22,
-    rotate: Math.round((Math.random() - 0.5) * 180),
-    scale: 0.8 + Math.random() * 1.2,
-    duration: 2400 + Math.round(Math.random() * 1800),
-    delay: Math.round(Math.random() * 520),
-    symbol: pickRandom(pool),
-  }))
-}
-
 const VISUAL_DURATIONS = {
   tap: 240,
   mega: 680,
@@ -114,8 +76,6 @@ const VISUAL_DURATIONS = {
 export function ClickerButton() {
   const [particles, setParticles] = useState([])
   const [coneSprites, setConeSprites] = useState([])
-  const [screenFireworks, setScreenFireworks] = useState([])
-  const [fallingEmojis, setFallingEmojis] = useState([])
   const [visualState, setVisualState] = useState('idle')
   const [shockwaves, setShockwaves] = useState([])
 
@@ -141,7 +101,6 @@ export function ClickerButton() {
     [particleLimitHint, state.clickPower, state.emojiMegaChance, state.megaClickChance],
   )
 
-  const overlayRoot = typeof document !== 'undefined' ? document.body : null
   const isCharged =
     visualState !== 'idle' ||
     particles.length > 0 ||
@@ -167,25 +126,27 @@ export function ClickerButton() {
     })
   }
 
-  function spawnMegaRain(symbols, intensity = 1) {
-    if (visualEffectCaps.rainCap <= 0) return
+  function getRandomBurstPoint(buttonElement) {
+    const rect = buttonElement.getBoundingClientRect()
+    const centerX = rect.left + rect.width / 2
+    const centerY = rect.top + rect.height / 2
+    const angle = getRandomAngle()
+    const radiusBase = Math.min(rect.width, rect.height) * 0.28
+    const radius = radiusBase + Math.random() * (radiusBase * 0.42)
 
-    const rain = createFallingEmojis(
-      Math.round((2 + visualEffectCaps.burstCap * 0.35) * (0.55 + visualEffectsFactor * 0.35) * intensity),
-      symbols,
-      visualEffectCaps.rainCap,
-    )
-
-    setFallingEmojis((current) => [...current.slice(-visualEffectCaps.rainCap), ...rain])
+    return {
+      x: centerX + Math.cos(angle) * radius,
+      y: centerY + Math.sin(angle) * radius,
+    }
   }
 
-  function getLocalPoint(event) {
+  function getShockwavePoint(event) {
     const rect = event.currentTarget.getBoundingClientRect()
     const hasPointerCoords = Number.isFinite(event.clientX) && Number.isFinite(event.clientY)
 
     return {
-      localX: hasPointerCoords ? event.clientX - rect.left : rect.width / 2,
-      localY: hasPointerCoords ? event.clientY - rect.top : rect.height / 2,
+      x: hasPointerCoords ? event.clientX - rect.left : rect.width / 2,
+      y: hasPointerCoords ? event.clientY - rect.top : rect.height / 2,
     }
   }
 
@@ -209,19 +170,21 @@ export function ClickerButton() {
 
     armVisualState(nextVisualState)
 
-    const { localX, localY } = getLocalPoint(event)
+    const { x, y } = getRandomBurstPoint(event.currentTarget)
     const burstValue = result.isEmojiExplosion
-      ? `🌈 +${formattedAmount}`
+      ? `💥 ЭМОДЗИ +${formattedAmount}`
       : result.isMega
         ? `⚡ МЕГА +${formattedAmount}`
         : `+${formattedAmount}`
 
-    addBurst(localX, localY, burstValue)
+    addBurst(x, y, burstValue)
 
     const spawnedParticles = createParticles(
-      localX,
-      localY,
-      Math.round(result.particleCount * (0.16 + visualEffectsFactor * 0.28)),
+      x,
+      y,
+      Math.round(
+        result.particleCount * (result.isEmojiExplosion ? 0.12 + visualEffectsFactor * 0.2 : 0.16 + visualEffectsFactor * 0.28),
+      ),
       result.symbols,
       result.isMega,
       result.isEmojiExplosion,
@@ -232,19 +195,20 @@ export function ClickerButton() {
 
     const coneBurstCount = Math.max(
       0,
-      Math.round((result.isEmojiExplosion ? 1 : result.isMega ? 1 : 0.5) * (0.45 + visualEffectsFactor * 0.2)),
+      Math.round((result.isEmojiExplosion ? 2 : result.isMega ? 1 : 0.5) * (0.45 + visualEffectsFactor * 0.2)),
     )
-    const cones = createConeSprites(localX, localY, coneBurstCount, result.isMega, visualEffectCaps.coneCap)
+    const cones = createConeSprites(x, y, coneBurstCount, result.isMega, visualEffectCaps.coneCap)
     setConeSprites((current) => [...current.slice(-visualEffectCaps.coneCap), ...cones])
 
     if (result.isMega) {
-      spawnMegaRain(result.symbols, result.isEmojiExplosion ? 1.5 : 1)
-
       const now = Date.now()
       const waveCount = result.isEmojiExplosion ? 3 : 2
+      const shockwavePoint = getShockwavePoint(event)
       const waves = Array.from({ length: waveCount }, (_, index) => ({
         id: `sw-${now}-${index}`,
         delay: index * 160,
+        x: shockwavePoint.x,
+        y: shockwavePoint.y,
         color: result.isEmojiExplosion
           ? ['rgba(168,85,247,0.72)', 'rgba(34,211,238,0.72)', 'rgba(255,166,0,0.72)'][index]
           : index === 0
@@ -255,16 +219,57 @@ export function ClickerButton() {
       setShockwaves((current) => [...current.slice(-6), ...waves])
     }
 
-    if (result.isEmojiExplosion && visualEffectCaps.fireworkCap > 0 && visualEffectsFactor >= 0.35) {
-      const fireworks = createViewportFireworks(
-        Math.round(Math.max(visualEffectCaps.fireworkCap, result.particleCount + 2) * (0.3 + visualEffectsFactor * 0.25)),
-        result.symbols,
-        visualEffectCaps.fireworkCap,
-      )
-
-      setScreenFireworks((current) => [...current.slice(-visualEffectCaps.fireworkCap), ...fireworks])
-    }
   }
+
+  const overlayEffects = (
+    <>
+      <div className="clicker-particles" aria-hidden="true">
+        {particles.map((particle) => (
+          <span
+            key={particle.id}
+            className={`clicker-particle ${particle.isMega ? 'clicker-particle--mega' : ''} ${particle.isEmojiExplosion ? 'clicker-particle--emoji-explosion' : ''}`}
+            style={{
+              left: `${particle.x}px`,
+              top: `${particle.y}px`,
+              '--dx': `${particle.dx}px`,
+              '--dy': `${particle.dy}px`,
+              '--rot': `${particle.rotate}deg`,
+              '--scale': particle.scale,
+            }}
+            onAnimationEnd={() => {
+              setParticles((current) => current.filter((entry) => entry.id !== particle.id))
+            }}
+          >
+            {particle.symbol}
+          </span>
+        ))}
+
+        {coneSprites.map((sprite) => (
+          <img
+            key={sprite.id}
+            src={coneImage}
+            alt=""
+            className={`cone-sprite ${sprite.isMega ? 'cone-sprite--mega' : ''}`}
+            draggable={false}
+            style={{
+              left: `${sprite.x}px`,
+              top: `${sprite.y}px`,
+              '--dx': `${sprite.dx}px`,
+              '--dy': `${sprite.dy}px`,
+              '--rot-start': `${sprite.rotateStart}deg`,
+              '--rot-end': `${sprite.rotateEnd}deg`,
+              '--cone-scale': sprite.scale,
+            }}
+            onAnimationEnd={() => {
+              setConeSprites((current) => current.filter((entry) => entry.id !== sprite.id))
+            }}
+          />
+        ))}
+      </div>
+
+      <ClickBurst bursts={bursts} />
+    </>
+  )
 
   return (
     <div className="clicker-wrap">
@@ -277,57 +282,11 @@ export function ClickerButton() {
         onKeyUp={blockKeyboardActivation}
         aria-label="Добыть шишки"
       >
-        <div className="clicker-particles" aria-hidden="true">
-          {particles.map((particle) => (
-            <span
-              key={particle.id}
-              className={`clicker-particle ${particle.isMega ? 'clicker-particle--mega' : ''} ${particle.isEmojiExplosion ? 'clicker-particle--emoji-explosion' : ''}`}
-              style={{
-                left: `${particle.x}px`,
-                top: `${particle.y}px`,
-                '--dx': `${particle.dx}px`,
-                '--dy': `${particle.dy}px`,
-                '--rot': `${particle.rotate}deg`,
-                '--scale': particle.scale,
-              }}
-              onAnimationEnd={() => {
-                setParticles((current) => current.filter((entry) => entry.id !== particle.id))
-              }}
-            >
-              {particle.symbol}
-            </span>
-          ))}
-
-          {coneSprites.map((sprite) => (
-            <img
-              key={sprite.id}
-              src={coneImage}
-              alt=""
-              className={`cone-sprite ${sprite.isMega ? 'cone-sprite--mega' : ''}`}
-              draggable={false}
-              style={{
-                left: `${sprite.x}px`,
-                top: `${sprite.y}px`,
-                '--dx': `${sprite.dx}px`,
-                '--dy': `${sprite.dy}px`,
-                '--rot-start': `${sprite.rotateStart}deg`,
-                '--rot-end': `${sprite.rotateEnd}deg`,
-                '--cone-scale': sprite.scale,
-              }}
-              onAnimationEnd={() => {
-                setConeSprites((current) => current.filter((entry) => entry.id !== sprite.id))
-              }}
-            />
-          ))}
-        </div>
-
-        <ClickBurst bursts={bursts} />
-
         {shockwaves.map((wave) => (
           <span
             key={wave.id}
             className="shockwave-ring"
-            style={{ '--sw-color': wave.color, animationDelay: `${wave.delay}ms` }}
+            style={{ left: `${wave.x}px`, top: `${wave.y}px`, '--sw-color': wave.color, animationDelay: `${wave.delay}ms` }}
             onAnimationEnd={() => setShockwaves((current) => current.filter((entry) => entry.id !== wave.id))}
           />
         ))}
@@ -363,54 +322,8 @@ export function ClickerButton() {
         </div>
       </button>
 
-      {overlayRoot && createPortal(
-        <>
-          <div className="screen-fireworks" aria-hidden="true">
-            {screenFireworks.map((firework) => (
-              <span
-                key={firework.id}
-                className="screen-firework"
-                style={{
-                  left: `${firework.x}vw`,
-                  '--dx': `${firework.dx}vw`,
-                  '--dy': `${firework.dy}px`,
-                  '--rot': `${firework.rotate}deg`,
-                  '--scale': firework.scale,
-                  animationDelay: `${firework.delay}ms`,
-                }}
-                onAnimationEnd={() => {
-                  setScreenFireworks((current) => current.filter((entry) => entry.id !== firework.id))
-                }}
-              >
-                {firework.symbol}
-              </span>
-            ))}
-          </div>
+      {createPortal(overlayEffects, document.body)}
 
-          <div className="emoji-rain" aria-hidden="true">
-            {fallingEmojis.map((emoji) => (
-              <span
-                key={emoji.id}
-                className="emoji-rain__item"
-                style={{
-                  left: `${emoji.x}vw`,
-                  '--rain-drift': `${emoji.drift}vw`,
-                  '--rain-rotate': `${emoji.rotate}deg`,
-                  '--rain-scale': emoji.scale,
-                  animationDuration: `${emoji.duration}ms`,
-                  animationDelay: `${emoji.delay}ms`,
-                }}
-                onAnimationEnd={() => {
-                  setFallingEmojis((current) => current.filter((entry) => entry.id !== emoji.id))
-                }}
-              >
-                {emoji.symbol}
-              </span>
-            ))}
-          </div>
-        </>,
-        overlayRoot,
-      )}
     </div>
   )
 }
