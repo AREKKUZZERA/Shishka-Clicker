@@ -13,6 +13,7 @@ import {SettingsSaveCard} from "./SettingsSaveCard.jsx"
 import {SettingsAudio} from "./SettingsAudio.jsx"
 import {SettingsEffects} from "./SettingsEffects.jsx"
 import {SettingsAbout} from "./SettingsAbout.jsx"
+import { ConeIcon } from '../ui/ConeIcon'
 
 
 export function SettingsScreen() {
@@ -34,7 +35,7 @@ export function SettingsScreen() {
   const effectSummary = [
     { icon: '✨', label: 'Эмодзи и шишки', value: `до ${visualEffectCaps.particleCap}`, hint: 'частицы на экране' },
     { icon: '🔢', label: 'Числа', value: `до ${visualEffectCaps.burstCap}`, hint: 'всплывающих значений' },
-    { icon: '🌰', label: 'Спрайты', value: `до ${visualEffectCaps.coneCap}`, hint: 'дополнительных шишек' },
+    { icon: <ConeIcon />, label: 'Спрайты', value: `до ${visualEffectCaps.coneCap}`, hint: 'дополнительных шишек' },
     { icon: '📦', label: 'Бюджет', value: visualEffectCaps.totalHint, hint: 'общий лимит эффектов' },
   ]
 

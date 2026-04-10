@@ -1,5 +1,6 @@
 import {formatNumber} from "../../lib/format.js"
 import {StatCard} from "../stats/StatCard.jsx"
+import { ConeIcon } from '../ui/ConeIcon'
 
 
 export const UnlockCard = ({ title, item, accentClass }) => {
@@ -30,7 +31,7 @@ export const UnlockCard = ({ title, item, accentClass }) => {
     >
       <div className="unlock-progress">
         <div className="unlock-progress__row">
-          <span>🌰 Шишки</span>
+          <span><ConeIcon /> Шишки</span>
           <span>{formatNumber(item.unlockProgress.shishki)} / {formatNumber(item.unlockRule.shishki)}</span>
         </div>
         <div className="unlock-progress__track">

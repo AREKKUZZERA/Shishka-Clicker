@@ -1,11 +1,12 @@
 import { useGameContext } from '../../context/GameContext'
 import { StatCard } from './StatCard'
 import { formatNumber } from '../../lib/format'
+import { ConeIcon } from '../ui/ConeIcon'
 
 export function buildStats(state, contributions) {
   return [
     {
-      icon: '🌰',
+      icon: <ConeIcon />,
       label: 'Шишки',
       value: state.shishki,
       hint: `+${formatNumber(state.shishkiPerSecond)} / сек`,

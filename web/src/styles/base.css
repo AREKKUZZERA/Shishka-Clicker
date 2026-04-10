@@ -17,6 +17,17 @@
   font-family: "SH-Font", monospace, serif !important;
 }
 
+/* Inline cone icon — replaces 🌰 emoji */
+.cone-icon {
+  display: inline-block;
+  width: 1.15em;
+  height: 1.15em;
+  vertical-align: -0.15em;
+  object-fit: contain;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
 html {
   scroll-behavior: smooth;
   scrollbar-width: none;

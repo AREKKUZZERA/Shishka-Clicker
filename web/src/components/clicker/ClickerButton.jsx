@@ -8,7 +8,9 @@ import { ClickBurst } from '../ui/ClickBurst'
 import { formatNumber } from '../../lib/format'
 import discoImage from '../../assets/disco.gif'
 import coneImage from '../../assets/cone.png'
+import coneV2Image from '../../assets/conev2.png'
 import shishkaSound from '../../assets/audio/ui/shishka.mp3'
+import { ConeIcon } from '../ui/ConeIcon'
 
 function pickRandom(pool) {
   return pool[Math.floor(Math.random() * pool.length)]
@@ -117,7 +119,7 @@ export function ClickerButton() {
 
   const metricItems = useMemo(
     () => [
-      { label: 'за клик', value: `+${formatNumber(state.clickPower)} 🌰` },
+      { label: 'за клик', value: <><span>+{formatNumber(state.clickPower)}</span> <ConeIcon /></> },
       { label: 'мега-шанс', value: `${formatNumber(state.megaClickChance)}%` },
       { label: 'эмодзи', value: `${formatNumber(state.emojiMegaChance)}%` },
       { label: 'лимит частиц', value: formatNumber(particleLimitHint) },
@@ -283,7 +285,9 @@ export function ClickerButton() {
               setParticles((current) => current.filter((entry) => entry.id !== particle.id))
             }}
           >
-            {particle.symbol}
+            {particle.symbol === '🌰'
+              ? <img src={coneV2Image} alt="" className="cone-icon" />
+              : particle.symbol}
           </span>
         ))}
 

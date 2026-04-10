@@ -4,11 +4,12 @@ import { useSound } from '../../hooks/useSound'
 import buySound from '../../assets/audio/ui/blip1.mp3'
 import denySound from '../../assets/audio/ui/wpn_denyselect.mp3'
 import {LockBadge} from "./LockBadge.jsx"
+import { ConeIcon } from '../ui/ConeIcon'
 
 
 const CURRENCY_META = {
   money: { icon: '💵', label: 'деньги' },
-  shishki: { icon: '🌰', label: 'шишки' },
+  shishki: { icon: <ConeIcon />, label: 'шишки' },
   knowledge: { icon: '📚', label: 'знания' },
 }
 

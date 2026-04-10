@@ -3,6 +3,7 @@ import { useGameContext } from '../../context/GameContext'
 import { formatNumber } from '../../lib/format'
 import {StatCard} from "../stats/StatCard.jsx"
 import {UnlockCard} from "./UnlockCard.jsx"
+import { ConeIcon } from '../ui/ConeIcon'
 
 
 export function ProgressOverview() {
@@ -18,7 +19,7 @@ export function ProgressOverview() {
     { icon: '🔮', label: 'След. награда', value: prestige.isUnlocked ? `${formatNumber(prestige.projectedShards)} 💎` : 'закрыто', hint: 'если ребёрс сейчас', },
   ]
   const progressStats = [
-    { icon: '🌰', label: 'Всего шишек', value: state.lifetimeShishkiEarned },
+    { icon: <ConeIcon />, label: 'Всего шишек', value: state.lifetimeShishkiEarned },
     { icon: '💵', label: 'Денег в цикле', value: state.totalMoneyEarned },
     { icon: '📚', label: 'Знаний в цикле', value: state.totalKnowledgeEarned },
     { icon: '⚡', label: 'Мега-кликов', value: state.megaClicks },
@@ -51,7 +52,7 @@ export function ProgressOverview() {
         {prestige.isUnlocked ? (
           <div className="unlock-progress">
             <div className="unlock-progress__row">
-              <span>🌰 Шишки цикла</span>
+              <span><ConeIcon /> Шишки цикла</span>
               <span>{formatNumber(prestige.cycleProgress.shishki)} / {formatNumber(prestige.rebirthRule.shishki)}</span>
             </div>
             <div className="unlock-progress__track">

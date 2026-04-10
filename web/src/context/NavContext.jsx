@@ -1,9 +1,10 @@
 import { createContext, useContext, useState } from 'react'
+import { ConeIcon } from '../components/ui/ConeIcon'
 
 export const TABS = [
   {
     id: 'clicker',
-    icon: '🌰',
+    icon: <ConeIcon />,
     label: 'Кликер',
     description: 'Кликай шишку, следи за прогрессом',
   },
