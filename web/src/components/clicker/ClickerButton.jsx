@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useGameContext } from '../../context/GameContext'
 import { useSettingsContext } from '../../context/SettingsContext'
 import { useBursts } from '../../hooks/useBursts'
@@ -63,7 +64,7 @@ function createConeSprites(localX, localY, amount, isMega, coneCap) {
 function createViewportFireworks(amount, symbols, particleCap) {
   const now = Date.now()
   const pool = Array.isArray(symbols) ? symbols : [symbols]
-  const total = Math.max(18, Math.min(Math.round(particleCap * 0.95), amount))
+  const total = Math.max(8, Math.min(Math.round(particleCap * 0.8), amount))
 
   return Array.from({ length: total }, (_, index) => {
     const lane = index / Math.max(1, total - 1)
@@ -88,7 +89,7 @@ function createViewportFireworks(amount, symbols, particleCap) {
 function createFallingEmojis(amount, symbols, limit) {
   const now = Date.now()
   const pool = Array.isArray(symbols) ? symbols : [symbols]
-  const total = Math.max(14, Math.min(limit, amount))
+  const total = Math.max(5, Math.min(limit, amount))
 
   return Array.from({ length: total }, (_, index) => ({
     id: `rain-${now}-${index}-${Math.random().toString(36).slice(2)}`,
@@ -122,9 +123,11 @@ export function ClickerButton() {
   const { play } = useSound(shishkaSound, { volume: 0.42 })
 
   const particleLimitHint = useMemo(
-    () => Math.min(visualEffectCaps.particleCap, Math.ceil(state.clickPower * (1.15 + visualEffectsFactor * 0.6))),
+    () => Math.min(visualEffectCaps.particleCap, Math.ceil(state.clickPower * (1.05 + visualEffectsFactor * 0.45))),
     [state.clickPower, visualEffectCaps.particleCap, visualEffectsFactor],
   )
+
+  const overlayRoot = typeof document !== 'undefined' ? document.body : null
 
   useEffect(() => {
     return () => {
@@ -184,11 +187,11 @@ export function ClickerButton() {
 
   function spawnMegaRain(symbols, intensity = 1) {
     const rain = createFallingEmojis(
-      Math.round((10 + visualEffectCaps.burstCap * 1.2) * (0.85 + visualEffectsFactor * 1.1) * intensity),
+      Math.round((5 + visualEffectCaps.burstCap * 0.9) * (0.75 + visualEffectsFactor * 0.7) * intensity),
       symbols,
-      visualEffectCaps.particleCap + visualEffectCaps.burstCap * 3,
+      visualEffectCaps.rainCap,
     )
-    setFallingEmojis((current) => [...current.slice(-(visualEffectCaps.particleCap * 2)), ...rain])
+    setFallingEmojis((current) => [...current.slice(-visualEffectCaps.rainCap), ...rain])
   }
 
   function handleClick(e) {
@@ -217,17 +220,17 @@ export function ClickerButton() {
     const spawned = createParticles(
       localX,
       localY,
-      Math.round(result.particleCount * (0.55 + visualEffectsFactor)),
+      Math.round(result.particleCount * (0.38 + visualEffectsFactor * 0.62)),
       result.symbols,
       result.isMega,
       result.isEmojiExplosion,
       visualEffectCaps.particleCap,
     )
-    setParticles((current) => [...current.slice(-(visualEffectCaps.particleCap * 2)), ...spawned])
+    setParticles((current) => [...current.slice(-visualEffectCaps.particleCap), ...spawned])
 
-    const coneBurstCount = Math.max(1, Math.round((result.isEmojiExplosion ? 2 : result.isMega ? 3 : 1) * (0.7 + visualEffectsFactor * 0.55)))
+    const coneBurstCount = Math.max(1, Math.round((result.isEmojiExplosion ? 2 : result.isMega ? 2 : 1) * (0.65 + visualEffectsFactor * 0.35)))
     const cones = createConeSprites(localX, localY, coneBurstCount, result.isMega, visualEffectCaps.coneCap)
-    setConeSprites((current) => [...current.slice(-(visualEffectCaps.coneCap * 2)), ...cones])
+    setConeSprites((current) => [...current.slice(-visualEffectCaps.coneCap), ...cones])
 
     if (result.isMega) {
       spawnMegaRain(result.symbols, result.isEmojiExplosion ? 1.5 : 1)
@@ -235,11 +238,11 @@ export function ClickerButton() {
 
     if (result.isEmojiExplosion) {
       const fireworks = createViewportFireworks(
-        Math.round(Math.max(visualEffectCaps.particleCap + 18, result.particleCount + 22) * (0.7 + visualEffectsFactor * 0.9)),
+        Math.round(Math.max(visualEffectCaps.fireworkCap, result.particleCount + 8) * (0.65 + visualEffectsFactor * 0.55)),
         result.symbols,
-        visualEffectCaps.particleCap + visualEffectCaps.burstCap,
+        visualEffectCaps.fireworkCap,
       )
-      setScreenFireworks((current) => [...current.slice(-visualEffectCaps.particleCap), ...fireworks])
+      setScreenFireworks((current) => [...current.slice(-visualEffectCaps.fireworkCap), ...fireworks])
     }
   }
 
@@ -322,49 +325,54 @@ export function ClickerButton() {
         </div>
       </div>
 
-      <div className="screen-fireworks" aria-hidden="true">
-        {screenFireworks.map((firework) => (
-          <span
-            key={firework.id}
-            className="screen-firework"
-            style={{
-              left: `${firework.x}vw`,
-              '--dx': `${firework.dx}vw`,
-              '--dy': `${firework.dy}px`,
-              '--rot': `${firework.rotate}deg`,
-              '--scale': firework.scale,
-              animationDelay: `${firework.delay}ms`,
-            }}
-            onAnimationEnd={() => {
-              setScreenFireworks((current) => current.filter((entry) => entry.id !== firework.id))
-            }}
-          >
-            {firework.symbol}
-          </span>
-        ))}
-      </div>
+      {overlayRoot && createPortal(
+        <>
+          <div className="screen-fireworks" aria-hidden="true">
+            {screenFireworks.map((firework) => (
+              <span
+                key={firework.id}
+                className="screen-firework"
+                style={{
+                  left: `${firework.x}vw`,
+                  '--dx': `${firework.dx}vw`,
+                  '--dy': `${firework.dy}px`,
+                  '--rot': `${firework.rotate}deg`,
+                  '--scale': firework.scale,
+                  animationDelay: `${firework.delay}ms`,
+                }}
+                onAnimationEnd={() => {
+                  setScreenFireworks((current) => current.filter((entry) => entry.id !== firework.id))
+                }}
+              >
+                {firework.symbol}
+              </span>
+            ))}
+          </div>
 
-      <div className="emoji-rain" aria-hidden="true">
-        {fallingEmojis.map((emoji) => (
-          <span
-            key={emoji.id}
-            className="emoji-rain__item"
-            style={{
-              left: `${emoji.x}vw`,
-              '--rain-drift': `${emoji.drift}vw`,
-              '--rain-rotate': `${emoji.rotate}deg`,
-              '--rain-scale': emoji.scale,
-              animationDuration: `${emoji.duration}ms`,
-              animationDelay: `${emoji.delay}ms`,
-            }}
-            onAnimationEnd={() => {
-              setFallingEmojis((current) => current.filter((entry) => entry.id !== emoji.id))
-            }}
-          >
-            {emoji.symbol}
-          </span>
-        ))}
-      </div>
+          <div className="emoji-rain" aria-hidden="true">
+            {fallingEmojis.map((emoji) => (
+              <span
+                key={emoji.id}
+                className="emoji-rain__item"
+                style={{
+                  left: `${emoji.x}vw`,
+                  '--rain-drift': `${emoji.drift}vw`,
+                  '--rain-rotate': `${emoji.rotate}deg`,
+                  '--rain-scale': emoji.scale,
+                  animationDuration: `${emoji.duration}ms`,
+                  animationDelay: `${emoji.delay}ms`,
+                }}
+                onAnimationEnd={() => {
+                  setFallingEmojis((current) => current.filter((entry) => entry.id !== emoji.id))
+                }}
+              >
+                {emoji.symbol}
+              </span>
+            ))}
+          </div>
+        </>,
+        overlayRoot,
+      )}
     </div>
   )
 }

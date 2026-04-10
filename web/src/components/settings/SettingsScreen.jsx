@@ -85,9 +85,6 @@ export function SettingsScreen() {
       <div className="screen__header">
         <span className="screen__kicker">Настройки</span>
         <h2 className="screen__title">Звук, эффекты и информация о приложении</h2>
-        <p className="screen__desc">
-          Вынес версию, репозиторий, changelog и юридические ссылки в отдельные аккуратные блоки, а саму сетку сделал компактнее и ровнее.
-        </p>
       </div>
 
       <div className="settings-grid">
@@ -197,7 +194,7 @@ export function SettingsScreen() {
 
           <div className="settings-links-grid">
             <LinkTile title="Репозиторий" hint="Исходный код проекта на GitHub" href={REPOSITORY_URL} />
-            <LinkTile title="Changelog" hint="Последние changelog-и и обновления" href={CHANGELOG_URL} />
+            <LinkTile title="Changelog" hint="Последние changelogs и обновления" href={CHANGELOG_URL} />
           </div>
         </article>
 

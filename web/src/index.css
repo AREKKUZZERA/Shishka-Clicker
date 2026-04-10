@@ -2782,8 +2782,7 @@ body.body--rgb-festival::after {
 .clicker-layout,
 .clicker-layout__left,
 .clicker-layout__right,
-.clicker-panel,
-.bottom-nav {
+.clicker-panel {
   position: relative;
   z-index: 2;
 }
@@ -2815,4 +2814,57 @@ body.body--rgb-festival::after {
 
 .screen-fireworks {
   z-index: 1;
+}
+
+
+/* --- Overlay performance and nav priority fixes --- */
+body::before,
+body::after,
+.screen-fireworks,
+.emoji-rain,
+.screen-firework,
+.emoji-rain__item {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+body::before,
+body::after {
+  will-change: opacity, transform, background-position, filter;
+}
+
+.screen-fireworks,
+.emoji-rain {
+  contain: layout paint style;
+}
+
+.emoji-rain {
+  z-index: 8;
+}
+
+.screen-fireworks {
+  z-index: 9;
+}
+
+.emoji-rain__item {
+  font-size: clamp(1.1rem, 1.9vw, 1.9rem);
+  filter: drop-shadow(0 0 6px rgba(255,255,255,0.16));
+}
+
+.screen-firework {
+  filter: drop-shadow(0 0 8px rgba(255,255,255,0.18));
+}
+
+.bottom-nav {
+  position: fixed !important;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1300 !important;
+  isolation: isolate;
+}
+
+.bottom-nav__track {
+  position: relative;
+  z-index: 1301;
 }

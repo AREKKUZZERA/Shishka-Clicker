@@ -45,9 +45,11 @@ export function SettingsProvider({ children }) {
 
   const value = useMemo(() => {
     const densityFactor = settings.visualEffectsDensity / 100
-    const particleCap = Math.round(10 + densityFactor * 130)
-    const burstCap = Math.round(3 + densityFactor * 26)
-    const coneCap = Math.round(1 + densityFactor * 16)
+    const particleCap = Math.round(8 + densityFactor * 64)
+    const burstCap = Math.round(2 + densityFactor * 10)
+    const coneCap = Math.round(1 + densityFactor * 7)
+    const rainCap = Math.round(6 + densityFactor * 18)
+    const fireworkCap = Math.round(10 + densityFactor * 24)
 
     return {
       settings,
@@ -64,7 +66,9 @@ export function SettingsProvider({ children }) {
         particleCap,
         burstCap,
         coneCap,
-        totalHint: particleCap + burstCap + coneCap,
+        rainCap,
+        fireworkCap,
+        totalHint: particleCap + burstCap + coneCap + rainCap + fireworkCap,
       },
     }
   }, [settings])
