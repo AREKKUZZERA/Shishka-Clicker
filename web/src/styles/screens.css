@@ -253,8 +253,8 @@
 
 .clicker-stats-stack {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.55rem;
+  grid-template-columns: repeat(auto-fit, minmax(6.9rem, 1fr));
+  gap: 0.46rem;
 }
 
 .clicker-stats-stack .stat-card {
@@ -262,8 +262,8 @@
 }
 
 .clicker-stats-stack .stat-card--compact {
-  padding: 0.72rem 0.8rem;
-  gap: 0.45rem;
+  padding: 0.48rem 0.52rem;
+  gap: 0.26rem;
   border-color: rgb(var(--white-rgb) / 0.05);
   background:
     linear-gradient(180deg, rgb(var(--white-rgb) / 0.05), rgb(var(--white-rgb) / 0.025)),
@@ -272,7 +272,7 @@
 }
 
 .clicker-stats-stack .stat-card__head {
-  gap: 0.4rem;
+  gap: 0.24rem;
 }
 
 .clicker-stats-stack .stat-card__icon {
@@ -280,36 +280,36 @@
 }
 
 .clicker-stats-stack .stat-card__label {
-  font-size: 0.6rem;
-  letter-spacing: 0.1em;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
 }
 
 .clicker-stats-stack .stat-card__value {
-  font-size: clamp(0.9rem, 2.4vw, 1.08rem);
+  font-size: clamp(0.94rem, 2.25vw, 1.08rem);
 }
 
 .clicker-stats-stack .stat-card__hint {
-  font-size: 0.64rem;
+  font-size: 0.66rem;
 }
 
 .clicker-stats-stack .stat-card__top-contrib {
   display: grid;
-  gap: 0.15rem;
-  padding-top: 0.45rem;
+  gap: 0.08rem;
+  padding-top: 0.24rem;
   border-top: 1px solid rgb(var(--white-rgb) / 0.08);
 }
 
 .clicker-stats-stack .stat-card__top-contrib span {
   color: var(--text-faint);
   font-family: var(--font-mono);
-  font-size: 0.54rem;
-  letter-spacing: 0.09em;
+  font-size: 0.56rem;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
 }
 
 .clicker-stats-stack .stat-card__top-contrib b {
   color: var(--text-base);
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1579,6 +1579,24 @@
 }
 
 @media (max-width: 720px) {
+  .clicker-stats-stack {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.42rem;
+  }
+
+  .clicker-stats-stack .stat-card--compact {
+    padding: 0.44rem 0.48rem;
+  }
+
+  .clicker-stats-stack .stat-card__value {
+    font-size: clamp(0.88rem, 3.4vw, 1rem);
+  }
+
+  .clicker-stats-stack .stat-card__hint,
+  .clicker-stats-stack .stat-card__top-contrib b {
+    font-size: 0.62rem;
+  }
+
   .clicker-btn__metrics {
     grid-template-columns: 1fr;
   }
@@ -1601,7 +1619,11 @@
 
 @media (min-width: 640px) {
   .clicker-stats-stack {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .clicker-stats-stack .stat-card--compact {
+    padding: 0.46rem 0.5rem;
   }
 
   .clicker-btn__metrics {
@@ -1609,8 +1631,13 @@
   }
 }
 
-@media (min-width: 1100px) {
+@media (min-width: 900px) {
   .clicker-stats-stack {
     grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .clicker-stats-stack .stat-card--compact {
+    padding: 0.52rem 0.58rem;
   }
 }
