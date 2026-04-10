@@ -8,4 +8,4 @@ services:
     ports:
       - "8002:8000"
     command:
-      sh -c "cd /app/server && node ./dist/index.js"
+      sh -c "cd /server && node ./dist/index.js"

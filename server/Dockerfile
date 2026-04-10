@@ -14,6 +14,8 @@ RUN pnpm build
 
 # runtime stage
 FROM node:alpine
+WORKDIR /server
+
 RUN npm i -g pnpm
 
 COPY package.json ./
