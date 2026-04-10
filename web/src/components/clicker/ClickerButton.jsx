@@ -6,7 +6,6 @@ import { useBursts } from '../../hooks/useBursts'
 import { useSound } from '../../hooks/useSound'
 import { ClickBurst } from '../ui/ClickBurst'
 import { formatNumber } from '../../lib/format'
-import buttonImage from '../../assets/disco.gif'
 import vityaImage from '../../assets/v4.png'
 import coneImage from '../../assets/cone.png'
 import shishkaSound from '../../assets/audio/ui/shishka.mp3'
@@ -17,7 +16,7 @@ function pickRandom(pool) {
 
 function createParticles(localX, localY, amount, symbols, isMega, isEmojiExplosion, particleCap) {
   const now = Date.now()
-  const capped = Math.max(6, Math.min(isEmojiExplosion ? particleCap : Math.min(particleCap, 32), amount))
+  const capped = Math.max(1, Math.min(isEmojiExplosion ? particleCap : Math.min(particleCap, 16), amount))
   const pool = Array.isArray(symbols) ? symbols : [symbols]
 
   return Array.from({ length: capped }, (_, index) => {
@@ -64,7 +63,7 @@ function createConeSprites(localX, localY, amount, isMega, coneCap) {
 function createViewportFireworks(amount, symbols, particleCap) {
   const now = Date.now()
   const pool = Array.isArray(symbols) ? symbols : [symbols]
-  const total = Math.max(8, Math.min(Math.round(particleCap * 0.8), amount))
+  const total = Math.max(1, Math.min(Math.max(1, Math.round(particleCap * 0.5)), amount))
 
   return Array.from({ length: total }, (_, index) => {
     const lane = index / Math.max(1, total - 1)
@@ -89,7 +88,7 @@ function createViewportFireworks(amount, symbols, particleCap) {
 function createFallingEmojis(amount, symbols, limit) {
   const now = Date.now()
   const pool = Array.isArray(symbols) ? symbols : [symbols]
-  const total = Math.max(5, Math.min(limit, amount))
+  const total = Math.max(1, Math.min(limit, amount))
 
   return Array.from({ length: total }, (_, index) => ({
     id: `rain-${now}-${index}-${Math.random().toString(36).slice(2)}`,
@@ -115,7 +114,6 @@ export function ClickerButton() {
   const pressTimeoutRef = useRef(null)
   const megaPressTimeoutRef = useRef(null)
   const rgbTimeoutRef = useRef(null)
-  const bodyFxTimeoutRef = useRef(null)
 
   const { state, mineShishki } = useGameContext()
   const { visualEffectCaps, visualEffectsFactor } = useSettingsContext()
@@ -134,30 +132,9 @@ export function ClickerButton() {
       if (pressTimeoutRef.current) window.clearTimeout(pressTimeoutRef.current)
       if (megaPressTimeoutRef.current) window.clearTimeout(megaPressTimeoutRef.current)
       if (rgbTimeoutRef.current) window.clearTimeout(rgbTimeoutRef.current)
-      if (bodyFxTimeoutRef.current) window.clearTimeout(bodyFxTimeoutRef.current)
-      document.body.classList.remove('body--mega-click', 'body--rgb-festival')
     }
   }, [])
 
-  useEffect(() => {
-    const activeClass = isRgbBurst ? 'body--rgb-festival' : isMegaPressed ? 'body--mega-click' : ''
-
-    document.body.classList.remove('body--mega-click', 'body--rgb-festival')
-
-    if (!activeClass) return
-
-    document.body.classList.add(activeClass)
-
-    if (bodyFxTimeoutRef.current) window.clearTimeout(bodyFxTimeoutRef.current)
-    bodyFxTimeoutRef.current = window.setTimeout(() => {
-      document.body.classList.remove(activeClass)
-    }, isRgbBurst ? 3400 : 1650)
-
-    return () => {
-      if (bodyFxTimeoutRef.current) window.clearTimeout(bodyFxTimeoutRef.current)
-      document.body.classList.remove(activeClass)
-    }
-  }, [isMegaPressed, isRgbBurst])
 
   function triggerPressAnimation() {
     setIsPressed(false)
@@ -186,8 +163,9 @@ export function ClickerButton() {
   }
 
   function spawnMegaRain(symbols, intensity = 1) {
+    if (visualEffectCaps.rainCap <= 0) return
     const rain = createFallingEmojis(
-      Math.round((5 + visualEffectCaps.burstCap * 0.9) * (0.75 + visualEffectsFactor * 0.7) * intensity),
+      Math.round((2 + visualEffectCaps.burstCap * 0.35) * (0.55 + visualEffectsFactor * 0.35) * intensity),
       symbols,
       visualEffectCaps.rainCap,
     )
@@ -220,7 +198,7 @@ export function ClickerButton() {
     const spawned = createParticles(
       localX,
       localY,
-      Math.round(result.particleCount * (0.38 + visualEffectsFactor * 0.62)),
+      Math.round(result.particleCount * (0.16 + visualEffectsFactor * 0.28)),
       result.symbols,
       result.isMega,
       result.isEmojiExplosion,
@@ -228,7 +206,7 @@ export function ClickerButton() {
     )
     setParticles((current) => [...current.slice(-visualEffectCaps.particleCap), ...spawned])
 
-    const coneBurstCount = Math.max(1, Math.round((result.isEmojiExplosion ? 2 : result.isMega ? 2 : 1) * (0.65 + visualEffectsFactor * 0.35)))
+    const coneBurstCount = Math.max(0, Math.round((result.isEmojiExplosion ? 1 : result.isMega ? 1 : 0.5) * (0.45 + visualEffectsFactor * 0.2)))
     const cones = createConeSprites(localX, localY, coneBurstCount, result.isMega, visualEffectCaps.coneCap)
     setConeSprites((current) => [...current.slice(-visualEffectCaps.coneCap), ...cones])
 
@@ -236,9 +214,9 @@ export function ClickerButton() {
       spawnMegaRain(result.symbols, result.isEmojiExplosion ? 1.5 : 1)
     }
 
-    if (result.isEmojiExplosion) {
+    if (result.isEmojiExplosion && visualEffectCaps.fireworkCap > 0 && visualEffectsFactor >= 0.35) {
       const fireworks = createViewportFireworks(
-        Math.round(Math.max(visualEffectCaps.fireworkCap, result.particleCount + 8) * (0.65 + visualEffectsFactor * 0.55)),
+        Math.round(Math.max(visualEffectCaps.fireworkCap, result.particleCount + 2) * (0.3 + visualEffectsFactor * 0.25)),
         result.symbols,
         visualEffectCaps.fireworkCap,
       )
@@ -249,8 +227,6 @@ export function ClickerButton() {
   function preventKeyboard(e) {
     if (e.key === 'Enter' || e.key === ' ') e.preventDefault()
   }
-
-  const isActive = state.shishkiPerSecond > 0
 
   return (
     <div className="clicker-wrap">
@@ -312,7 +288,7 @@ export function ClickerButton() {
         <div className="clicker-btn__ring clicker-btn__ring--inner" />
 
         <img
-          src={isActive ? buttonImage : vityaImage}
+          src={vityaImage}
           alt="Шишка"
           className="clicker-btn__hero"
           draggable={false}

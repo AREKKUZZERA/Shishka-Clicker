@@ -6,7 +6,7 @@ export const DEFAULT_SETTINGS = {
   masterVolume: 70,
   effectsVolume: 80,
   musicVolume: 35,
-  visualEffectsDensity: 100,
+  visualEffectsDensity: 45,
 }
 
 function clampPercent(value, fallback, min = 0, max = 100) {
@@ -24,7 +24,7 @@ export function normalizeSettings(settings) {
     masterVolume: clampPercent(input.masterVolume, DEFAULT_SETTINGS.masterVolume),
     effectsVolume: clampPercent(input.effectsVolume, DEFAULT_SETTINGS.effectsVolume),
     musicVolume: clampPercent(input.musicVolume, DEFAULT_SETTINGS.musicVolume),
-    visualEffectsDensity: clampPercent(input.visualEffectsDensity, DEFAULT_SETTINGS.visualEffectsDensity, 20, 200),
+    visualEffectsDensity: clampPercent(input.visualEffectsDensity, DEFAULT_SETTINGS.visualEffectsDensity, 10, 100),
   }
 }
 

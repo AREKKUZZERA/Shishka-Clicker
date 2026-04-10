@@ -15,9 +15,9 @@ export function SettingsProvider({ children }) {
     const densityFactor = settings.visualEffectsDensity / 100
     const root = document.documentElement
     root.style.setProperty('--fx-density', densityFactor.toFixed(2))
-    root.style.setProperty('--fx-grid-opacity', String((0.14 + densityFactor * 0.24).toFixed(3)))
-    root.style.setProperty('--fx-grid-size', `${Math.round(30 + densityFactor * 10)}px`)
-    root.style.setProperty('--fx-firework-scale', String((0.75 + densityFactor * 0.65).toFixed(2)))
+    root.style.setProperty('--fx-grid-opacity', String((0.06 + densityFactor * 0.08).toFixed(3)))
+    root.style.setProperty('--fx-grid-size', `${Math.round(34 + densityFactor * 6)}px`)
+    root.style.setProperty('--fx-firework-scale', String((0.6 + densityFactor * 0.25).toFixed(2)))
 
     return () => {
       root.style.removeProperty('--fx-density')
@@ -45,11 +45,11 @@ export function SettingsProvider({ children }) {
 
   const value = useMemo(() => {
     const densityFactor = settings.visualEffectsDensity / 100
-    const particleCap = Math.round(8 + densityFactor * 64)
-    const burstCap = Math.round(2 + densityFactor * 10)
-    const coneCap = Math.round(1 + densityFactor * 7)
-    const rainCap = Math.round(6 + densityFactor * 18)
-    const fireworkCap = Math.round(10 + densityFactor * 24)
+    const particleCap = Math.round(4 + densityFactor * 20)
+    const burstCap = Math.round(1 + densityFactor * 4)
+    const coneCap = Math.round(1 + densityFactor * 3)
+    const rainCap = Math.round(0 + densityFactor * 6)
+    const fireworkCap = Math.round(0 + densityFactor * 8)
 
     return {
       settings,

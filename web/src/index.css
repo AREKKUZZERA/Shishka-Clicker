@@ -2868,3 +2868,98 @@ body::after {
   position: relative;
   z-index: 1301;
 }
+
+
+/* ─── Performance overrides: disable heavy visual effects ───────────────── */
+body {
+  animation: none !important;
+  transition: background-color 180ms ease, color 180ms ease !important;
+  background-size: 40px 40px, 40px 40px, auto !important;
+}
+
+body::before,
+body::after,
+.ambient,
+.noise-overlay {
+  display: none !important;
+  animation: none !important;
+  filter: none !important;
+}
+
+.app-header,
+.screen,
+.meta-card,
+.achievement-card,
+.bottom-nav {
+  backdrop-filter: none !important;
+}
+
+.clicker-btn,
+.clicker-btn:hover,
+.clicker-btn--rgb,
+.clicker-btn[data-buff-state='click'],
+.clicker-btn[data-buff-state='mega'] {
+  transform: none !important;
+  filter: none !important;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.18) !important;
+}
+
+.clicker-btn__halo,
+.clicker-btn__ring,
+.clicker-btn--mega-pressed .clicker-btn__halo,
+.clicker-btn--mega-pressed .clicker-btn__ring--outer,
+.clicker-btn--mega-pressed .clicker-btn__ring--inner,
+.clicker-btn--rgb .clicker-btn__halo,
+.clicker-btn--rgb .clicker-btn__ring--outer,
+.clicker-btn--rgb .clicker-btn__ring--inner {
+  animation: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+}
+
+.clicker-btn__ring {
+  border-color: rgba(255,255,255,0.08) !important;
+}
+
+.clicker-btn__hero,
+.clicker-btn:hover .clicker-btn__hero,
+.clicker-btn:active .clicker-btn__hero,
+.clicker-btn--mega-pressed .clicker-btn__hero,
+.clicker-btn--rgb .clicker-btn__hero {
+  animation: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+.clicker-particle,
+.clicker-particle--mega,
+.clicker-particle--emoji-explosion,
+.cone-sprite,
+.cone-sprite--mega,
+.click-burst,
+.screen-firework,
+.emoji-rain__item,
+.achievement-toast {
+  filter: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+.clicker-particle,
+.cone-sprite,
+.screen-firework,
+.emoji-rain__item {
+  animation-duration: 420ms !important;
+}
+
+.click-burst {
+  animation-duration: 380ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
