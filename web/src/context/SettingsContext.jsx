@@ -43,6 +43,14 @@ export function SettingsProvider({ children }) {
     setSettings(DEFAULT_SETTINGS)
   }
 
+  function exportSettings() {
+    return normalizeSettings(settings)
+  }
+
+  function importSettings(nextSettings) {
+    setSettings(normalizeSettings(nextSettings))
+  }
+
   const value = useMemo(() => {
     const densityFactor = settings.visualEffectsDensity / 100
     const particleCap = Math.round(4 + densityFactor * 20)
@@ -57,6 +65,8 @@ export function SettingsProvider({ children }) {
       setVolume,
       toggle,
       resetSettings,
+      exportSettings,
+      importSettings,
       effectVolumeFactor:
         settings.soundEnabled ? (settings.masterVolume / 100) * (settings.effectsVolume / 100) : 0,
       musicVolumeFactor:

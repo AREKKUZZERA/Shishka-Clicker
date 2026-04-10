@@ -1,7 +1,13 @@
+import { useRef, useState } from 'react'
 import { useGameContext } from '../../context/GameContext'
 import { useSettingsContext } from '../../context/SettingsContext'
+import {
+  buildSaveFileName,
+  createSaveBundle,
+  normalizeImportedBundle,
+} from '../../lib/saveTransfer'
 
-const APP_VERSION = '1.5.45'
+const APP_VERSION = '1.5.46'
 const REPOSITORY_URL = 'https://github.com/AREKKUZZERA/Shishka-Clicker'
 const CHANGELOG_URL = 'https://github.com/AREKKUZZERA/Shishka-Clicker/releases'
 const PRIVACY_URL = 'https://arekkuzzera.github.io/privacy-policy-terms-of-service/privacy-policy.html'
@@ -59,14 +65,18 @@ function LinkTile({ title, hint, href }) {
 }
 
 export function SettingsScreen() {
-  const { resetGame, markSilenceLover } = useGameContext()
+  const { resetGame, markSilenceLover, exportGameSave, importGameSave } = useGameContext()
   const {
     settings,
     setVolume,
     toggle,
     resetSettings,
     visualEffectCaps,
+    exportSettings,
+    importSettings,
   } = useSettingsContext()
+  const importInputRef = useRef(null)
+  const [transferStatus, setTransferStatus] = useState(null)
 
   const handleMusicToggle = () => {
     if (settings.musicEnabled) markSilenceLover()
@@ -76,6 +86,62 @@ export function SettingsScreen() {
   const handleMusicVolume = (value) => {
     if (value <= 5) markSilenceLover()
     setVolume('musicVolume', value)
+  }
+
+  const handleExportSave = () => {
+    try {
+      const bundle = createSaveBundle({
+        gameState: exportGameSave(),
+        settings: exportSettings(),
+        appVersion: APP_VERSION,
+      })
+      const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = buildSaveFileName()
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      window.URL.revokeObjectURL(url)
+      setTransferStatus({ type: 'success', text: 'Сохранение экспортировано в JSON-файл со всем прогрессом и настройками.' })
+    } catch (error) {
+      console.error(error)
+      setTransferStatus({ type: 'error', text: 'Не удалось экспортировать сохранение.' })
+    }
+  }
+
+  const handleImportClick = () => {
+    importInputRef.current?.click()
+  }
+
+  const handleImportSave = async (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    try {
+      const rawText = await file.text()
+      const imported = normalizeImportedBundle(JSON.parse(rawText))
+      importGameSave(imported.game)
+      if (imported.settings) {
+        importSettings(imported.settings)
+      }
+
+      setTransferStatus({
+        type: 'success',
+        text: imported.isLegacy
+          ? 'Старое сохранение импортировано. Игровой прогресс восстановлен.'
+          : 'Сохранение импортировано. Восстановлены игровой прогресс и локальные настройки.',
+      })
+    } catch (error) {
+      console.error(error)
+      setTransferStatus({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Не удалось импортировать сохранение.',
+      })
+    } finally {
+      event.target.value = ''
+    }
   }
 
   return (
@@ -173,6 +239,41 @@ export function SettingsScreen() {
               </div>
             </div>
           </div>
+        </article>
+
+        <article className="settings-card">
+          <div className="settings-card__head">
+            <h3 className="settings-card__title">Экспорт и импорт сейвов</h3>
+            <span className="settings-chip">Backup</span>
+          </div>
+
+          <p className="settings-card__hint settings-card__hint--block">
+            Экспорт создаёт JSON-файл с полным прогрессом игрока, достижениями, престижем и локальными настройками.
+            Импорт заменяет текущий сейв данными из файла.
+          </p>
+
+          <div className="settings-transfer-actions">
+            <button type="button" className="settings-ghost-btn" onClick={handleExportSave}>
+              Экспортировать сейв
+            </button>
+            <button type="button" className="settings-ghost-btn" onClick={handleImportClick}>
+              Импортировать сейв
+            </button>
+          </div>
+
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json,.json,.shishka-save.json"
+            className="settings-file-input"
+            onChange={handleImportSave}
+          />
+
+          {transferStatus ? (
+            <div className={`settings-transfer-status settings-transfer-status--${transferStatus.type}`}>
+              {transferStatus.text}
+            </div>
+          ) : null}
         </article>
 
         <article className="settings-card">

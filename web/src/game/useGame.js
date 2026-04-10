@@ -368,6 +368,19 @@ export function useGame() {
     setState(() => ({ ...STARTING_STATE }))
   }
 
+  function exportGameSave() {
+    return JSON.parse(JSON.stringify(safeState))
+  }
+
+  function importGameSave(saveData) {
+    const nextState = mergeState(saveData)
+    window.clearTimeout(saveTimeoutRef.current)
+    skipNextSaveRef.current = true
+    saveGame(nextState)
+    setAchievementQueue([])
+    setState(nextState)
+  }
+
   return {
     state: {
       ...safeState,
@@ -384,6 +397,8 @@ export function useGame() {
     markSilenceLover,
     prestigeReset,
     resetGame,
+    exportGameSave,
+    importGameSave,
     achievementQueue,
     dismissAchievement: () => setAchievementQueue((queue) => queue.slice(1)),
   }
