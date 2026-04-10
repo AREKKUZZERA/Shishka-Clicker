@@ -17,6 +17,7 @@ import {
 } from './config'
 import { getPrestigeUpgradeCards, PRESTIGE_UPGRADES, getPrestigeUpgradeCost } from './metaConfig'
 import { loadGame, saveGame, clearGame } from '../lib/storage'
+import {formatNumber} from "../lib/format.js";
 
 function mergeState(saved) {
   if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return STARTING_STATE
@@ -203,7 +204,7 @@ export function useGame() {
       current = mergeState(current)
       const rates = deriveEconomy(current)
       const clickValue = isMega ? rates.clickPower * 5 : rates.clickPower
-      burstValue = `${isMega ? 'МЕГА ' : '+'}${Math.round(clickValue * 10) / 10}`
+      burstValue = `${isMega ? 'МЕГА ' : '+'}${formatNumber(clickValue)}`
 
       const result = unlockAchievements({
         ...current,
