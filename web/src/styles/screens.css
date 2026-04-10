@@ -1009,12 +1009,12 @@
   pointer-events: none;
 }
 
-.shop-card__btn:hover:not(:disabled) {
+.shop-card__btn:hover:not(:disabled):not([aria-disabled='true']) {
   transform: translateY(-2px) scale(1.01);
   box-shadow: 0 14px 26px rgb(var(--btn-accent-rgb) / 0.18);
 }
 
-.shop-card__btn:hover:not(:disabled)::before,
+.shop-card__btn:hover:not(:disabled):not([aria-disabled='true'])::before,
 .shop-card__btn:focus-visible::before {
   transform: translateX(120%);
 }
