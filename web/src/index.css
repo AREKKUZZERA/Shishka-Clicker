@@ -2740,9 +2740,6 @@ body {
   font-size: clamp(1.1rem, 1.9vw, 1.9rem);
 }
 
-.screen-firework {
-}
-
 .bottom-nav {
   position: fixed !important;
   left: 0;
@@ -3049,17 +3046,6 @@ body {
     filter 700ms ease !important;
   background-size: 40px 40px, 40px 40px, auto !important;
 }
-
-
-
-/* Restore backdrop filters */
-.app-header,
-.screen,
-.meta-card,
-.achievement-card,
-.bottom-nav {
-}
-
 
 /* ═══════════════════════════════════════════════════════════════════════════
    SHOP CARDS — PREMIUM HOVER OVERHAUL
