@@ -7,9 +7,9 @@
   --bg:          #0a0d0a;
   --bg-2:        #0d1210;
   --bg-3:        #111a14;
-  --surface:     rgba(255,255,255,0.10);
-  --surface-2:   rgba(255,255,255,0.15);
-  --surface-3:   rgba(255,255,255,0.20);
+  --surface:     rgba(8,12,8,0.82);
+  --surface-2:   rgba(10,16,10,0.88);
+  --surface-3:   rgba(14,20,14,0.92);
   --border:      rgba(255,255,255,0.08);
   --border-2:    rgba(255,255,255,0.14);
 
@@ -221,7 +221,7 @@ img { display: block; }
   padding: 0.7rem 0.95rem;
   border-radius: var(--r-lg);
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.10);
+  background: rgba(8,12,8,0.82);
   color: var(--text);
   font-size: 0.82rem;
   font-weight: 700;
@@ -232,7 +232,7 @@ img { display: block; }
 .app-header__link:hover {
   transform: translateY(-1px);
   border-color: var(--border-2);
-  background: rgba(255,255,255,0.15);
+  background: rgba(10,16,10,0.88);
 }
 @media (max-width: 640px) {
   .app-header__inner {
@@ -265,7 +265,6 @@ img { display: block; }
   border-radius: var(--r-lg);
   background: var(--surface);
   padding: 1rem;
-  animation: revealUp var(--dur-slow) var(--ease-out) both;
   transition:
     transform var(--dur-mid) var(--ease-out),
     border-color var(--dur-mid) ease,
@@ -409,7 +408,7 @@ img { display: block; }
 .clicker-panel {
   border: 1px solid var(--border);
   border-radius: var(--r-xl);
-  background: linear-gradient(180deg, rgba(255,255,255,0.13), rgba(255,255,255,0.07));
+  background: linear-gradient(180deg, rgba(10,16,10,0.88), rgba(8,12,8,0.82));
   padding: 0.9rem;
 }
 
@@ -677,7 +676,7 @@ img { display: block; }
   color: var(--text-2);
   padding: 0.5rem 0.75rem;
   border-radius: var(--r-sm);
-  background: rgba(255,255,255,0.10);
+  background: rgba(8,12,8,0.82);
 }
 .loop-step b { color: var(--white); }
 
@@ -818,7 +817,6 @@ img { display: block; }
   background: var(--surface);
   overflow: hidden;
   padding: 1.1rem;
-  animation: revealUp var(--dur-slow) var(--ease-out) both;
   transition:
     transform var(--dur-mid) var(--ease-out),
     border-color var(--dur-mid) ease,
@@ -1121,7 +1119,7 @@ img { display: block; }
   grid-column: span 12;
   border: 1px solid var(--border);
   border-radius: var(--r-xl);
-  background: linear-gradient(180deg, var(--surface-2), rgba(255,255,255,0.08));
+  background: linear-gradient(180deg, var(--surface-2), rgba(8,12,8,0.78));
   padding: 1.1rem;
   display: flex;
   flex-direction: column;
@@ -1171,7 +1169,7 @@ img { display: block; }
   padding: 0.25rem 0.7rem;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,0.08);
-  background: rgba(255,255,255,0.10);
+  background: rgba(8,12,8,0.82);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1197,7 +1195,7 @@ img { display: block; }
   gap: 0.75rem;
   padding: 0.9rem 0.95rem;
   border-radius: var(--r-lg);
-  background: rgba(255,255,255,0.09);
+  background: rgba(8,12,8,0.78);
   border: 1px solid rgba(255,255,255,0.06);
 }
 
@@ -1212,7 +1210,7 @@ img { display: block; }
   width: 3.5rem;
   height: 2rem;
   border-radius: 999px;
-  background: rgba(255,255,255,0.18);
+  background: rgba(14,20,14,0.90);
   padding: 0.25rem;
   position: relative;
   transition: background var(--dur-mid) var(--ease-out);
@@ -1259,7 +1257,7 @@ img { display: block; }
   gap: 0.9rem;
   padding: 1rem;
   border-radius: var(--r-lg);
-  background: rgba(255,255,255,0.09);
+  background: rgba(8,12,8,0.78);
   border: 1px solid rgba(255,255,255,0.06);
 }
 
@@ -1281,7 +1279,7 @@ img { display: block; }
 .settings-link-tile {
   padding: 0.8rem 0.9rem;
   border-radius: 1rem;
-  background: rgba(255,255,255,0.10);
+  background: rgba(8,12,8,0.82);
   border: 1px solid rgba(255,255,255,0.05);
   display: flex;
   flex-direction: column;
@@ -1325,7 +1323,7 @@ img { display: block; }
 .settings-ghost-btn {
   color: var(--text);
   border: 1px solid var(--border-2);
-  background: rgba(255,255,255,0.09);
+  background: rgba(8,12,8,0.78);
 }
 
 .settings-ghost-btn:hover,
@@ -1456,7 +1454,7 @@ img { display: block; }
 .meta-card,
 .achievement-card {
   border: 1px solid var(--border);
-  background: linear-gradient(180deg, var(--surface-2), rgba(255,255,255,0.08));
+  background: linear-gradient(180deg, var(--surface-2), rgba(8,12,8,0.78));
   border-radius: var(--r-lg);
   padding: 1rem;
 }
@@ -1499,7 +1497,7 @@ img { display: block; }
 .meta-stats div,
 .meta-lifetime-grid > div {
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.09);
+  background: rgba(8,12,8,0.78);
   border-radius: var(--r-md);
   padding: 0.8rem;
 }
@@ -2179,7 +2177,7 @@ img { display: block; }
   padding: 0.75rem 0.85rem;
   border-radius: var(--r-md);
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.09);
+  background: rgba(8,12,8,0.78);
 }
 
 .prestige-step--active {
@@ -2224,7 +2222,7 @@ img { display: block; }
 .prestige-lab__summary > div {
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  background: rgba(255,255,255,0.09);
+  background: rgba(8,12,8,0.78);
   padding: 0.75rem;
 }
 
@@ -2740,6 +2738,9 @@ body {
   font-size: clamp(1.1rem, 1.9vw, 1.9rem);
 }
 
+.screen-firework {
+}
+
 .bottom-nav {
   position: fixed !important;
   left: 0;
@@ -3047,6 +3048,17 @@ body {
   background-size: 40px 40px, 40px 40px, auto !important;
 }
 
+
+
+/* Restore backdrop filters */
+.app-header,
+.screen,
+.meta-card,
+.achievement-card,
+.bottom-nav {
+}
+
+
 /* ═══════════════════════════════════════════════════════════════════════════
    SHOP CARDS — PREMIUM HOVER OVERHAUL
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -3152,27 +3164,24 @@ body {
 
 /* ── Can-buy state: pulsing border glow ──────────────────────── */
 .shop-card--can-buy {
-  animation: canBuyPulse 2.8s ease-in-out infinite;
+  border-color: rgba(245,158,11,0.45);
+  box-shadow: 0 0 18px rgba(245,158,11,0.12);
 }
 
 .shop-screen--fuchsia .shop-card--can-buy {
-  animation: canBuyPulseFuchsia 2.8s ease-in-out infinite;
+  border-color: rgba(232,121,249,0.45);
+  box-shadow: 0 0 18px rgba(232,121,249,0.12);
 }
 
 .shop-screen--cyan .shop-card--can-buy {
-  animation: canBuyPulseCyan 2.8s ease-in-out infinite;
+  border-color: rgba(34,211,238,0.45);
+  box-shadow: 0 0 18px rgba(34,211,238,0.12);
 }
 
-@keyframes canBuyPulse {
-  0%, 100% { border-color: rgba(245,158,11,0.3); box-shadow: 0 0 12px rgba(245,158,11,0.08); }
   50%       { border-color: rgba(245,158,11,0.55); box-shadow: 0 0 26px rgba(245,158,11,0.18); }
 }
-@keyframes canBuyPulseFuchsia {
-  0%, 100% { border-color: rgba(232,121,249,0.3); box-shadow: 0 0 12px rgba(232,121,249,0.08); }
   50%       { border-color: rgba(232,121,249,0.55); box-shadow: 0 0 26px rgba(232,121,249,0.18); }
 }
-@keyframes canBuyPulseCyan {
-  0%, 100% { border-color: rgba(34,211,238,0.3); box-shadow: 0 0 12px rgba(34,211,238,0.08); }
   50%       { border-color: rgba(34,211,238,0.55); box-shadow: 0 0 26px rgba(34,211,238,0.18); }
 }
 
@@ -3245,29 +3254,14 @@ body {
 }
 
 /* ── Price flash on can-buy ──────────────────────────────────── */
-.shop-card--can-buy .shop-card__price-num {
-  animation: priceShimmer 3s ease-in-out infinite;
-}
 
-@keyframes priceShimmer {
-  0%, 100% { color: var(--white); }
   50%       { color: var(--amber-2); text-shadow: 0 0 12px rgba(245,158,11,0.35); }
 }
 
-.shop-screen--fuchsia .shop-card--can-buy .shop-card__price-num {
-  animation: priceShimmerFuchsia 3s ease-in-out infinite;
-}
-@keyframes priceShimmerFuchsia {
-  0%, 100% { color: var(--white); }
-  50%       { color: var(--fuchsia); text-shadow: 0 0 12px rgba(232,121,249,0.35); }
+.shop-screen--fuchsia   50%       { color: var(--fuchsia); text-shadow: 0 0 12px rgba(232,121,249,0.35); }
 }
 
-.shop-screen--cyan .shop-card--can-buy .shop-card__price-num {
-  animation: priceShimmerCyan 3s ease-in-out infinite;
-}
-@keyframes priceShimmerCyan {
-  0%, 100% { color: var(--white); }
-  50%       { color: var(--cyan); text-shadow: 0 0 12px rgba(34,211,238,0.35); }
+.shop-screen--cyan   50%       { color: var(--cyan); text-shadow: 0 0 12px rgba(34,211,238,0.35); }
 }
 
 

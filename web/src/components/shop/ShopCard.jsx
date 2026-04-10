@@ -1,3 +1,4 @@
+import { useRef, useState, useEffect } from 'react'
 import { formatNumber } from '../../lib/format'
 import { useSound } from '../../hooks/useSound'
 import buySound from '../../assets/audio/ui/blip1.mp3'
@@ -26,6 +27,17 @@ export function ShopCard({ item, canBuy, onBuy, delay = 0 }) {
   const currency = CURRENCY_META[item.currency] ?? { icon: '✨', label: 'ресурс' }
   const { play } = useSound(buySound, { volume: 0.2 })
 
+  // Only apply entrance animation delay on first mount — never re-trigger it
+  const mountedRef = useRef(false)
+  const [entryStyle, setEntryStyle] = useState({ animationDelay: `${delay * 50}ms` })
+  useEffect(() => {
+    if (mountedRef.current) return
+    mountedRef.current = true
+    // After the entrance animation completes, clear the delay so re-renders don't retrigger it
+    const t = setTimeout(() => setEntryStyle({}), delay * 50 + 600)
+    return () => clearTimeout(t)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleBuy = () => {
     if (isLocked || !canBuy) return
     play()
@@ -35,7 +47,7 @@ export function ShopCard({ item, canBuy, onBuy, delay = 0 }) {
   return (
     <article
       className={`shop-card ${item.currency === 'money' ? 'shop-card--money' : item.currency === 'knowledge' ? 'shop-card--knowledge' : 'shop-card--shishki'} ${isLocked ? 'shop-card--locked' : ''} ${canBuy && !isLocked ? 'shop-card--can-buy' : ''}`}
-      style={{ animationDelay: `${delay * 50}ms` }}
+      style={entryStyle}
       tabIndex={0}
     >
       <div className="shop-card__glow" />
