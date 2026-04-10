@@ -1,4 +1,4 @@
-const CHANGELOG_URL = 'https://github.com/AREKKUZZERA/Shishka-Clicker/releases'
+import { APP_VERSION, CHANGELOG_URL } from '../../config/appMeta'
 
 export function Header() {
   return (
@@ -13,7 +13,7 @@ export function Header() {
           target="_blank"
           rel="noreferrer"
         >
-          v1.5.45
+          v{APP_VERSION}
         </a>
       </div>
     </header>

@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { setupDiscord } from '../../discord'
 import { useNav } from '../../context/NavContext'
 import { useBackgroundMusic } from '../../hooks/useBackgroundMusic'
@@ -30,12 +30,11 @@ function ScreenFallback() {
 
 export function AppShell() {
   const { activeTab } = useNav()
-  const [user, setUser] = useState(null)
 
   useBackgroundMusic(backgroundMusic)
 
   useEffect(() => {
-    setupDiscord().then(setUser).catch(() => {})
+    void setupDiscord()
   }, [])
 
   return (

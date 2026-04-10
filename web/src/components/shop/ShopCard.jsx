@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { formatNumber } from '../../lib/format'
 import { useSound } from '../../hooks/useSound'
 import buySound from '../../assets/audio/ui/blip1.mp3'
@@ -22,21 +22,31 @@ function LockBadge({ item }) {
   )
 }
 
+function getCardClassName(item, isLocked, canBuy) {
+  const toneClass = item.currency === 'money'
+    ? 'shop-card--money'
+    : item.currency === 'knowledge'
+      ? 'shop-card--knowledge'
+      : 'shop-card--shishki'
+
+  return [
+    'shop-card',
+    toneClass,
+    isLocked ? 'shop-card--locked' : '',
+    canBuy && !isLocked ? 'shop-card--can-buy' : '',
+  ].filter(Boolean).join(' ')
+}
+
 export function ShopCard({ item, canBuy, onBuy, delay = 0 }) {
   const isLocked = !item.unlocked
   const currency = CURRENCY_META[item.currency] ?? { icon: '✨', label: 'ресурс' }
   const { play } = useSound(buySound, { volume: 0.2 })
+  const [isEntering, setIsEntering] = useState(true)
 
-  // Only apply entrance animation delay on first mount — never re-trigger it
-  const mountedRef = useRef(false)
-  const [entryStyle, setEntryStyle] = useState({ animationDelay: `${delay * 50}ms` })
   useEffect(() => {
-    if (mountedRef.current) return
-    mountedRef.current = true
-    // After the entrance animation completes, clear the delay so re-renders don't retrigger it
-    const t = setTimeout(() => setEntryStyle({}), delay * 50 + 600)
-    return () => clearTimeout(t)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    const timeoutId = window.setTimeout(() => setIsEntering(false), delay * 50 + 600)
+    return () => window.clearTimeout(timeoutId)
+  }, [delay])
 
   const handleBuy = () => {
     if (isLocked || !canBuy) return
@@ -46,8 +56,8 @@ export function ShopCard({ item, canBuy, onBuy, delay = 0 }) {
 
   return (
     <article
-      className={`shop-card ${item.currency === 'money' ? 'shop-card--money' : item.currency === 'knowledge' ? 'shop-card--knowledge' : 'shop-card--shishki'} ${isLocked ? 'shop-card--locked' : ''} ${canBuy && !isLocked ? 'shop-card--can-buy' : ''}`}
-      style={entryStyle}
+      className={getCardClassName(item, isLocked, canBuy)}
+      style={isEntering ? { animationDelay: `${delay * 50}ms` } : undefined}
       tabIndex={0}
     >
       <div className="shop-card__glow" />
