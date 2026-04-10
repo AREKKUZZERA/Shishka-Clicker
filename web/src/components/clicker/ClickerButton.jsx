@@ -84,10 +84,29 @@ function createViewportFireworks(amount, symbols, particleCap) {
   })
 }
 
+
+function createFallingEmojis(amount, symbols, limit) {
+  const now = Date.now()
+  const pool = Array.isArray(symbols) ? symbols : [symbols]
+  const total = Math.max(14, Math.min(limit, amount))
+
+  return Array.from({ length: total }, (_, index) => ({
+    id: `rain-${now}-${index}-${Math.random().toString(36).slice(2)}`,
+    x: 2 + Math.random() * 96,
+    drift: (Math.random() - 0.5) * 22,
+    rotate: Math.round((Math.random() - 0.5) * 180),
+    scale: 0.8 + Math.random() * 1.2,
+    duration: 2400 + Math.round(Math.random() * 1800),
+    delay: Math.round(Math.random() * 520),
+    symbol: pickRandom(pool),
+  }))
+}
+
 export function ClickerButton() {
   const [particles, setParticles] = useState([])
   const [coneSprites, setConeSprites] = useState([])
   const [screenFireworks, setScreenFireworks] = useState([])
+  const [fallingEmojis, setFallingEmojis] = useState([])
   const [isPressed, setIsPressed] = useState(false)
   const [isMegaPressed, setIsMegaPressed] = useState(false)
   const [isRgbBurst, setIsRgbBurst] = useState(false)
@@ -95,8 +114,7 @@ export function ClickerButton() {
   const pressTimeoutRef = useRef(null)
   const megaPressTimeoutRef = useRef(null)
   const rgbTimeoutRef = useRef(null)
-  const bodyMegaTimeoutRef = useRef(null)
-  const bodyRgbTimeoutRef = useRef(null)
+  const bodyFxTimeoutRef = useRef(null)
 
   const { state, mineShishki } = useGameContext()
   const { visualEffectCaps, visualEffectsFactor } = useSettingsContext()
@@ -113,41 +131,30 @@ export function ClickerButton() {
       if (pressTimeoutRef.current) window.clearTimeout(pressTimeoutRef.current)
       if (megaPressTimeoutRef.current) window.clearTimeout(megaPressTimeoutRef.current)
       if (rgbTimeoutRef.current) window.clearTimeout(rgbTimeoutRef.current)
-      if (bodyMegaTimeoutRef.current) window.clearTimeout(bodyMegaTimeoutRef.current)
-      if (bodyRgbTimeoutRef.current) window.clearTimeout(bodyRgbTimeoutRef.current)
+      if (bodyFxTimeoutRef.current) window.clearTimeout(bodyFxTimeoutRef.current)
       document.body.classList.remove('body--mega-click', 'body--rgb-festival')
     }
   }, [])
 
   useEffect(() => {
-    if (!isMegaPressed) return
+    const activeClass = isRgbBurst ? 'body--rgb-festival' : isMegaPressed ? 'body--mega-click' : ''
 
-    document.body.classList.add('body--mega-click')
-    if (bodyMegaTimeoutRef.current) window.clearTimeout(bodyMegaTimeoutRef.current)
-    bodyMegaTimeoutRef.current = window.setTimeout(() => {
-      document.body.classList.remove('body--mega-click')
-    }, 1650)
+    document.body.classList.remove('body--mega-click', 'body--rgb-festival')
 
-    return () => {
-      if (bodyMegaTimeoutRef.current) window.clearTimeout(bodyMegaTimeoutRef.current)
-      document.body.classList.remove('body--mega-click')
-    }
-  }, [isMegaPressed])
+    if (!activeClass) return
 
-  useEffect(() => {
-    if (!isRgbBurst) return
+    document.body.classList.add(activeClass)
 
-    document.body.classList.add('body--rgb-festival', 'body--mega-click')
-    if (bodyRgbTimeoutRef.current) window.clearTimeout(bodyRgbTimeoutRef.current)
-    bodyRgbTimeoutRef.current = window.setTimeout(() => {
-      document.body.classList.remove('body--rgb-festival', 'body--mega-click')
-    }, 3400)
+    if (bodyFxTimeoutRef.current) window.clearTimeout(bodyFxTimeoutRef.current)
+    bodyFxTimeoutRef.current = window.setTimeout(() => {
+      document.body.classList.remove(activeClass)
+    }, isRgbBurst ? 3400 : 1650)
 
     return () => {
-      if (bodyRgbTimeoutRef.current) window.clearTimeout(bodyRgbTimeoutRef.current)
-      document.body.classList.remove('body--rgb-festival', 'body--mega-click')
+      if (bodyFxTimeoutRef.current) window.clearTimeout(bodyFxTimeoutRef.current)
+      document.body.classList.remove(activeClass)
     }
-  }, [isRgbBurst])
+  }, [isMegaPressed, isRgbBurst])
 
   function triggerPressAnimation() {
     setIsPressed(false)
@@ -173,6 +180,15 @@ export function ClickerButton() {
     setIsRgbBurst(true)
     if (rgbTimeoutRef.current) window.clearTimeout(rgbTimeoutRef.current)
     rgbTimeoutRef.current = window.setTimeout(() => setIsRgbBurst(false), 2400)
+  }
+
+  function spawnMegaRain(symbols, intensity = 1) {
+    const rain = createFallingEmojis(
+      Math.round((10 + visualEffectCaps.burstCap * 1.2) * (0.85 + visualEffectsFactor * 1.1) * intensity),
+      symbols,
+      visualEffectCaps.particleCap + visualEffectCaps.burstCap * 3,
+    )
+    setFallingEmojis((current) => [...current.slice(-(visualEffectCaps.particleCap * 2)), ...rain])
   }
 
   function handleClick(e) {
@@ -212,6 +228,10 @@ export function ClickerButton() {
     const coneBurstCount = Math.max(1, Math.round((result.isEmojiExplosion ? 2 : result.isMega ? 3 : 1) * (0.7 + visualEffectsFactor * 0.55)))
     const cones = createConeSprites(localX, localY, coneBurstCount, result.isMega, visualEffectCaps.coneCap)
     setConeSprites((current) => [...current.slice(-(visualEffectCaps.coneCap * 2)), ...cones])
+
+    if (result.isMega) {
+      spawnMegaRain(result.symbols, result.isEmojiExplosion ? 1.5 : 1)
+    }
 
     if (result.isEmojiExplosion) {
       const fireworks = createViewportFireworks(
@@ -302,6 +322,28 @@ export function ClickerButton() {
               }}
             >
               {firework.symbol}
+            </span>
+          ))}
+        </div>
+
+        <div className="emoji-rain" aria-hidden="true">
+          {fallingEmojis.map((emoji) => (
+            <span
+              key={emoji.id}
+              className="emoji-rain__item"
+              style={{
+                left: `${emoji.x}vw`,
+                '--rain-drift': `${emoji.drift}vw`,
+                '--rain-rotate': `${emoji.rotate}deg`,
+                '--rain-scale': emoji.scale,
+                animationDuration: `${emoji.duration}ms`,
+                animationDelay: `${emoji.delay}ms`,
+              }}
+              onAnimationEnd={() => {
+                setFallingEmojis((current) => current.filter((entry) => entry.id !== emoji.id))
+              }}
+            >
+              {emoji.symbol}
             </span>
           ))}
         </div>

@@ -2566,7 +2566,7 @@ body::after {
 
 body.body--mega-click::before,
 body.body--mega-click::after {
-  opacity: calc(0.52 * var(--fx-density, 1));
+  opacity: calc(0.46 * var(--fx-density, 1));
 }
 
 body.body--mega-click::before {
@@ -2579,7 +2579,7 @@ body.body--mega-click::after {
 
 body.body--rgb-festival::before,
 body.body--rgb-festival::after {
-  opacity: calc(0.88 * var(--fx-density, 1));
+  opacity: calc(0.78 * var(--fx-density, 1));
 }
 
 body.body--rgb-festival::before {
@@ -2753,5 +2753,22 @@ body.body--rgb-festival::after {
   100% {
     opacity: 0;
     transform: translate3d(calc(var(--dx) * 1.18), calc(var(--dy) * 1.08), 0) scale(calc(var(--scale) * 0.82)) rotate(var(--rot));
+  }
+}
+
+@keyframes megaEmojiRain {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -6vh, 0) scale(calc(var(--rain-scale, 1) * 0.82)) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--rain-drift, 0vw), 118vh, 0) scale(var(--rain-scale, 1)) rotate(var(--rain-rotate, 0deg));
   }
 }
