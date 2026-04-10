@@ -4,6 +4,15 @@
   box-sizing: border-box;
 }
 
+@font-face {
+  font-family: "SH-Font";
+  src: url("/fonts/SH-Font.woff2") format("woff2");
+}
+
+* {
+  font-family: "SH-Font", monospace, serif !important;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -12,7 +21,6 @@ body {
   margin: 0;
   min-width: 320px;
   color: var(--text-base);
-  font-family: var(--font-body);
   line-height: 1.55;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
