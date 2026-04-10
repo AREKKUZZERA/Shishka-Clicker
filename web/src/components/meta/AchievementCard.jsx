@@ -1,3 +1,5 @@
+import { PrizeIcon } from '../ui/GameIcon'
+
 export const AchievementCard = ({ achievement }) => {
 	return (
 		<article className={`meta-card achievement-card ${achievement.unlocked ? 'achievement-card--done' : ''} ${achievement.secret ? 'achievement-card--secret' : ''}`}>
@@ -14,7 +16,7 @@ export const AchievementCard = ({ achievement }) => {
 					: 'Откроется только после выполнения скрытого условия.'}
 			</p>
 			<div className="achievement-card__status">
-				{achievement.unlocked ? '🏆 Открыто' : achievement.secret ? '🕶️ Скрыто' : '🔒 В процессе'}
+				{achievement.unlocked ? <><PrizeIcon /> Открыто</> : achievement.secret ? '🕶️ Скрыто' : '🔒 В процессе'}
 			</div>
 		</article>
 	)

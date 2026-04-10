@@ -5,12 +5,13 @@ import buySound from '../../assets/audio/ui/blip1.mp3'
 import denySound from '../../assets/audio/ui/wpn_denyselect.mp3'
 import {LockBadge} from "./LockBadge.jsx"
 import { ConeIcon } from '../ui/ConeIcon'
+import { MoneyIcon, KnowledgeIcon } from '../ui/GameIcon'
 
 
 const CURRENCY_META = {
-  money: { icon: '💵', label: 'деньги' },
+  money: { icon: <MoneyIcon />, label: 'деньги' },
   shishki: { icon: <ConeIcon />, label: 'шишки' },
-  knowledge: { icon: '📚', label: 'знания' },
+  knowledge: { icon: <KnowledgeIcon />, label: 'знания' },
 }
 
 const ITEM_EMOJI = {

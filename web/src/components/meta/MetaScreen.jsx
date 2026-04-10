@@ -9,6 +9,7 @@ import {ShardsLaboratory} from "./ShardsLaboratory.jsx"
 import {LifetimeCard} from "./LifetimeCard.jsx"
 import {StatCard} from "../stats/StatCard.jsx"
 import { ConeIcon } from '../ui/ConeIcon'
+import { KnowledgeIcon, MoneyIcon, PrizeIcon } from '../ui/GameIcon'
 
 
 export function MetaScreen() {
@@ -41,24 +42,24 @@ export function MetaScreen() {
     { icon: '🔮', label: 'Прогноз', value: formatNumber(prestige.projectedShards), hint: 'осколков за ребёрс' },
     { icon: '📊', label: 'Квота', value: formatNumber(prestige.quotaScore), hint: 'текущая оценка цикла' },
     { icon: <ConeIcon />, label: 'След. квота', value: <>{formatNumber(prestige.nextQuota.shishki)} <ConeIcon /></>, hint: 'по шишкам' },
-    { icon: '📚', label: 'След. знания', value: `${formatNumber(prestige.nextQuota.knowledge)} 📚`, hint: 'по знаниям' },
+    { icon: <KnowledgeIcon />, label: 'След. знания', value: <>{formatNumber(prestige.nextQuota.knowledge)} <KnowledgeIcon /></>, hint: 'по знаниям' },
   ]
 
   const lifetimeStats = [
     { icon: <ConeIcon />, label: 'Шишки', value: formatNumber(state.lifetimeShishkiEarned), hint: 'за всё время' },
-    { icon: '💵', label: 'Деньги', value: formatNumber(state.lifetimeMoneyEarned), hint: 'заработано всего' },
-    { icon: '📚', label: 'Знания', value: formatNumber(state.lifetimeKnowledgeEarned), hint: 'заработано всего' },
+    { icon: <MoneyIcon />, label: 'Деньги', value: formatNumber(state.lifetimeMoneyEarned), hint: 'заработано всего' },
+    { icon: <KnowledgeIcon />, label: 'Знания', value: formatNumber(state.lifetimeKnowledgeEarned), hint: 'заработано всего' },
     { icon: '⚡', label: 'Мега-клики', value: formatNumber(state.megaClicks), hint: 'ручные усиления' },
     { icon: '🎉', label: 'Взрывы', value: formatNumber(state.emojiBursts), hint: 'эмодзи-эффектов' },
-    { icon: '🏆', label: 'Достижения', value: `${unlockedCount}/${achievements.length}`, hint: 'открыто навсегда' },
+    { icon: <PrizeIcon />, label: 'Достижения', value: `${unlockedCount}/${achievements.length}`, hint: 'открыто навсегда' },
   ]
 
   const prestigeLabSummary = [
     { icon: '💎', label: 'На руках', value: `${formatNumber(state.prestigeShards)} 💎`, hint: 'свободный баланс' },
     { icon: '🏦', label: 'Заработано', value: `${formatNumber(state.totalPrestigeShardsEarned)} 💎`, hint: 'за все циклы' },
     { icon: <ConeIcon />, label: 'Квота шишек', value: `-${formatNumber(prestige.bonuses.shishkiQuotaReduction * 100)}%`, hint: 'снижение требования' },
-    { icon: '📚', label: 'Квота знаний', value: `-${formatNumber(prestige.bonuses.knowledgeQuotaReduction * 100)}%`, hint: 'снижение требования' },
-    { icon: '🏆', label: 'Достижения', value: `-${formatNumber(prestige.bonuses.achievementQuotaReduction)}`, hint: 'срез по квоте' },
+    { icon: <KnowledgeIcon />, label: 'Квота знаний', value: `-${formatNumber(prestige.bonuses.knowledgeQuotaReduction * 100)}%`, hint: 'снижение требования' },
+    { icon: <PrizeIcon />, label: 'Достижения', value: `-${formatNumber(prestige.bonuses.achievementQuotaReduction)}`, hint: 'срез по квоте' },
     { icon: '🚀', label: 'Бонус', value: `+x${formatNumber(prestige.bonuses.permanentMultiplierBonus)}`, hint: 'к постоянному престижу' },
   ]
 
@@ -93,8 +94,8 @@ export function MetaScreen() {
               <>
                 <div className="unlock-progress">
                   <ProgressRow label={<><ConeIcon /> Лайфтайм шишки</>} current={prestige.unlockProgress.shishki} goal={prestige.unlockRule.shishki} />
-                  <ProgressRow label="📚 Лайфтайм знания" current={prestige.unlockProgress.knowledge} goal={prestige.unlockRule.knowledge} alt />
-                  <ProgressRow label="🏆 Достижения" current={prestige.unlockProgress.achievements} goal={prestige.unlockRule.achievements} />
+                  <ProgressRow label={<><KnowledgeIcon /> Лайфтайм знания</>} current={prestige.unlockProgress.knowledge} goal={prestige.unlockRule.knowledge} alt />
+                  <ProgressRow label={<><PrizeIcon /> Достижения</>} current={prestige.unlockProgress.achievements} goal={prestige.unlockRule.achievements} />
                 </div>
 
                 <div className="meta-card__hint">
@@ -105,8 +106,8 @@ export function MetaScreen() {
               <>
                 <div className="unlock-progress">
                   <ProgressRow label={<><ConeIcon /> Квота шишек в этом цикле</>} current={prestige.cycleProgress.shishki} goal={prestige.rebirthRule.shishki} />
-                  <ProgressRow label="📚 Квота знаний в этом цикле" current={prestige.cycleProgress.knowledge} goal={prestige.rebirthRule.knowledge} alt />
-                  <ProgressRow label="🏆 Квота достижений" current={prestige.cycleProgress.achievements} goal={prestige.rebirthRule.achievements} />
+                  <ProgressRow label={<><KnowledgeIcon /> Квота знаний в этом цикле</>} current={prestige.cycleProgress.knowledge} goal={prestige.rebirthRule.knowledge} alt />
+                  <ProgressRow label={<><PrizeIcon /> Квота достижений</>} current={prestige.cycleProgress.achievements} goal={prestige.rebirthRule.achievements} />
                 </div>
 
                 <section className="stats-bar stats-bar--shop prestige-forecast-grid">

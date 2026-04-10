@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useGameContext } from '../../context/GameContext'
 import { useSound } from '../../hooks/useSound'
 import achievementSound from '../../assets/audio/ui/opoveshchenie.mp3'
+import { PrizeIcon } from './GameIcon'
 
 export function AchievementToast() {
   const { achievementQueue, dismissAchievement } = useGameContext()
@@ -26,7 +27,7 @@ export function AchievementToast() {
   return (
     <div className={`achievement-toast ${current.secret ? 'achievement-toast--secret' : ''}`} role="status" aria-live="polite">
       <div className="achievement-toast__steam">{current.secret ? 'SECRET ACHIEVEMENT' : 'ACHIEVEMENT UNLOCKED'}</div>
-      <div className="achievement-toast__icon">{current.secret ? '🕵️' : '🏆'}</div>
+      <div className="achievement-toast__icon">{current.secret ? '🕵️' : <PrizeIcon />}</div>
       <div className="achievement-toast__body">
         <div className="achievement-toast__label">
           {current.category ?? 'Достижение'} · ур. {current.tier ?? 1}

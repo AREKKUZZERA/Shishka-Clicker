@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from 'react'
 import { ConeIcon } from '../components/ui/ConeIcon'
+import { PrizeIcon } from '../components/ui/GameIcon'
 
 export const TABS = [
   {
@@ -22,7 +23,7 @@ export const TABS = [
   },
   {
     id: 'meta',
-    icon: '🏆',
+    icon: <PrizeIcon />,
     label: 'Мета',
     description: 'Достижения, ребёрс и престиж',
   },

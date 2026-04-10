@@ -4,6 +4,7 @@ import { formatNumber } from '../../lib/format'
 import {StatCard} from "../stats/StatCard.jsx"
 import {UnlockCard} from "./UnlockCard.jsx"
 import { ConeIcon } from '../ui/ConeIcon'
+import { MoneyIcon, KnowledgeIcon, PrizeIcon } from '../ui/GameIcon'
 
 
 export function ProgressOverview() {
@@ -13,15 +14,15 @@ export function ProgressOverview() {
   const nextUpgrade = useMemo(() => economy.upgrades.find((i) => !i.unlocked), [economy.upgrades])
   const unlockedAchievements = achievements.filter((entry) => entry.unlocked).length
   const metaSummary = [
-    { icon: '🏆', label: 'Достижения', value: `${unlockedAchievements}/${achievements.length}`, hint: 'открыто сейчас', },
+    { icon: <PrizeIcon />, label: 'Достижения', value: `${unlockedAchievements}/${achievements.length}`, hint: 'открыто сейчас', },
     { icon: '♻️', label: 'Ребёрсы', value: formatNumber(state.rebirths), hint: 'завершённых циклов', },
     { icon: '💎', label: 'Осколки', value: prestige.isUnlocked ? `${formatNumber(state.prestigeShards)} 💎` : 'закрыто', hint: 'баланс престижа', },
     { icon: '🔮', label: 'След. награда', value: prestige.isUnlocked ? `${formatNumber(prestige.projectedShards)} 💎` : 'закрыто', hint: 'если ребёрс сейчас', },
   ]
   const progressStats = [
     { icon: <ConeIcon />, label: 'Всего шишек', value: state.lifetimeShishkiEarned },
-    { icon: '💵', label: 'Денег в цикле', value: state.totalMoneyEarned },
-    { icon: '📚', label: 'Знаний в цикле', value: state.totalKnowledgeEarned },
+    { icon: <MoneyIcon />, label: 'Денег в цикле', value: state.totalMoneyEarned },
+    { icon: <KnowledgeIcon />, label: 'Знаний в цикле', value: state.totalKnowledgeEarned },
     { icon: '⚡', label: 'Мега-кликов', value: state.megaClicks },
   ]
 
@@ -60,7 +61,7 @@ export function ProgressOverview() {
             </div>
 
             <div className="unlock-progress__row">
-              <span>📚 Знания цикла</span>
+              <span><KnowledgeIcon /> Знания цикла</span>
               <span>{formatNumber(prestige.cycleProgress.knowledge)} / {formatNumber(prestige.rebirthRule.knowledge)}</span>
             </div>
             <div className="unlock-progress__track">
