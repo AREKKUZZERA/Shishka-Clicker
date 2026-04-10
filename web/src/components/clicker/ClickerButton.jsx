@@ -105,6 +105,10 @@ function createFallingEmojis(amount, symbols, limit) {
   }))
 }
 
+const PRESS_ANIMATION_MS = 240
+const MEGA_ANIMATION_MS = 760
+const RGB_BURST_MS = 2100
+
 export function ClickerButton() {
   const [particles, setParticles] = useState([])
   const [coneSprites, setConeSprites] = useState([])
@@ -141,29 +145,35 @@ export function ClickerButton() {
 
 
   function triggerPressAnimation() {
+    setIsMegaPressed(false)
     setIsPressed(false)
 
     requestAnimationFrame(() => {
       setIsPressed(true)
       if (pressTimeoutRef.current) window.clearTimeout(pressTimeoutRef.current)
-      pressTimeoutRef.current = window.setTimeout(() => setIsPressed(false), 220)
+      pressTimeoutRef.current = window.setTimeout(() => setIsPressed(false), PRESS_ANIMATION_MS)
     })
   }
 
   function triggerMegaPressAnimation() {
+    setIsPressed(false)
     setIsMegaPressed(false)
 
     requestAnimationFrame(() => {
       setIsMegaPressed(true)
       if (megaPressTimeoutRef.current) window.clearTimeout(megaPressTimeoutRef.current)
-      megaPressTimeoutRef.current = window.setTimeout(() => setIsMegaPressed(false), 760)
+      megaPressTimeoutRef.current = window.setTimeout(() => setIsMegaPressed(false), MEGA_ANIMATION_MS)
     })
   }
 
   function triggerRgbBurst() {
-    setIsRgbBurst(true)
-    if (rgbTimeoutRef.current) window.clearTimeout(rgbTimeoutRef.current)
-    rgbTimeoutRef.current = window.setTimeout(() => setIsRgbBurst(false), 2400)
+    setIsRgbBurst(false)
+
+    requestAnimationFrame(() => {
+      setIsRgbBurst(true)
+      if (rgbTimeoutRef.current) window.clearTimeout(rgbTimeoutRef.current)
+      rgbTimeoutRef.current = window.setTimeout(() => setIsRgbBurst(false), RGB_BURST_MS)
+    })
   }
 
   function spawnMegaRain(symbols, intensity = 1) {
