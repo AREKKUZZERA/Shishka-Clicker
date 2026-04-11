@@ -299,6 +299,8 @@ function createParticles(localX, localY, amount, symbols, isMega, isEmojiExplosi
 }
 
 function createConeSprites(localX, localY, amount, isMega, coneCap, now) {
+  if (amount <= 0 || coneCap <= 0) return []
+
   const total = Math.min(coneCap, isMega ? amount + 3 : amount + 1)
   const lifetime = EFFECT_LIFETIMES.cone
 
@@ -629,10 +631,13 @@ const ClickerEffectsOverlay = memo(forwardRef(function ClickerEffectsOverlay(_, 
       }
 
       if (toggles.particles) {
+        const particleAmount = result.isEmojiExplosion || result.isMega
+          ? Math.round(result.particleCount * scaling.particleSpawnScale)
+          : result.particleCount
         const spawnedParticles = createParticles(
           particlePoint.x,
           particlePoint.y,
-          Math.round(result.particleCount * scaling.particleSpawnScale),
+          particleAmount,
           result.symbols,
           result.isMega,
           result.isEmojiExplosion,
@@ -648,7 +653,11 @@ const ClickerEffectsOverlay = memo(forwardRef(function ClickerEffectsOverlay(_, 
       if (toggles.coneSprites) {
         const coneBurstCount = Math.max(
           0,
-          Math.round((result.isEmojiExplosion ? 2 : result.isMega ? 1 : 0.5) * scaling.coneSpawnScale),
+          result.isEmojiExplosion
+            ? Math.round(2 * scaling.coneSpawnScale)
+            : result.isMega
+              ? Math.round(1 * scaling.coneSpawnScale)
+              : 0,
         )
         const cones = createConeSprites(
           particlePoint.x,
