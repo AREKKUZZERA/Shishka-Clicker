@@ -3,7 +3,6 @@ import { ProgressOverview } from './ProgressOverview'
 import { useGameContext } from '../../context/GameContext'
 import { buildStats } from '../stats/StatsBar'
 import { StatCard } from '../stats/StatCard'
-import { formatNumber } from '../../lib/format'
 
 export function ClickerScreen() {
   const { state, contributions } = useGameContext()
@@ -11,8 +10,6 @@ export function ClickerScreen() {
 
   return (
     <section className="screen clicker-screen">
-      <div className="screen__glow" />
-
       <div className="clicker-layout">
         <aside className="clicker-sidebar">
           <div className="clicker-panel">

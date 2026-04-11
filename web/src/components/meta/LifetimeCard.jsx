@@ -1,0 +1,22 @@
+import {StatCard} from "../stats/StatCard.jsx"
+
+
+export const LifetimeCard = ({
+	lifetimeStats
+}) => {
+	return (
+		<article className="meta-card meta-card--stats">
+			<div className="meta-card__kicker">Лайфтайм</div>
+			<h3 className="meta-card__title">Глобальный прогресс</h3>
+			<section className="stats-bar stats-bar--shop meta-lifetime-grid">
+			  {lifetimeStats.map((item) => (
+					<StatCard key={item.label} {...item} formatValue={false} />
+			  ))}
+			</section>
+
+			<div className="meta-card__hint">
+			  После ребёрса сбрасываются текущие ресурсы и уровни магазина, но сохраняются достижения, осколки, мета-улучшения и общий множитель престижа.
+			</div>
+		</article>
+	)
+}

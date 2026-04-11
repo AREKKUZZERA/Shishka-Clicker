@@ -1,9 +1,11 @@
 import { createContext, useContext, useState } from 'react'
+import { ConeIcon } from '../components/ui/ConeIcon'
+import { PrizeIcon } from '../components/ui/GameIcon'
 
 export const TABS = [
   {
     id: 'clicker',
-    icon: '🌰',
+    icon: <ConeIcon />,
     label: 'Кликер',
     description: 'Кликай шишку, следи за прогрессом',
   },
@@ -21,7 +23,7 @@ export const TABS = [
   },
   {
     id: 'meta',
-    icon: '🏆',
+    icon: <PrizeIcon />,
     label: 'Мета',
     description: 'Достижения, ребёрс и престиж',
   },

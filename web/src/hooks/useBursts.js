@@ -1,19 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useSettingsContext } from '../context/SettingsContext'
 
 export function useBursts() {
   const [bursts, setBursts] = useState([])
   const { visualEffectCaps, visualEffectsFactor } = useSettingsContext()
 
-  useEffect(() => {
-    if (!bursts.length) return
-
-    const timeout = setTimeout(() => {
-      setBursts((current) => current.slice(1))
-    }, 650)
-
-    return () => clearTimeout(timeout)
-  }, [bursts])
+  const removeBurst = useCallback((id) => {
+    setBursts((current) => current.filter((b) => b.id !== id))
+  }, [])
 
   function addBurst(x, y, value) {
     setBursts((current) => [
@@ -27,5 +21,5 @@ export function useBursts() {
     ])
   }
 
-  return { bursts, addBurst }
+  return { bursts, addBurst, removeBurst }
 }

@@ -3,11 +3,15 @@ import { formatNumber } from '../../lib/format'
 import { useSound } from '../../hooks/useSound'
 import buySound from '../../assets/audio/ui/blip1.mp3'
 import denySound from '../../assets/audio/ui/wpn_denyselect.mp3'
+import {LockBadge} from "./LockBadge.jsx"
+import { ConeIcon } from '../ui/ConeIcon'
+import { MoneyIcon, KnowledgeIcon } from '../ui/GameIcon'
+
 
 const CURRENCY_META = {
-  money: { icon: '💵', label: 'деньги' },
-  shishki: { icon: '🌰', label: 'шишки' },
-  knowledge: { icon: '📚', label: 'знания' },
+  money: { icon: <MoneyIcon />, label: 'деньги' },
+  shishki: { icon: <ConeIcon />, label: 'шишки' },
+  knowledge: { icon: <KnowledgeIcon />, label: 'знания' },
 }
 
 const ITEM_EMOJI = {
@@ -41,17 +45,19 @@ const ITEM_EMOJI = {
   quantFund: '📈',
 }
 
-function LockBadge({ item }) {
-  return (
-    <div className="shop-card__lock">
-      <div className="shop-card__lock-title">🔒 Заблокировано</div>
-      <div className="shop-card__lock-text">{item.unlockText}</div>
-      <div className="shop-card__lock-progress">
-        <span>🌰 {formatNumber(item.unlockProgress.shishki)} / {formatNumber(item.unlockRule.shishki)}</span>
-        <span>📚 {formatNumber(item.unlockProgress.knowledge)} / {formatNumber(item.unlockRule.knowledge)}</span>
-      </div>
-    </div>
-  )
+function splitEffectLines(text, stripNextPrefix = false) {
+  if (!text) return []
+
+  let normalized = String(text).trim()
+
+  if (stripNextPrefix) {
+    normalized = normalized.replace(/^След\.\s*ур\.:\s*/i, '').trim()
+  }
+
+  return normalized
+    .split(' · ')
+    .map((line) => line.trim())
+    .filter(Boolean)
 }
 
 function getCardClassName(item, isLocked, canBuy) {
@@ -79,6 +85,7 @@ function getCardClassName(item, isLocked, canBuy) {
     toneClass,
     rarityClass,
     item.isNew ? 'shop-card--new' : '',
+    item.isBuyableNew ? 'shop-card--buyable-new' : '',
     isLocked ? 'shop-card--locked' : '',
     canBuy && !isLocked ? 'shop-card--can-buy' : '',
   ].filter(Boolean).join(' ')
@@ -100,8 +107,8 @@ export function ShopCard({ item, canBuy, balance = 0, onBuy, onInspect, delay = 
   const deniedButtonLabelAnimationRef = useRef(null)
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => setIsEntering(false), delay * 50 + 600)
-    return () => window.clearTimeout(timeoutId)
+    const timeoutId = setTimeout(() => setIsEntering(false), delay * 50 + 600)
+    return () => clearTimeout(timeoutId)
   }, [delay])
 
   useEffect(() => () => {
@@ -194,11 +201,15 @@ export function ShopCard({ item, canBuy, balance = 0, onBuy, onInspect, delay = 
   }
 
   const handleInspect = () => {
-    if (!item.isNew) return
+    if (!item.isNew && !item.isBuyableNew) return
     onInspect?.()
   }
 
   const missingAmount = Math.max(0, Number(item.cost) - Number(balance))
+  const currentEffectText = item.effectPreview?.currentText ?? item.effectLabel
+  const nextEffectText = item.effectPreview?.nextText ?? 'Следующий уровень усилит слот'
+  const currentEffectLines = splitEffectLines(currentEffectText)
+  const nextEffectLines = splitEffectLines(nextEffectText, true)
 
   return (
     <article
@@ -225,9 +236,9 @@ export function ShopCard({ item, canBuy, balance = 0, onBuy, onInspect, delay = 
 
         <div className="shop-card__chips">
           {item.isNew && <span className="shop-card__new-badge">новое</span>}
+          {item.isBuyableNew && <span className="shop-card__new-badge shop-card__new-badge--ready">можно взять</span>}
           <span className="shop-card__tier">тир {item.tier}</span>
           {!isLocked && <span className="shop-card__level">ур. {item.level}</span>}
-          <span className="shop-card__currency-chip">{currency.icon} {currency.label}</span>
         </div>
       </div>
 
@@ -239,10 +250,18 @@ export function ShopCard({ item, canBuy, balance = 0, onBuy, onInspect, delay = 
             <div className="shop-card__effect-box">
               <div className="shop-card__effect-label">Эффект</div>
               <div className="shop-card__effect-val">
-                {item.effectPreview?.currentText ?? item.effectLabel}
+                {currentEffectLines.length > 0
+                  ? currentEffectLines.map((line) => (
+                    <div key={line} className="shop-card__effect-line">{line}</div>
+                  ))
+                  : currentEffectText}
               </div>
               <div className="shop-card__effect-next">
-                {item.effectPreview?.nextText ?? 'Следующий уровень усилит слот'}
+                {nextEffectLines.length > 0
+                  ? nextEffectLines.map((line) => (
+                    <div key={line} className="shop-card__effect-next-line">{line}</div>
+                  ))
+                  : nextEffectText}
               </div>
             </div>
 
@@ -251,7 +270,6 @@ export function ShopCard({ item, canBuy, balance = 0, onBuy, onInspect, delay = 
               <div className="shop-card__price">
                 <span className="shop-card__price-num">{formatNumber(item.cost)}</span>
                 <span className="shop-card__price-icon">{currency.icon}</span>
-                <span className="shop-card__price-cur">{currency.label}</span>
               </div>
               {!canBuy && (
                 <div className="shop-card__shortage">

@@ -1,4 +1,4 @@
-export function ClickBurst({ bursts }) {
+export function ClickBurst({ bursts, onBurstEnd }) {
   if (!bursts.length) return null
 
   return (
@@ -8,6 +8,7 @@ export function ClickBurst({ bursts }) {
           key={burst.id}
           className="click-burst"
           style={{ left: burst.x, top: burst.y }}
+          onAnimationEnd={() => onBurstEnd(burst.id)}
         >
           {burst.value}
         </span>
