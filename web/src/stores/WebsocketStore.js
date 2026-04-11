@@ -15,11 +15,7 @@ export default class WebsocketStore {
 
 	constructor() {
 		makeAutoObservable(this)
-		this.init()
-
-		setInterval(() => {
-			this.sendDataToServer()
-		}, 5 * 1000)
+		// this.init()
 	}
 
 	sendDataToServer() {
@@ -31,6 +27,10 @@ export default class WebsocketStore {
 	}
 
 	init() {
+		setInterval(() => {
+			this.sendDataToServer()
+		}, 5 * 1000)
+
 		runInAction(() => {
 			this.socket = io("https://shishki.default-squad.ru/")
 		})
