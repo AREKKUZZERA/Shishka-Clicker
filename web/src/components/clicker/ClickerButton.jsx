@@ -21,6 +21,16 @@ function getRandomAngle() {
   return Math.random() * Math.PI * 2
 }
 
+function getRandomOffset(radius) {
+  const angle = getRandomAngle()
+  const distance = Math.random() * radius
+
+  return {
+    x: Math.cos(angle) * distance,
+    y: Math.sin(angle) * distance,
+  }
+}
+
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
@@ -110,18 +120,23 @@ function createParticles(localX, localY, amount, symbols, isMega, isEmojiExplosi
 
   return Array.from({ length: total }, (_, index) => {
     const angle = getRandomAngle()
+    const spawnOffset = getRandomOffset(isEmojiExplosion ? 42 : isMega ? 26 : 18)
     const distance = isEmojiExplosion
       ? 220 + Math.random() * 300
       : (22 + Math.random() * (isMega ? 180 : 92))
 
     return {
       id: `${now}-${index}-${Math.random().toString(36).slice(2)}`,
-      x: localX,
-      y: localY,
+      x: localX + spawnOffset.x,
+      y: localY + spawnOffset.y,
       dx: Math.cos(angle) * distance,
-      dy: Math.sin(angle) * distance - (isMega ? 42 : 14),
-      rotate: Math.round((Math.random() - 0.5) * (isEmojiExplosion ? 520 : 240)),
-      scale: 0.9 + Math.random() * (isEmojiExplosion ? 1.35 : isMega ? 0.9 : 0.45),
+      dy: Math.sin(angle) * distance,
+      rotate: Math.round((Math.random() - 0.5) * (isEmojiExplosion ? 1080 : isMega ? 720 : 540)),
+      scale: isEmojiExplosion
+        ? 0.78 + Math.random() * 1.34
+        : isMega
+          ? 0.84 + Math.random() * 0.94
+          : 0.7 + Math.random() * 0.72,
       symbol: pickRandom(pool),
       isMega,
       isEmojiExplosion,
@@ -135,17 +150,20 @@ function createConeSprites(localX, localY, amount, isMega, coneCap) {
 
   return Array.from({ length: total }, (_, index) => {
     const angle = getRandomAngle()
+    const spawnOffset = getRandomOffset(isMega ? 24 : 16)
     const distance = 56 + Math.random() * (isMega ? 165 : 84)
 
     return {
       id: `cone-${now}-${index}-${Math.random().toString(36).slice(2)}`,
-      x: localX,
-      y: localY,
+      x: localX + spawnOffset.x,
+      y: localY + spawnOffset.y,
       dx: Math.cos(angle) * distance,
       dy: Math.sin(angle) * distance,
-      rotateStart: Math.round(Math.random() * 180),
-      rotateEnd: Math.round((Math.random() - 0.5) * 720),
-      scale: 0.6 + Math.random() * (isMega ? 0.95 : 0.5),
+      rotateStart: Math.round(Math.random() * 360),
+      rotateEnd: Math.round((Math.random() - 0.5) * (isMega ? 1440 : 1080)),
+      scale: isMega
+        ? 0.96 + Math.random() * 0.32
+        : 0.92 + Math.random() * 0.18,
       isMega,
     }
   })
@@ -178,7 +196,7 @@ export function ClickerButton() {
   const lastLabelIndexRef = useRef(0)
 
   const { state, mineShishki, markAutoClicker } = useGameContext()
-  const { visualEffectCaps, visualEffectsFactor, visualEffectToggles } = useSettingsContext()
+  const { visualEffectCaps, visualEffectsFactor, visualEffectScaling, visualEffectToggles } = useSettingsContext()
   const { activeTab } = useNav()
   const { bursts, addBurst, removeBurst } = useBursts()
   const { play } = useSound(shishkaSound, { volume: 0.42, randomPitch: [-3.9, 5.8] })
@@ -354,6 +372,7 @@ export function ClickerButton() {
 
     const { x, y } = getRandomBurstPoint(event.currentTarget)
     const { x: burstX, y: burstY } = getRandomBurstPoint(event.currentTarget)
+    const burstType = result.isEmojiExplosion ? 'emoji' : result.isMega ? 'mega' : 'normal'
     const burstValue = result.isEmojiExplosion
       ? `💥 ЭМОДЗИ +${formattedAmount}`
       : result.isMega
@@ -361,15 +380,13 @@ export function ClickerButton() {
         : `+${formattedAmount}`
 
     if (visualEffectToggles.floatingNumbers) {
-      addBurst(burstX, burstY, burstValue)
+      addBurst(burstX, burstY, burstValue, burstType)
     }
 
     const spawnedParticles = visualEffectToggles.particles ? createParticles(
       x,
       y,
-      Math.round(
-        result.particleCount * (result.isEmojiExplosion ? 0.12 + visualEffectsFactor * 0.2 : 0.16 + visualEffectsFactor * 0.28),
-      ),
+      Math.round(result.particleCount * visualEffectScaling.particleSpawnScale),
       result.symbols,
       result.isMega,
       result.isEmojiExplosion,
@@ -382,7 +399,7 @@ export function ClickerButton() {
 
     const coneBurstCount = Math.max(
       0,
-      Math.round((result.isEmojiExplosion ? 2 : result.isMega ? 1 : 0.5) * (0.45 + visualEffectsFactor * 0.2)),
+      Math.round((result.isEmojiExplosion ? 2 : result.isMega ? 1 : 0.5) * visualEffectScaling.coneSpawnScale),
     )
     const cones = visualEffectToggles.coneSprites
       ? createConeSprites(x, y, coneBurstCount, result.isMega, visualEffectCaps.coneCap)

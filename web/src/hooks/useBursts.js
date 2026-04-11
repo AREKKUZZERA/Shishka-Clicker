@@ -3,14 +3,14 @@ import { useSettingsContext } from '../context/SettingsContext'
 
 export function useBursts() {
   const [bursts, setBursts] = useState([])
-  const { visualEffectCaps, visualEffectsFactor } = useSettingsContext()
+  const { visualEffectCaps, visualEffectScaling } = useSettingsContext()
 
   const removeBurst = useCallback((id) => {
     setBursts((current) => current.filter((b) => b.id !== id))
   }, [])
 
-  function addBurst(x, y, value) {
-    const cap = Math.round(visualEffectCaps.burstCap * (0.4 + visualEffectsFactor * 0.35))
+  function addBurst(x, y, value, type = 'normal') {
+    const cap = Math.round(visualEffectCaps.burstCap * visualEffectScaling.burstSpawnScale)
     if (cap <= 0) return
 
     setBursts((current) => [
@@ -20,6 +20,7 @@ export function useBursts() {
         x,
         y,
         value,
+        type,
       },
     ])
   }

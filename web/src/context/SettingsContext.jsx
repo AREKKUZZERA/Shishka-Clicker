@@ -67,11 +67,13 @@ export function SettingsProvider({ children }) {
 
   const value = useMemo(() => {
     const densityFactor = Math.max(0, settings.visualEffectsDensity / 100)
-    const particleCap = Math.max(0, Math.round(densityFactor * 24))
-    const burstCap = Math.max(0, Math.round(densityFactor * 5))
-    const coneCap = Math.max(0, Math.round(densityFactor * 4))
-    const rainCap = Math.max(0, Math.round(densityFactor * 6))
-    const fireworkCap = Math.max(0, Math.round(densityFactor * 8))
+    const densityScale = Math.min(2, Math.max(0.2, densityFactor))
+    const particleCap = Math.max(0, Math.round(4 + densityScale * 18))
+    const burstCap = Math.max(0, Math.round(1 + densityScale * 5))
+    const coneCap = Math.max(0, Math.round(densityScale * 4))
+    const particleSpawnScale = 0.3 + densityScale * 0.55
+    const burstSpawnScale = 0.4 + densityScale * 0.35
+    const coneSpawnScale = 0.25 + densityScale * 0.55
     const visualEffectToggles = {
       ambientEffects: settings.showAmbientEffects,
       noiseOverlay: settings.showNoiseOverlay,
@@ -97,18 +99,20 @@ export function SettingsProvider({ children }) {
       musicVolumeFactor:
         settings.musicEnabled ? (settings.masterVolume / 100) * (settings.musicVolume / 100) : 0,
       visualEffectsFactor: densityFactor,
+      visualEffectsScale: densityScale,
+      visualEffectScaling: {
+        particleSpawnScale,
+        burstSpawnScale,
+        coneSpawnScale,
+      },
       visualEffectCaps: {
         particleCap: visualEffectToggles.particles ? particleCap : 0,
         burstCap: visualEffectToggles.floatingNumbers ? burstCap : 0,
         coneCap: visualEffectToggles.coneSprites ? coneCap : 0,
-        rainCap,
-        fireworkCap,
         totalHint:
           (visualEffectToggles.particles ? particleCap : 0) +
           (visualEffectToggles.floatingNumbers ? burstCap : 0) +
-          (visualEffectToggles.coneSprites ? coneCap : 0) +
-          rainCap +
-          fireworkCap,
+          (visualEffectToggles.coneSprites ? coneCap : 0),
       },
       visualEffectToggles,
     }
