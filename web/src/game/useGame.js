@@ -192,6 +192,7 @@ export function useGame() {
   const saveIdleRef = useRef(null)
   const skipNextSaveRef = useRef(false)
   const [achievementQueue, setAchievementQueue] = useState([])
+  const stateRef = useRef(state)
 
   useEffect(() => {
     const FOREGROUND_TICK_MS = 250
@@ -257,6 +258,38 @@ export function useGame() {
       }
     }
   }, [state])
+
+  // Keep a ref to the latest state for unload/visibility handlers and register handlers once
+  useEffect(() => {
+    stateRef.current = state
+  }, [state])
+
+  useEffect(() => {
+    const handleSaveOnUnload = () => {
+      if (skipNextSaveRef.current) return
+      try {
+        saveGame(stateRef.current)
+      } catch (err) {
+        // best-effort save on unload
+      }
+    }
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        handleSaveOnUnload()
+      }
+    }
+
+    window.addEventListener('beforeunload', handleSaveOnUnload)
+    window.addEventListener('pagehide', handleSaveOnUnload)
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleSaveOnUnload)
+      window.removeEventListener('pagehide', handleSaveOnUnload)
+      document.removeEventListener('visibilitychange', handleVisibility)
+    }
+  }, [])
 
   const achievements = useMemo(() => deriveAchievements(safeState), [safeState])
   const contributions = useMemo(() => deriveContributionBreakdown(safeState), [safeState])

@@ -143,12 +143,9 @@
 .screen-fireworks {
   position: fixed;
   inset: 0;
+  z-index: 100;
   pointer-events: none;
   overflow: hidden;
-}
-
-.screen-fireworks {
-  z-index: 100;
 }
 
 .screen-firework {

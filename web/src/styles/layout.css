@@ -409,11 +409,6 @@
   border-top: 1px solid var(--border-soft);
 }
 
-.contribution-row {
-  display: grid;
-  gap: 0.3rem;
-}
-
 .contribution-row__info {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -449,6 +444,7 @@
   overflow: hidden;
   border-radius: var(--radius-pill);
   background: rgb(var(--white-rgb) / 0.06);
+  border: 1px solid rgb(var(--white-rgb) / 0.05);
 }
 
 .contribution-bar__fill,
