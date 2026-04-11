@@ -68,9 +68,9 @@ export function SettingsProvider({ children }) {
   const value = useMemo(() => {
     const densityFactor = Math.max(0, settings.visualEffectsDensity / 100)
     const densityScale = Math.min(2, Math.max(0.2, densityFactor))
-    const particleCap = Math.max(0, Math.round(4 + densityScale * 18))
+    const particleCap = Math.max(0, Math.round(10 + densityScale * 28))
     const burstCap = Math.max(0, Math.round(1 + densityScale * 5))
-    const coneCap = Math.max(0, Math.round(densityScale * 4))
+    const coneCap = 10
     const particleSpawnScale = 0.3 + densityScale * 0.55
     const burstSpawnScale = 0.4 + densityScale * 0.35
     const coneSpawnScale = 0.25 + densityScale * 0.55

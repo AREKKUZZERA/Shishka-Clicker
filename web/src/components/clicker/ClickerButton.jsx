@@ -54,7 +54,40 @@ function appendWithCapInPlace(current, incoming, cap) {
   current.push(...incoming)
 
   if (current.length > cap) {
-    current.splice(0, current.length - cap)
+    const now = Date.now()
+    const overflow = current.length - cap
+    fastExpireOverflowInPlace(current, overflow, now)
+  }
+
+  return current
+}
+
+function fastExpireOverflowInPlace(current, overflow, now) {
+  if (!overflow) return current
+
+  let remaining = overflow
+
+  for (let index = 0; index < current.length && remaining > 0; index += 1) {
+    const effect = current[index]
+    if (effect.expiresAt <= now) continue
+
+    const elapsed = Math.max(0, now - effect.createdAt)
+    const lifetime = Math.max(1, effect.lifetime)
+    const progress = clamp(elapsed / lifetime, 0, 1)
+    if (progress >= 0.9) {
+      remaining -= 1
+      continue
+    }
+
+    const targetProgress = 0.9 + Math.random() * 0.08
+    const adjustedCreatedAt = now - (lifetime * targetProgress)
+    effect.createdAt = adjustedCreatedAt
+    effect.expiresAt = adjustedCreatedAt + lifetime + CLEANUP_BUFFER_MS
+    remaining -= 1
+  }
+
+  if (remaining > 0) {
+    current.splice(0, remaining)
   }
 
   return current
