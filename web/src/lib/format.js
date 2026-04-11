@@ -12,7 +12,7 @@ export function formatNumber(number) {
     i++
   }
 
-  let sym = ""
+  let sym
 
   if (i > 8) {
     const zeros = i * 3

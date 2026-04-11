@@ -17,7 +17,7 @@ import {
 } from './config'
 import { getPrestigeUpgradeCards, PRESTIGE_UPGRADES, getPrestigeUpgradeCost } from './metaConfig'
 import { loadGame, saveGame, clearGame } from '../lib/storage'
-import {formatNumber} from "../lib/format.js"
+
 
 function buildSeenShopItems(snapshot = STARTING_STATE) {
   const safeSnapshot = snapshot ?? STARTING_STATE
@@ -60,7 +60,7 @@ function mergeState(saved) {
     }
   }
 
-  const mergedState = {
+  const mergedState = { // Local variable mergedState is redundant
     ...STARTING_STATE,
     ...saved,
     achievements: {
