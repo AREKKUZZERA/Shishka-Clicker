@@ -24,22 +24,48 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-function getRandomClickThreshold() {
-  return getRandomInt(6, 12)
-}
+const TAP_SPEED_WINDOW = 2000
 
-const DEFAULT_CLICKER_LABEL = 'Нажми на меня'
-
-const CLICKER_LABEL_POOL = [
-  'ЖМИИИИ!!!!',
-  'ЕБАНУТЫЙ РАЗГОН НАХУЙ',
-  'ЕБАТЬ ТЫ ЖМЯКАЕШЬ',
-  'Лучше бы котиков гладил',
-  'Ахахах - лисимп',
-  'Тапай, пока шишка горячая',
-  'Тапай, тапай этого хомячка',
-  'КЛИК = ПРОФИТ',
+const TAP_SPEED_TIERS = [
+  {
+    minTps: 0,
+    labels: ['Че так медленно', 'Давай, тапай побыстрее'],
+  },
+  {
+    minTps: 2,
+    labels: ['Неплохо!', 'Разгоняемся...', 'КЛИК = ПРОФИТ', 'Так держать!'],
+  },
+  {
+    minTps: 4,
+    labels: ['ЖМИИИИ!!!!', 'Тапай, пока шишка горячая', 'Тапай, тапай этого хомячка', 'Ахахах - лисимп'],
+  },
+  {
+    minTps: 7,
+    labels: ['ЕБАНУТЫЙ РАЗГОН НАХУЙ', 'ЕБАТЬ ТЫ ЖМЯКАЕШЬ', 'ЧУВААААК', 'МАШИНА КЛИКОВ!!!'],
+  },
+  {
+    minTps: 11,
+    labels: ['АВТОКЛИКЕР?!', 'ТЫ ВООБЩЕ ЧЕЛОВЕК?!', 'НЕРЕАЛЬНАЯ СКОРОСТЬ', 'БОГА ТАПА ПРИЗВАЛИ'],
+  },
 ]
+
+const IDLE_LABELS = [
+  'Ты чо уснул?',
+  'Тапать будем, нет?',
+  'Всё да?',
+  'Блади мышка имба',
+  'Шишки сами себя не натапают',
+  'Эй, ты тут?',
+]
+
+const IDLE_TIMEOUT = 4500
+
+function getTierForTps(tps) {
+  for (let i = TAP_SPEED_TIERS.length - 1; i >= 0; i--) {
+    if (tps >= TAP_SPEED_TIERS[i].minTps) return TAP_SPEED_TIERS[i]
+  }
+  return TAP_SPEED_TIERS[0]
+}
 
 function createParticles(localX, localY, amount, symbols, isMega, isEmojiExplosion, particleCap) {
   const now = Date.now()
@@ -101,15 +127,17 @@ export function ClickerButton() {
   const [coneSprites, setConeSprites] = useState([])
   const [visualState, setVisualState] = useState('idle')
   const [shockwaves, setShockwaves] = useState([])
-  const [clickerLabel, setClickerLabel] = useState(DEFAULT_CLICKER_LABEL)
+  const [clickerLabel, setClickerLabel] = useState(TAP_SPEED_TIERS[0].labels[0])
 
   const visualTimeoutRef = useRef(null)
-  const clicksUntilLabelChangeRef = useRef(getRandomClickThreshold())
-  const clickerLabelIndexRef = useRef(-1)
+  const idleTimeoutRef = useRef(null)
+  const tapTimestampsRef = useRef([])
+  const lastTierIndexRef = useRef(0)
+  const lastLabelIndexRef = useRef(0)
 
   const { state, mineShishki } = useGameContext()
   const { visualEffectCaps, visualEffectsFactor } = useSettingsContext()
-  const { bursts, addBurst } = useBursts()
+  const { bursts, addBurst, removeBurst } = useBursts()
   const { play } = useSound(shishkaSound, { volume: 0.42 })
 
   const particleLimitHint = useMemo(
@@ -136,6 +164,7 @@ export function ClickerButton() {
   useEffect(() => {
     return () => {
       if (visualTimeoutRef.current) window.clearTimeout(visualTimeoutRef.current)
+      if (idleTimeoutRef.current) window.clearTimeout(idleTimeoutRef.current)
     }
   }, [])
 
@@ -182,22 +211,44 @@ export function ClickerButton() {
     event.stopPropagation()
   }
 
+  function scheduleIdleLabel() {
+    if (idleTimeoutRef.current) window.clearTimeout(idleTimeoutRef.current)
+    idleTimeoutRef.current = window.setTimeout(() => {
+      const label = pickRandom(IDLE_LABELS)
+      setClickerLabel(label)
+      lastTierIndexRef.current = -1
+    }, IDLE_TIMEOUT)
+  }
+
   function rotateClickerLabel() {
-    clicksUntilLabelChangeRef.current -= 1
+    const now = Date.now()
+    tapTimestampsRef.current.push(now)
+    tapTimestampsRef.current = tapTimestampsRef.current.filter((t) => now - t <= TAP_SPEED_WINDOW)
 
-    if (clicksUntilLabelChangeRef.current > 0) return
+    scheduleIdleLabel()
 
-    let nextIndex = getRandomInt(0, CLICKER_LABEL_POOL.length - 1)
+    const elapsed = (now - tapTimestampsRef.current[0]) / 1000
+    const tps = elapsed > 0 ? (tapTimestampsRef.current.length - 1) / elapsed : 0
 
-    if (CLICKER_LABEL_POOL.length > 1) {
-      while (nextIndex === clickerLabelIndexRef.current) {
-        nextIndex = getRandomInt(0, CLICKER_LABEL_POOL.length - 1)
+    const tier = getTierForTps(tps)
+    const tierIndex = TAP_SPEED_TIERS.indexOf(tier)
+    const tierChanged = tierIndex !== lastTierIndexRef.current
+
+    if (tierChanged) {
+      lastTierIndexRef.current = tierIndex
+      const nextIndex = getRandomInt(0, tier.labels.length - 1)
+      lastLabelIndexRef.current = nextIndex
+      setClickerLabel(tier.labels[nextIndex])
+    } else if (tapTimestampsRef.current.length % 3 === 0) {
+      let nextIndex = getRandomInt(0, tier.labels.length - 1)
+      if (tier.labels.length > 1) {
+        while (nextIndex === lastLabelIndexRef.current) {
+          nextIndex = getRandomInt(0, tier.labels.length - 1)
+        }
       }
+      lastLabelIndexRef.current = nextIndex
+      setClickerLabel(tier.labels[nextIndex])
     }
-
-    clickerLabelIndexRef.current = nextIndex
-    setClickerLabel(CLICKER_LABEL_POOL[nextIndex])
-    clicksUntilLabelChangeRef.current = getRandomClickThreshold()
   }
 
   function handleClick(event) {
@@ -216,13 +267,14 @@ export function ClickerButton() {
     rotateClickerLabel()
 
     const { x, y } = getRandomBurstPoint(event.currentTarget)
+    const { x: burstX, y: burstY } = getRandomBurstPoint(event.currentTarget)
     const burstValue = result.isEmojiExplosion
       ? `💥 ЭМОДЗИ +${formattedAmount}`
       : result.isMega
         ? `⚡ МЕГА +${formattedAmount}`
         : `+${formattedAmount}`
 
-    addBurst(x, y, burstValue)
+    addBurst(burstX, burstY, burstValue)
 
     const spawnedParticles = createParticles(
       x,
@@ -314,7 +366,7 @@ export function ClickerButton() {
         ))}
       </div>
 
-      <ClickBurst bursts={bursts} />
+      <ClickBurst bursts={bursts} onBurstEnd={removeBurst} />
     </>
   )
 
