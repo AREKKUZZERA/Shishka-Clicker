@@ -767,7 +767,7 @@ export const ClickerButton = observer(function ClickerButton() {
             <span
               key={item.label}
               className="clicker-btn__metric"
-              {...(item.fullValue && isNumberAbbreviated(String(item.value)) ? { 'data-tip': item.fullValue } : {})}
+              
             >
               {item.streak > 0 && <span className="clicker-btn__metric-streak">x{formatNumber(item.streak)}</span>}
               <b>{item.value}</b>

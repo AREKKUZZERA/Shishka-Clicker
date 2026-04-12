@@ -1,7 +1,6 @@
 import {BottomNav} from "../bottom/BottomNav.jsx"
 import {AchievementToast} from "../ui/AchievementToast.jsx"
 import {DevConsole} from "../ui/DevConsole.jsx"
-import {TooltipManager} from "../ui/TooltipManager.jsx"
 import {StatsBar} from "../stats/StatsBar.jsx"
 import {lazy, memo, Suspense, useEffect, useMemo} from "react"
 import {Header} from "../header/Header.jsx"
@@ -95,7 +94,6 @@ export const AppWrapper = memo(function AppWrapper() {
 
 			<AchievementToast />
 			<DevConsole />
-			<TooltipManager />
 			<BottomNav />
 		</div>
 	)

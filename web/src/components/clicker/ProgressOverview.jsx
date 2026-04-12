@@ -53,7 +53,7 @@ const PrestigeOverviewCard = memo(function PrestigeOverviewCard({
         <div className="unlock-progress">
           <div className="unlock-progress__row">
             <span><ConeIcon /> Шишки цикла</span>
-            <span {...(cycleShishkiAbbreviated ? { 'data-tip': cycleShishkiFull } : {})}>
+            <span>
               {cycleShishkiText} / {cycleShishkiGoalText}
             </span>
           </div>
@@ -63,7 +63,7 @@ const PrestigeOverviewCard = memo(function PrestigeOverviewCard({
 
           <div className="unlock-progress__row">
             <span><KnowledgeIcon /> Знания цикла</span>
-            <span {...(cycleKnowledgeAbbreviated ? { 'data-tip': cycleKnowledgeFull } : {})}>
+            <span>
               {cycleKnowledgeText} / {cycleKnowledgeGoalText}
             </span>
           </div>

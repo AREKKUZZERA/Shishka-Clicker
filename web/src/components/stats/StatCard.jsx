@@ -119,7 +119,7 @@ export const StatCard = memo(function StatCard({
 
       <div
         className={valueClasses}
-        {...(fullValue && isNumberAbbreviated(displayValue) ? { 'data-tip': fullValue } : {})}
+        
       >
         <span ref={valueTrackRef} className="stat-card__value-track" aria-hidden="true">
           {animatedDigits.map((entry) => (
@@ -143,17 +143,13 @@ export const StatCard = memo(function StatCard({
             <div
               key={entry.id}
               className="stat-card__top-contrib-row"
-              {...(isNumberAbbreviated(formatNumber(entry.value))
-                ? { 'data-tip': `#${index + 1} ${entry.title}: ${formatFullNumber(entry.value)}` }
-                : {})}
+              
             >
               <span>#{index + 1}</span>
               <b>{entry.title}</b>
               <span
                 className="stat-card__top-contrib-val"
-                {...(isNumberAbbreviated(formatNumber(entry.value))
-                  ? { 'data-tip': formatFullNumber(entry.value) }
-                  : {})}
+                
               >
                 {formatNumber(entry.value)}
               </span>

@@ -313,12 +313,12 @@ export const ShopCard = memo(function ShopCard({ itemId, item, canBuy, balance =
             <div className="shop-card__price-box">
               <div className="shop-card__price-label">Цена уровня</div>
               <div className="shop-card__price">
-                <span className="shop-card__price-num" {...(isNumberAbbreviated(formatNumber(item.cost)) ? { 'data-tip': formatFullNumber(item.cost) } : {})}>{formatNumber(item.cost)}</span>
+                <span className="shop-card__price-num">{formatNumber(item.cost)}</span>
                 <span className="shop-card__price-icon">{currency.icon}</span>
               </div>
               {!canBuy && (
                 <div className="shop-card__shortage">
-                  Нужно ещё <strong {...(isNumberAbbreviated(formatNumber(missingAmount)) ? { 'data-tip': formatFullNumber(missingAmount) } : {})}>{formatNumber(missingAmount)}</strong>
+                  Нужно ещё <strong>{formatNumber(missingAmount)}</strong>
                 </div>
               )}
             </div>

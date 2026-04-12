@@ -12,7 +12,7 @@ export const ContributionBar = memo(({ entry, total, index }) => {
 				<span className="contribution-row__name min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{entry.title}</span>
 				<span
 					className="contribution-row__val"
-					{...(isNumberAbbreviated(formatNumber(entry.value)) ? { 'data-tip': formatFullNumber(entry.value) } : {})}
+					
 				>
 					{formatNumber(entry.value)}
 				</span>
