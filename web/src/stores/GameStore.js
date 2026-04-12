@@ -777,18 +777,6 @@ export default class GameStore {
     })
   }
 
-  markSilenceLover() {
-    const result = unlockAchievements({
-      ...this._state,
-      achievements: {
-        ...this._state.achievements,
-        silence_lover_progress: true,
-      },
-    })
-
-    this.commitState(result.state, result.unlockedNow)
-  }
-
   markAutoClicker() {
     if (this._state.achievements?.autoclicker_reached) return
 

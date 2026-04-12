@@ -14,7 +14,7 @@ import { SettingsEffects } from './SettingsEffects.jsx'
 import { SettingsAbout } from './SettingsAbout.jsx'
 
 export const SettingsScreen = observer(function SettingsScreen() {
-  const { resetGame, markSilenceLover, exportGameSave, importGameSave } = useGameContext()
+  const { resetGame, exportGameSave, importGameSave } = useGameContext()
   const {
     settings,
     setVolume,
@@ -38,16 +38,6 @@ export const SettingsScreen = observer(function SettingsScreen() {
 
     return JSON.stringify(bundle, null, 2)
   }, [exportGameSave, exportSettings])
-
-  const handleMusicToggle = () => {
-    if (settings.musicEnabled) markSilenceLover()
-    toggle('musicEnabled')
-  }
-
-  const handleMusicVolume = (value) => {
-    if (value <= 5) markSilenceLover()
-    setVolume('musicVolume', value)
-  }
 
   const revealSaveText = (text) => {
     setExportedSaveText(text)
@@ -108,7 +98,7 @@ export const SettingsScreen = observer(function SettingsScreen() {
       revealSaveText(exportedSaveText || currentSaveText)
       setTransferStatus({
         type: 'error',
-        text: 'Не удалось автоматически скопировать текст. Ниже он уже открыт — можно выделить и скопировать вручную.',
+        text: 'Не удалось автоматически скопировать текст. Ниже он уже открыт - можно выделить и скопировать вручную.',
       })
     }
   }
@@ -152,8 +142,6 @@ export const SettingsScreen = observer(function SettingsScreen() {
       <div className="settings-layout">
         <div className="settings-layout__main">
           <SettingsAudio
-            handleMusicVolume={handleMusicVolume}
-            handleMusicToggle={handleMusicToggle}
             toggle={toggle}
             setVolume={setVolume}
             settings={settings}

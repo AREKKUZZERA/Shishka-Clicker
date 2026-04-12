@@ -2,10 +2,8 @@ const SETTINGS_KEY = 'shishka-clicker-settings-v1'
 
 export const DEFAULT_SETTINGS = {
   soundEnabled: true,
-  musicEnabled: true,
   masterVolume: 70,
   effectsVolume: 80,
-  musicVolume: 35,
   visualEffectsDensity: 45,
   showAmbientEffects: true,
   showNoiseOverlay: true,
@@ -29,10 +27,8 @@ export function normalizeSettings(settings) {
 
   return {
     soundEnabled: input.soundEnabled ?? DEFAULT_SETTINGS.soundEnabled,
-    musicEnabled: input.musicEnabled ?? DEFAULT_SETTINGS.musicEnabled,
     masterVolume: clampPercent(input.masterVolume, DEFAULT_SETTINGS.masterVolume),
     effectsVolume: clampPercent(input.effectsVolume, DEFAULT_SETTINGS.effectsVolume),
-    musicVolume: clampPercent(input.musicVolume, DEFAULT_SETTINGS.musicVolume),
     visualEffectsDensity: clampPercent(input.visualEffectsDensity, DEFAULT_SETTINGS.visualEffectsDensity, 20, 200),
     showAmbientEffects: input.showAmbientEffects ?? DEFAULT_SETTINGS.showAmbientEffects,
     showNoiseOverlay: input.showNoiseOverlay ?? DEFAULT_SETTINGS.showNoiseOverlay,

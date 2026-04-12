@@ -2,14 +2,11 @@ import {BottomNav} from "../bottom/BottomNav.jsx"
 import {AchievementToast} from "../ui/AchievementToast.jsx"
 import {DevConsole} from "../ui/DevConsole.jsx"
 import {StatsBar} from "../stats/StatsBar.jsx"
-import {lazy, memo, Suspense, useEffect, useMemo} from "react"
+import {lazy, memo, Suspense, useEffect} from "react"
 import {Header} from "../header/Header.jsx"
 import {setupDiscord} from "../../discord.js"
-import {useBackgroundMusic} from "../../hooks/useBackgroundMusic.js"
 import {useNav} from "../../context/NavContext.jsx"
 import {useSettingsContext} from "../../context/SettingsContext.jsx"
-import backgroundMusicOpus from '../../assets/audio/music/background.opus'
-import backgroundMusicMp3 from '../../assets/audio/music/background.mp3'
 import {ScreenFallback} from "./ScreenFallback.jsx"
 
 
@@ -35,9 +32,6 @@ const AppBackground = memo(function AppBackground({ visualEffectToggles }) {
 export const AppWrapper = memo(function AppWrapper() {
 	const { activeTab } = useNav()
 	const { visualEffectToggles } = useSettingsContext()
-	const backgroundSources = useMemo(() => [backgroundMusicOpus, backgroundMusicMp3], [])
-
-	useBackgroundMusic(backgroundSources)
 
 	useEffect(() => {
 		void setupDiscord()

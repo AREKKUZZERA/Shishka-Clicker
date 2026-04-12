@@ -518,25 +518,6 @@ export function useGame() {
     })
   }, [])
 
-  const markSilenceLover = useCallback(function markSilenceLover() {
-    setState((current) => {
-      current = mergeState(current)
-      const result = unlockAchievements({
-        ...current,
-        achievements: {
-          ...current.achievements,
-          silence_lover_progress: true,
-        },
-      })
-
-      if (result.unlockedNow.length) {
-        setAchievementQueue((queue) => [...queue, ...result.unlockedNow])
-      }
-
-      return result.state
-    })
-  }, [])
-
   const markAutoClicker = useCallback(function markAutoClicker() {
     setState((current) => {
       current = mergeState(current)
@@ -650,7 +631,6 @@ export function useGame() {
     buyUpgrade,
     buyPrestigeUpgrade,
     markShopItemSeen,
-    markSilenceLover,
     markAutoClicker,
     prestigeReset,
     resetGame,
@@ -663,7 +643,7 @@ export function useGame() {
   }), [
     safeState, derived, economy, achievements, prestige, contributions,
     mineShishki, buySubscription, buyUpgrade, buyPrestigeUpgrade,
-    markShopItemSeen, markSilenceLover, markAutoClicker,
+    markShopItemSeen, markAutoClicker,
     prestigeReset, resetGame, exportGameSave, importGameSave,
     achievementQueue, dismissAchievement, _devGiveResource, _devSetResource
   ])

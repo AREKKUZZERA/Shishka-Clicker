@@ -113,8 +113,6 @@ export function SettingsProvider({ children }) {
       importSettings,
       effectVolumeFactor:
         settings.soundEnabled ? (settings.masterVolume / 100) * (settings.effectsVolume / 100) : 0,
-      musicVolumeFactor:
-        settings.musicEnabled ? (settings.masterVolume / 100) * (settings.musicVolume / 100) : 0,
       visualEffectsFactor: densityFactor,
       visualEffectsScale: densityScale,
       visualEffectScaling: {

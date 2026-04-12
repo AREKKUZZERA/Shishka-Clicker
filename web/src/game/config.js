@@ -626,15 +626,6 @@ const specialAchievements = [
     tier: 1,
   },
   {
-    id: 'silence_lover',
-    title: 'Любитель тишины',
-    description: 'Зачем вы делаете музыку такой громкой?',
-    check: (state) => state.achievements?.silence_lover_progress,
-    category: 'Секреты',
-    tier: 1,
-    secret: true,
-  },
-  {
     id: 'collector',
     title: 'Коллекционер шишек',
     description: 'Накопи 1 000 шишек за всё время.',
@@ -899,15 +890,6 @@ const secretAchievements = [
     secret: true,
   },
   {
-    id: 'ascetic',
-    title: '🔕 Аскет',
-    description: 'Открой тишину и всё равно сделай ребёрс.',
-    check: (state) => Boolean(state.achievements?.silence_lover_progress) && (state.rebirths ?? 0) >= 1,
-    category: 'Секреты',
-    tier: 13,
-    secret: true,
-  },
-  {
     id: 'manual_monster',
     title: '🖐️ Ручной режим',
     description: 'Сделай 1 000 000 ручных кликов.',
@@ -941,15 +923,6 @@ const secretAchievements = [
     check: (state) => (state.shishki ?? 0) >= 5_000_000,
     category: 'Секреты',
     tier: 17,
-    secret: true,
-  },
-  {
-    id: 'silent_architect',
-    title: '🕯️ Тихий архитектор',
-    description: 'Сделай 5 ребёрсов с выключенной музыкой.',
-    check: (state) => Boolean(state.achievements?.silence_lover_progress) && (state.rebirths ?? 0) >= 5,
-    category: 'Секреты',
-    tier: 18,
     secret: true,
   },
   {
