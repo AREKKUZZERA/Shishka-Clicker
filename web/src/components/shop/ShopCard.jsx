@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef } from 'react'
-import { formatNumber, formatFullNumber, isNumberAbbreviated } from '../../lib/format'
+import { formatNumber } from '../../lib/format'
 import { useSound } from '../../hooks/useSound'
 import buySound from '../../assets/audio/ui/blip1.mp3'
 import denySound from '../../assets/audio/ui/wpn_denyselect.mp3'

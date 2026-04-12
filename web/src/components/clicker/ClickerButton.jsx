@@ -14,7 +14,7 @@ import { useGameContext } from '../../context/GameContext'
 import { useSettingsContext } from '../../context/SettingsContext'
 import { useNav } from '../../context/NavContext'
 import { useSound } from '../../hooks/useSound'
-import { formatNumber, formatFullNumber, isNumberAbbreviated } from '../../lib/format'
+import { formatNumber } from '../../lib/format'
 import discoImage from '../../assets/disco.gif'
 import coneImage from '../../assets/cone.png'
 import coneV2Image from '../../assets/conev2.png'
@@ -26,7 +26,6 @@ import {
   buildClickSpawnState,
   easeOutCubic,
   easeOutQuad,
-  EFFECT_LIFETIMES,
   MAX_CANVAS_DPR,
   pruneExpiredInPlace,
 } from './clickEffects'
@@ -599,18 +598,15 @@ export const ClickerButton = observer(function ClickerButton() {
       {
         label: 'за клик',
         value: <><span>+{clickerMetrics.clickPowerText}</span> <ConeIcon /></>,
-        fullValue: clickerMetrics.clickPowerFull,
       },
       {
         label: 'мега-шанс',
         value: clickerMetrics.megaClickChanceText,
-        fullValue: clickerMetrics.megaClickChanceFull,
         streak: clickerMetrics.megaClickStreak,
       },
       {
         label: 'эмодзи',
         value: clickerMetrics.emojiMegaChanceText,
-        fullValue: clickerMetrics.emojiMegaChanceFull,
         streak: clickerMetrics.emojiBurstStreak,
       },
     ],

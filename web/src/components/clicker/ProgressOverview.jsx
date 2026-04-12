@@ -31,12 +31,8 @@ const PrestigeOverviewCard = memo(function PrestigeOverviewCard({
   prestigeLabel,
   cycleShishkiText,
   cycleShishkiGoalText,
-  cycleShishkiFull,
-  cycleShishkiAbbreviated,
   cycleKnowledgeText,
   cycleKnowledgeGoalText,
-  cycleKnowledgeFull,
-  cycleKnowledgeAbbreviated,
 }) {
   return (
     <StatCard

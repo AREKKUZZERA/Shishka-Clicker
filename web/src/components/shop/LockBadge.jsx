@@ -1,4 +1,4 @@
-import {formatNumber, formatFullNumber, isNumberAbbreviated} from "../../lib/format.js"
+import {formatNumber} from "../../lib/format.js"
 import { ConeIcon } from '../ui/ConeIcon'
 import { KnowledgeIcon } from '../ui/GameIcon'
 

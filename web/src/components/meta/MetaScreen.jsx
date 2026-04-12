@@ -12,6 +12,87 @@ import { StatCard } from '../stats/StatCard.jsx'
 import { ConeIcon } from '../ui/ConeIcon'
 import { KnowledgeIcon, MoneyIcon, PrizeIcon } from '../ui/GameIcon'
 
+const ACHIEVEMENT_THEME_BY_CATEGORY = {
+  Кликер: { tone: 'amber', icon: '⚡' },
+  Прогресс: { tone: 'emerald', icon: '🌲' },
+  Экономика: { tone: 'cyan', icon: '💸' },
+  Исследование: { tone: 'violet', icon: '🧠' },
+  Метa: { tone: 'fuchsia', icon: '💎' },
+  Мета: { tone: 'fuchsia', icon: '💎' },
+  Секреты: { tone: 'rose', icon: '🜂' },
+}
+
+function getAchievementTheme(category, secret = false) {
+  if (secret) {
+    return ACHIEVEMENT_THEME_BY_CATEGORY.Секреты
+  }
+
+  return ACHIEVEMENT_THEME_BY_CATEGORY[category] ?? { tone: 'slate', icon: '✦' }
+}
+
+function toRoman(value) {
+  const numerals = [
+    ['X', 10],
+    ['IX', 9],
+    ['V', 5],
+    ['IV', 4],
+    ['I', 1],
+  ]
+
+  let number = Math.max(0, Number(value) || 0)
+  if (number <= 0) return '0'
+
+  let result = ''
+  numerals.forEach(([symbol, amount]) => {
+    while (number >= amount) {
+      result += symbol
+      number -= amount
+    }
+  })
+  return result
+}
+
+function buildAchievementGroup(items) {
+  const sortedItems = [...items].sort((a, b) => a.level - b.level)
+  const currentLevel = sortedItems.reduce((level, item) => (item.unlocked ? item.level : level), 0)
+  const nextItem = sortedItems.find((item) => !item.unlocked) ?? null
+  const lastItem = sortedItems[sortedItems.length - 1]
+  const nextLevel = nextItem?.level ?? null
+  const progressValue = Number(sortedItems[0]?.progressValue ?? 0)
+  const progressTarget = nextItem?.target ?? lastItem?.target ?? 0
+  const theme = getAchievementTheme(sortedItems[0].category, sortedItems[0].secret)
+
+  return {
+    id: `group-${sortedItems[0].groupKey}`,
+    kind: 'group',
+    title: sortedItems[0].groupTitle,
+    category: sortedItems[0].category,
+    secret: Boolean(sortedItems[0].secret),
+    unlocked: currentLevel > 0,
+    currentLevel,
+    maxLevel: sortedItems.length,
+    levelLabel: currentLevel > 0 ? toRoman(currentLevel) : '0',
+    nextLevelLabel: nextLevel ? toRoman(nextLevel) : null,
+    nextDescription: nextItem?.description ?? lastItem?.description ?? '',
+    progressValue,
+    nextTarget: progressTarget,
+    progressText: `${formatNumber(progressValue)} / ${formatNumber(progressTarget)}`,
+    theme,
+  }
+}
+
+function getAchievementSortWeight(item) {
+  if (item.kind === 'group') {
+    if (item.currentLevel > 0 && item.currentLevel < item.maxLevel) return 0
+    if (item.currentLevel === 0) return 1
+    return 2
+  }
+
+  if (item.unlocked) return 3
+  if (item.secret) return 5
+  return 4
+}
+
 export const MetaScreen = observer(function MetaScreen() {
   const {
     uiState,
@@ -26,17 +107,50 @@ export const MetaScreen = observer(function MetaScreen() {
   const grouped = useMemo(() => {
     const groups = uiAchievements.reduce((acc, achievement) => {
       const key = achievement.category ?? 'Разное'
-      if (!acc[key]) acc[key] = []
-      acc[key].push(achievement)
+      if (!acc[key]) {
+        acc[key] = {
+          rawUnlocked: 0,
+          rawTotal: 0,
+          milestoneGroups: new Map(),
+          singles: [],
+        }
+      }
+
+      acc[key].rawTotal += 1
+      if (achievement.unlocked) {
+        acc[key].rawUnlocked += 1
+      }
+
+      if (achievement.achievementType === 'milestone' && achievement.groupKey) {
+        const bucket = acc[key].milestoneGroups.get(achievement.groupKey) ?? []
+        bucket.push(achievement)
+        acc[key].milestoneGroups.set(achievement.groupKey, bucket)
+        return acc
+      }
+
+      acc[key].singles.push({
+        ...achievement,
+        kind: 'single',
+        theme: getAchievementTheme(achievement.category, achievement.secret),
+      })
       return acc
     }, {})
 
-    return Object.entries(groups).map(([category, items]) => ({
-      category,
-      unlocked: items.filter((entry) => entry.unlocked).length,
-      total: items.length,
-      items: items.sort((a, b) => Number(a.secret) - Number(b.secret) || a.tier - b.tier),
-    }))
+    return Object.entries(groups).map(([category, data]) => {
+      const milestoneItems = Array.from(data.milestoneGroups.values()).map(buildAchievementGroup)
+      const items = [...milestoneItems, ...data.singles].sort((a, b) => {
+        const weightDelta = getAchievementSortWeight(a) - getAchievementSortWeight(b)
+        if (weightDelta !== 0) return weightDelta
+        return (a.tier ?? a.currentLevel ?? 0) - (b.tier ?? b.currentLevel ?? 0)
+      })
+
+      return {
+        category,
+        unlocked: data.rawUnlocked,
+        total: data.rawTotal,
+        items,
+      }
+    })
   }, [uiAchievements])
 
   const prestigeStats = [

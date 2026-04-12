@@ -71,11 +71,6 @@ function getReductionFromLevel(level, firstGain, decay, cap) {
   return Math.min(cap, geometricGain(level, firstGain, decay))
 }
 
-function getFlatAchievementReduction(level) {
-  if (level <= 0) return 0
-  return Math.min(18, Math.floor(level + Math.max(0, level - 2) * 0.45))
-}
-
 export function getPrestigeUpgradeCost(item, level) {
   const ramp = Number(item?.costRamp ?? 1)
   const linearPenalty = 1 + level * (0.082 * ramp)
@@ -114,11 +109,11 @@ function getRawQuota(rebirths = 0) {
   return {
     shishki: Math.floor(120_000 * Math.pow(1.62, cycle)),
     knowledge: Math.floor(3_400 * Math.pow(1.95, cycle)),
-    achievements: Math.floor(52 + cycle * 3 + Math.max(0, cycle - 2) * 2),
+    achievements: Math.floor(18 + cycle * 2 + Math.max(0, cycle - 2)),
   }
 }
 
-export function getRebirthQuota(state = {}, unlockedAchievements = 0, rebirthsOverride = null) {
+export function getRebirthQuota(state = {}, _unlockedAchievements = 0, rebirthsOverride = null) {
   const rebirths = typeof rebirthsOverride === 'number' ? rebirthsOverride : Number(state?.rebirths ?? 0)
   const raw = getRawQuota(rebirths)
   const bonuses = getPrestigeBonuses(state)
@@ -128,7 +123,7 @@ export function getRebirthQuota(state = {}, unlockedAchievements = 0, rebirthsOv
     raw,
     shishki: Math.max(95_000, Math.floor(raw.shishki * (1 - bonuses.shishkiQuotaReduction))),
     knowledge: Math.max(2_400, Math.floor(raw.knowledge * (1 - bonuses.knowledgeQuotaReduction))),
-    achievements: Math.max(38, raw.achievements - bonuses.achievementQuotaReduction),
+    achievements: Math.max(14, raw.achievements - bonuses.achievementQuotaReduction),
   }
 }
 

@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import {formatNumber, formatFullNumber, isNumberAbbreviated} from "../../lib/format.js"
+import {formatNumber} from "../../lib/format.js"
 
 
 export const ContributionBar = memo(({ entry, total, index }) => {

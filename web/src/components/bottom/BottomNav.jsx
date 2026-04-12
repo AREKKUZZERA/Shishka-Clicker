@@ -4,35 +4,10 @@ import { useNav } from '../../context/NavContext.jsx'
 import { useGameContext } from '../../context/GameContext.jsx'
 import { useSound } from '../../hooks/useSound.js'
 import switchSound from '../../assets/audio/ui/wpn_select.mp3'
-import {
-  loadClickerScreen,
-  loadMetaScreen,
-  loadSettingsScreen,
-  loadShopScreen,
-} from '../wrapper/AppWrapper.jsx'
+import { isTabScreenLoaded, preloadTabScreen } from '../wrapper/AppWrapper.jsx'
 
 function getButtonClassName(isActive) {
   return `bottom-nav__btn ${isActive ? 'bottom-nav__btn--active' : ''}`
-}
-
-function preloadTabScreen(tabId) {
-  switch (tabId) {
-    case 'clicker':
-      void loadClickerScreen()
-      break
-    case 'subscriptions':
-    case 'upgrades':
-      void loadShopScreen()
-      break
-    case 'meta':
-      void loadMetaScreen()
-      break
-    case 'settings':
-      void loadSettingsScreen()
-      break
-    default:
-      break
-  }
 }
 
 export const BottomNav = observer(function BottomNav() {
@@ -40,10 +15,16 @@ export const BottomNav = observer(function BottomNav() {
   const { bottomNavAlerts } = useGameContext()
   const { play } = useSound(switchSound, { volume: 0.1 })
 
-  const handleTabChange = useCallback((tabId) => {
+  const handleTabChange = useCallback(async (tabId) => {
+    if (tabId === activeTab) return
+
+    if (!isTabScreenLoaded(tabId)) {
+      await preloadTabScreen(tabId)
+    }
+
     play()
     setActiveTab(tabId)
-  }, [play, setActiveTab])
+  }, [activeTab, play, setActiveTab])
 
   return (
     <nav className="bottom-nav" aria-label="Разделы игры">
@@ -57,23 +38,23 @@ export const BottomNav = observer(function BottomNav() {
               key={tab.id}
               type="button"
               className={getButtonClassName(isActive)}
-              onClick={() => handleTabChange(tab.id)}
-              onMouseEnter={() => preloadTabScreen(tab.id)}
-              onFocus={() => preloadTabScreen(tab.id)}
-              onTouchStart={() => preloadTabScreen(tab.id)}
+              onClick={() => void handleTabChange(tab.id)}
+              onMouseEnter={() => void preloadTabScreen(tab.id)}
+              onFocus={() => void preloadTabScreen(tab.id)}
+              onTouchStart={() => void preloadTabScreen(tab.id)}
               aria-pressed={isActive}
             >
               <span className="bottom-nav__icon">{tab.icon}</span>
               <span className="bottom-nav__label">{tab.label}</span>
-              {alert?.count > 0 && (
+              {alert?.count > 0 ? (
                 <span
                   className={`bottom-nav__alert ${alert.hasReady ? 'bottom-nav__alert--ready' : 'bottom-nav__alert--new'}`}
                   aria-hidden="true"
                 >
                   {alert.count > 9 ? '9+' : alert.count}
                 </span>
-              )}
-              {isActive && <span className="bottom-nav__pip" />}
+              ) : null}
+              {isActive ? <span className="bottom-nav__pip" /> : null}
             </button>
           )
         })}

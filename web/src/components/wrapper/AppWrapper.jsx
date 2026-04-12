@@ -1,109 +1,202 @@
-import {BottomNav} from "../bottom/BottomNav.jsx"
-import {AchievementToast} from "../ui/AchievementToast.jsx"
-import {DevConsole} from "../ui/DevConsole.jsx"
-import {StatsBar} from "../stats/StatsBar.jsx"
-import {lazy, memo, Suspense, useEffect} from "react"
-import {Header} from "../header/Header.jsx"
-import {setupDiscord} from "../../discord.js"
-import {useNav} from "../../context/NavContext.jsx"
-import {useSettingsContext} from "../../context/SettingsContext.jsx"
-import {ScreenFallback} from "./ScreenFallback.jsx"
-
+import { BottomNav } from '../bottom/BottomNav.jsx'
+import { AchievementToast } from '../ui/AchievementToast.jsx'
+import { DevConsole } from '../ui/DevConsole.jsx'
+import { StatsBar } from '../stats/StatsBar.jsx'
+import { memo, useEffect, useSyncExternalStore } from 'react'
+import { Header } from '../header/Header.jsx'
+import { setupDiscord } from '../../discord.js'
+import { useNav } from '../../context/NavContext.jsx'
+import { useSettingsContext } from '../../context/SettingsContext.jsx'
+import { ScreenFallback } from './ScreenFallback.jsx'
 
 export const loadClickerScreen = () => import('../clicker/ClickerScreen')
 export const loadShopScreen = () => import('../shop/ShopScreen')
 export const loadSettingsScreen = () => import('../settings/SettingsScreen')
 export const loadMetaScreen = () => import('../meta/MetaScreen')
 
-const ClickerScreen = lazy(() => loadClickerScreen().then((module) => ({ default: module.ClickerScreen })))
-const ShopScreen = lazy(() => loadShopScreen().then((module) => ({ default: module.ShopScreen })))
-const SettingsScreen = lazy(() => loadSettingsScreen().then((module) => ({ default: module.SettingsScreen })))
-const MetaScreen = lazy(() => loadMetaScreen().then((module) => ({ default: module.MetaScreen })))
+const screenLoaders = {
+  clicker: loadClickerScreen,
+  subscriptions: loadShopScreen,
+  upgrades: loadShopScreen,
+  meta: loadMetaScreen,
+  settings: loadSettingsScreen,
+}
 
-function renderScreen(tabId) {
-	switch (tabId) {
-		case 'clicker':
-			return <ClickerScreen />
-		case 'subscriptions':
-			return <ShopScreen type="subscriptions" />
-		case 'upgrades':
-			return <ShopScreen type="upgrades" />
-		case 'meta':
-			return <MetaScreen />
-		case 'settings':
-			return <SettingsScreen />
-		default:
-			return <ScreenFallback />
-	}
+const loadedTabs = new Set()
+const screenLoadPromises = new Map()
+const screenRegistry = new Map()
+const screenRegistryListeners = new Set()
+
+function notifyScreenRegistry() {
+  screenRegistryListeners.forEach((listener) => listener())
+}
+
+function registerLoadedScreen(tabId, component) {
+  loadedTabs.add(tabId)
+  screenRegistry.set(tabId, component)
+}
+
+function registerLoadedModule(tabId, module) {
+  if (tabId === 'clicker') {
+    registerLoadedScreen('clicker', module.ClickerScreen)
+    return
+  }
+
+  if (tabId === 'subscriptions' || tabId === 'upgrades') {
+    registerLoadedScreen('subscriptions', module.ShopScreen)
+    registerLoadedScreen('upgrades', module.ShopScreen)
+    return
+  }
+
+  if (tabId === 'meta') {
+    registerLoadedScreen('meta', module.MetaScreen)
+    return
+  }
+
+  if (tabId === 'settings') {
+    registerLoadedScreen('settings', module.SettingsScreen)
+  }
+}
+
+export function isTabScreenLoaded(tabId) {
+  return loadedTabs.has(tabId)
+}
+
+export function preloadTabScreen(tabId) {
+  const loader = screenLoaders[tabId]
+  if (!loader) return Promise.resolve(null)
+  if (loadedTabs.has(tabId)) return Promise.resolve(screenRegistry.get(tabId) ?? null)
+
+  const existingPromise = screenLoadPromises.get(tabId)
+  if (existingPromise) return existingPromise
+
+  const promise = loader()
+    .then((module) => {
+      registerLoadedModule(tabId, module)
+      notifyScreenRegistry()
+      return module
+    })
+    .finally(() => {
+      screenLoadPromises.delete(tabId)
+      if (tabId === 'subscriptions' || tabId === 'upgrades') {
+        screenLoadPromises.delete('subscriptions')
+        screenLoadPromises.delete('upgrades')
+      }
+    })
+
+  screenLoadPromises.set(tabId, promise)
+
+  if (tabId === 'subscriptions' || tabId === 'upgrades') {
+    screenLoadPromises.set('subscriptions', promise)
+    screenLoadPromises.set('upgrades', promise)
+  }
+
+  return promise
+}
+
+function subscribeToScreenRegistry(listener) {
+  screenRegistryListeners.add(listener)
+  return () => {
+    screenRegistryListeners.delete(listener)
+  }
+}
+
+function getScreenRegistrySnapshot() {
+  return screenRegistry.size
+}
+
+function renderLoadedScreen(tabId) {
+  const ScreenComponent = screenRegistry.get(tabId)
+  if (!ScreenComponent) {
+    return <ScreenFallback />
+  }
+
+  switch (tabId) {
+    case 'clicker':
+      return <ScreenComponent />
+    case 'subscriptions':
+      return <ScreenComponent type="subscriptions" />
+    case 'upgrades':
+      return <ScreenComponent type="upgrades" />
+    case 'meta':
+      return <ScreenComponent />
+    case 'settings':
+      return <ScreenComponent />
+    default:
+      return <ScreenFallback />
+  }
 }
 
 const AppBackground = memo(function AppBackground({ visualEffectToggles }) {
-	const showAmbientOrbs = visualEffectToggles.ambientEffects
-	const showNoiseOverlay = visualEffectToggles.noiseOverlay
+  const showAmbientOrbs = visualEffectToggles.ambientEffects
+  const showNoiseOverlay = visualEffectToggles.noiseOverlay
 
-	return (
-		<>
-			{showAmbientOrbs && <div className="ambient ambient--a" />}
-			{showAmbientOrbs && <div className="ambient ambient--b" />}
-			{showAmbientOrbs && <div className="ambient ambient--c" />}
-			{showNoiseOverlay && <div className="noise-overlay" />}
-		</>
-	)
+  return (
+    <>
+      {showAmbientOrbs ? <div className="ambient ambient--a" /> : null}
+      {showAmbientOrbs ? <div className="ambient ambient--b" /> : null}
+      {showAmbientOrbs ? <div className="ambient ambient--c" /> : null}
+      {showNoiseOverlay ? <div className="noise-overlay" /> : null}
+    </>
+  )
 })
 
 export const AppWrapper = memo(function AppWrapper() {
-	const { activeTab, transitionDirection } = useNav()
-	const { visualEffectToggles } = useSettingsContext()
+  const { activeTab, transitionDirection } = useNav()
+  const { visualEffectToggles } = useSettingsContext()
 
-	useEffect(() => {
-		void setupDiscord()
-	}, [])
+  useSyncExternalStore(subscribeToScreenRegistry, getScreenRegistrySnapshot, getScreenRegistrySnapshot)
 
-	useEffect(() => {
-		const preloadScreens = () => {
-			void loadClickerScreen()
-			void loadShopScreen()
-			void loadSettingsScreen()
-			void loadMetaScreen()
-		}
+  useEffect(() => {
+    void setupDiscord()
+  }, [])
 
-		if (typeof window === 'undefined') return undefined
+  useEffect(() => {
+    void preloadTabScreen('clicker')
+  }, [])
 
-		if (typeof window.requestIdleCallback === 'function') {
-			const idleId = window.requestIdleCallback(preloadScreens, { timeout: 1200 })
-			return () => window.cancelIdleCallback?.(idleId)
-		}
+  useEffect(() => {
+    const preloadScreens = () => {
+      void preloadTabScreen('subscriptions')
+      void preloadTabScreen('settings')
+      void preloadTabScreen('meta')
+    }
 
-		const timeoutId = window.setTimeout(preloadScreens, 250)
-		return () => window.clearTimeout(timeoutId)
-	}, [])
+    if (typeof window === 'undefined') return undefined
 
-	return (
-		<div className="app-shell">
-			<AppBackground visualEffectToggles={visualEffectToggles} />
+    if (typeof window.requestIdleCallback === 'function') {
+      const idleId = window.requestIdleCallback(preloadScreens, { timeout: 1200 })
+      return () => window.cancelIdleCallback?.(idleId)
+    }
 
-			<div className="app-content">
-				<Header />
-				<main className="app-main">
-					<StatsBar className="stats-bar--shop" />
-					<div className="screen-bg">
-						<div className="screen__glow" />
-						<div
-							key={activeTab}
-							className={`screen-stage ${visualEffectToggles.revealAnimations ? 'screen-stage--animate' : ''}`}
-							data-direction={transitionDirection}
-						>
-							<Suspense fallback={<ScreenFallback />}>
-								{renderScreen(activeTab)}
-							</Suspense>
-						</div>
-					</div>
-				</main>
-			</div>
+    const timeoutId = window.setTimeout(preloadScreens, 250)
+    return () => window.clearTimeout(timeoutId)
+  }, [])
 
-			<AchievementToast />
-			<DevConsole />
-			<BottomNav />
-		</div>
-	)
+  return (
+    <div className="app-shell">
+      <AppBackground visualEffectToggles={visualEffectToggles} />
+
+      <div className="app-content">
+        <Header />
+        <main className="app-main">
+          <StatsBar className="stats-bar--shop" />
+          <div className="screen-bg">
+            <div className="screen__glow" />
+            <div
+              key={activeTab}
+              className={`screen-stage ${visualEffectToggles.revealAnimations ? 'screen-stage--animate' : ''}`}
+              data-direction={transitionDirection}
+            >
+              {renderLoadedScreen(activeTab)}
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <AchievementToast />
+      <DevConsole />
+      <BottomNav />
+    </div>
+  )
 })

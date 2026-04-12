@@ -1,4 +1,3 @@
-import { memo } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useGameContext } from '../../context/GameContext'
 import { StatCard } from './StatCard'

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { memo, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useGameContext } from '../../context/GameContext'
 import { ShopCard } from './ShopCard'
@@ -80,15 +80,47 @@ function groupItemsByCategory(items, type, categories) {
     .filter((category) => category.items.length > 0)
 }
 
-function renderCategorySections({ groupedItems, onBuy, onInspect }) {
-  return groupedItems.map((category) => {
-    return (
-      <section key={category.id} className="shop-category">
-        <div className="shop-category__head">
-          <h4 className="shop-category__title">{category.title}</h4>
-          <p className="shop-category__desc">{category.desc}</p>
-        </div>
+const ShopCategory = memo(function ShopCategory({
+  category,
+  onBuy,
+  onInspect,
+  eagerlyRender = false,
+  isLockedGroup = false,
+}) {
+  const sectionRef = useRef(null)
+  const [hasRendered, setHasRendered] = useState(eagerlyRender)
 
+  useEffect(() => {
+    if (hasRendered || typeof window === 'undefined') return
+
+    const node = sectionRef.current
+    if (!node) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return
+        setHasRendered(true)
+        observer.disconnect()
+      },
+      { rootMargin: '280px 0px' }
+    )
+
+    observer.observe(node)
+    return () => observer.disconnect()
+  }, [hasRendered])
+
+  return (
+    <section
+      ref={sectionRef}
+      className={`shop-category ${isLockedGroup ? 'shop-category--virtualized-locked' : 'shop-category--virtualized'}`}
+      style={{ '--shop-placeholder-count': Math.min(Math.max(category.items.length, 1), 4) }}
+    >
+      <div className="shop-category__head">
+        <h4 className="shop-category__title">{category.title}</h4>
+        <p className="shop-category__desc">{category.desc}</p>
+      </div>
+
+      {hasRendered ? (
         <div className="shop-grid shop-grid--category">
           {category.items.map((item) => (
             <ShopCard
@@ -102,9 +134,48 @@ function renderCategorySections({ groupedItems, onBuy, onInspect }) {
             />
           ))}
         </div>
-      </section>
-    )
-  })
+      ) : (
+        <div className="shop-grid shop-grid--category shop-grid--deferred" aria-hidden="true">
+          <div className="shop-grid__placeholder">Категория будет отрисована при прокрутке.</div>
+        </div>
+      )}
+    </section>
+  )
+})
+
+function ShopCategoryList({ groupedItems, onBuy, onInspect, isLockedGroup = false }) {
+  return (
+    <div className={`shop-categories${isLockedGroup ? ' shop-categories--locked' : ''}`}>
+      {groupedItems.map((category, index) => (
+        <ShopCategory
+          key={category.id}
+          category={category}
+          onBuy={onBuy}
+          onInspect={onInspect}
+          eagerlyRender={index < 2}
+          isLockedGroup={isLockedGroup}
+        />
+      ))}
+    </div>
+  )
+}
+
+function ShopCardGrid({ items, onBuy, onInspect, locked = false }) {
+  return (
+    <div className={`shop-grid${locked ? ' shop-grid--locked' : ''}`}>
+      {items.map((item) => (
+        <ShopCard
+          key={item.id}
+          itemId={item.id}
+          item={item}
+          canBuy={item.canBuy}
+          balance={item.balance}
+          onBuy={onBuy}
+          onInspect={onInspect}
+        />
+      ))}
+    </div>
+  )
 }
 
 export const ShopScreen = observer(function ShopScreen({ type }) {
@@ -113,11 +184,20 @@ export const ShopScreen = observer(function ShopScreen({ type }) {
   const hasItemCategories = type === 'upgrades'
 
   const items = type === 'subscriptions' ? uiEconomy.subscriptions : uiEconomy.upgrades
+  const deferredItems = useDeferredValue(items)
   const onBuy = type === 'subscriptions' ? buySubscription : buyUpgrade
-  const unlockedItems = items.filter((item) => item.unlocked)
-  const lockedItems = items.filter((item) => !item.unlocked)
-  const unlockedByCategory = hasItemCategories ? groupItemsByCategory(unlockedItems, type, meta.categories) : []
-  const lockedByCategory = hasItemCategories ? groupItemsByCategory(lockedItems, type, meta.categories) : []
+
+  const { unlockedItems, lockedItems, unlockedByCategory, lockedByCategory } = useMemo(() => {
+    const unlocked = deferredItems.filter((item) => item.unlocked)
+    const locked = deferredItems.filter((item) => !item.unlocked)
+
+    return {
+      unlockedItems: unlocked,
+      lockedItems: locked,
+      unlockedByCategory: hasItemCategories ? groupItemsByCategory(unlocked, type, meta.categories) : [],
+      lockedByCategory: hasItemCategories ? groupItemsByCategory(locked, type, meta.categories) : [],
+    }
+  }, [deferredItems, hasItemCategories, meta.categories, type])
 
   useEffect(() => {
     const idsToMark = items
@@ -137,45 +217,31 @@ export const ShopScreen = observer(function ShopScreen({ type }) {
         <p className="screen__desc">{meta.desc}</p>
       </div>
 
-      {items.length === 0 && <div className="shop-empty">{meta.emptyText}</div>}
+      {items.length === 0 ? <div className="shop-empty">{meta.emptyText}</div> : null}
 
-      {unlockedItems.length > 0 && (
+      {unlockedItems.length > 0 ? (
         <section className="shop-group shop-group--active">
-          {lockedItems.length > 0 && (
+          {lockedItems.length > 0 ? (
             <div className="shop-group__head">
               <span className="shop-group__eyebrow">Доступно сейчас</span>
               <h3 className="shop-group__title">Разблокированные</h3>
               <p className="shop-group__desc">Выбирай с умом, выстраивай свою стратегию и просчитывай следующий шаг.</p>
             </div>
-          )}
+          ) : null}
 
           {hasItemCategories ? (
-            <div className="shop-categories">
-              {renderCategorySections({
-                groupedItems: unlockedByCategory,
-                onBuy,
-                onInspect: markShopItemSeen,
-              })}
-            </div>
+            <ShopCategoryList
+              groupedItems={unlockedByCategory}
+              onBuy={onBuy}
+              onInspect={markShopItemSeen}
+            />
           ) : (
-            <div className="shop-grid">
-              {unlockedItems.map((item, index) => (
-                <ShopCard
-                  key={item.id}
-                  itemId={item.id}
-                  item={item}
-                  canBuy={item.canBuy}
-                  balance={item.balance}
-                  onBuy={onBuy}
-                  onInspect={markShopItemSeen}
-                />
-              ))}
-            </div>
+            <ShopCardGrid items={unlockedItems} onBuy={onBuy} onInspect={markShopItemSeen} />
           )}
         </section>
-      )}
+      ) : null}
 
-      {lockedItems.length > 0 && (
+      {lockedItems.length > 0 ? (
         <section className="shop-group shop-group--locked">
           <div className="shop-group__head">
             <span className="shop-group__eyebrow">Следующие цели</span>
@@ -184,30 +250,17 @@ export const ShopScreen = observer(function ShopScreen({ type }) {
           </div>
 
           {hasItemCategories ? (
-            <div className="shop-categories shop-categories--locked">
-              {renderCategorySections({
-                groupedItems: lockedByCategory,
-                onBuy,
-                onInspect: markShopItemSeen,
-              })}
-            </div>
+            <ShopCategoryList
+              groupedItems={lockedByCategory}
+              onBuy={onBuy}
+              onInspect={markShopItemSeen}
+              isLockedGroup
+            />
           ) : (
-            <div className="shop-grid shop-grid--locked">
-              {lockedItems.map((item, index) => (
-                <ShopCard
-                  key={item.id}
-                  itemId={item.id}
-                  item={item}
-                  canBuy={item.canBuy}
-                  balance={item.balance}
-                  onBuy={onBuy}
-                  onInspect={markShopItemSeen}
-                />
-              ))}
-            </div>
+            <ShopCardGrid items={lockedItems} onBuy={onBuy} onInspect={markShopItemSeen} locked />
           )}
         </section>
-      )}
+      ) : null}
     </section>
   )
 })

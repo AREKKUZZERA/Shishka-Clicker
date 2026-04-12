@@ -1,5 +1,5 @@
 import { memo, useEffect, useMemo, useRef } from 'react'
-import { formatNumber, formatFullNumber, isNumberAbbreviated } from '../../lib/format'
+import { formatNumber } from '../../lib/format'
 import { ContributionBar } from './ContributionBar.jsx'
 import { ConeIcon } from '../ui/ConeIcon'
 import { MoneyIcon, KnowledgeIcon, PowerIcon, RobotIcon, PrizeIcon } from '../ui/GameIcon'
@@ -67,7 +67,6 @@ export const StatCard = memo(function StatCard({
   const total = items.reduce((sum, entry) => sum + entry.value, 0) ?? 0
   const topContributors = compact ? items.slice(0, 3) : []
   const displayValue = formatValue ? formatNumber(value) : value
-  const fullValue = typeof value === 'number' ? formatFullNumber(value) : undefined
   const cardClassName = ['stat-card', compact ? 'stat-card--compact' : '', className].filter(Boolean).join(' ')
   const valueClasses = ['stat-card__value', valueClassName].filter(Boolean).join(' ')
   const hintClasses = ['stat-card__hint', hintClassName].filter(Boolean).join(' ')
