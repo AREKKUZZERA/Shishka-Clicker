@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef } from 'react'
 import { formatNumber, formatFullNumber, isNumberAbbreviated } from '../../lib/format'
 import { useSound } from '../../hooks/useSound'
 import buySound from '../../assets/audio/ui/blip1.mp3'
@@ -130,31 +130,24 @@ function areShopCardPropsEqual(previousProps, nextProps) {
   return previousProps.itemId === nextProps.itemId
     && previousProps.canBuy === nextProps.canBuy
     && previousProps.balance === nextProps.balance
-    && previousProps.delay === nextProps.delay
     && previousProps.onBuy === nextProps.onBuy
     && previousProps.onInspect === nextProps.onInspect
     && areShopItemsEqual(previousProps.item, nextProps.item)
 }
 
-export const ShopCard = memo(function ShopCard({ itemId, item, canBuy, balance = 0, onBuy, onInspect, delay = 0 }) {
+export const ShopCard = memo(function ShopCard({ itemId, item, canBuy, balance = 0, onBuy, onInspect }) {
   const isLocked = !item.unlocked
   const showDetails = !isLocked
   const currency = CURRENCY_META[item.currency] ?? { icon: '✨', label: 'ресурс' }
   const itemEmoji = ITEM_EMOJI[item.id] ?? '✨'
   const { play: playBuySound } = useSound(buySound, { volume: 0.2 })
   const { play: playDenySound } = useSound(denySound, { volume: 0.26 })
-  const [isEntering, setIsEntering] = useState(true)
   const cardRef = useRef(null)
   const buyButtonRef = useRef(null)
   const buyButtonLabelRef = useRef(null)
   const deniedCardAnimationRef = useRef(null)
   const deniedButtonAnimationRef = useRef(null)
   const deniedButtonLabelAnimationRef = useRef(null)
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => setIsEntering(false), delay * 50 + 600)
-    return () => clearTimeout(timeoutId)
-  }, [delay])
 
   useEffect(() => () => {
     deniedCardAnimationRef.current?.cancel()
@@ -263,7 +256,6 @@ export const ShopCard = memo(function ShopCard({ itemId, item, canBuy, balance =
       data-new={item.isNew ? 'true' : 'false'}
       onMouseEnter={handleInspect}
       onFocus={handleInspect}
-      style={isEntering ? { animationDelay: `${delay * 50}ms` } : undefined}
     >
       <div className="shop-card__glow" />
       <div className="shop-card__shine" />

@@ -10,10 +10,32 @@ import {useSettingsContext} from "../../context/SettingsContext.jsx"
 import {ScreenFallback} from "./ScreenFallback.jsx"
 
 
-const ClickerScreen = lazy(() => import('../clicker/ClickerScreen').then((module) => ({ default: module.ClickerScreen })))
-const ShopScreen = lazy(() => import('../shop/ShopScreen').then((module) => ({ default: module.ShopScreen })))
-const SettingsScreen = lazy(() => import('../settings/SettingsScreen').then((module) => ({ default: module.SettingsScreen })))
-const MetaScreen = lazy(() => import('../meta/MetaScreen').then((module) => ({ default: module.MetaScreen })))
+export const loadClickerScreen = () => import('../clicker/ClickerScreen')
+export const loadShopScreen = () => import('../shop/ShopScreen')
+export const loadSettingsScreen = () => import('../settings/SettingsScreen')
+export const loadMetaScreen = () => import('../meta/MetaScreen')
+
+const ClickerScreen = lazy(() => loadClickerScreen().then((module) => ({ default: module.ClickerScreen })))
+const ShopScreen = lazy(() => loadShopScreen().then((module) => ({ default: module.ShopScreen })))
+const SettingsScreen = lazy(() => loadSettingsScreen().then((module) => ({ default: module.SettingsScreen })))
+const MetaScreen = lazy(() => loadMetaScreen().then((module) => ({ default: module.MetaScreen })))
+
+function renderScreen(tabId) {
+	switch (tabId) {
+		case 'clicker':
+			return <ClickerScreen />
+		case 'subscriptions':
+			return <ShopScreen type="subscriptions" />
+		case 'upgrades':
+			return <ShopScreen type="upgrades" />
+		case 'meta':
+			return <MetaScreen />
+		case 'settings':
+			return <SettingsScreen />
+		default:
+			return <ScreenFallback />
+	}
+}
 
 const AppBackground = memo(function AppBackground({ visualEffectToggles }) {
 	const showAmbientOrbs = visualEffectToggles.ambientEffects
@@ -30,11 +52,30 @@ const AppBackground = memo(function AppBackground({ visualEffectToggles }) {
 })
 
 export const AppWrapper = memo(function AppWrapper() {
-	const { activeTab } = useNav()
+	const { activeTab, transitionDirection } = useNav()
 	const { visualEffectToggles } = useSettingsContext()
 
 	useEffect(() => {
 		void setupDiscord()
+	}, [])
+
+	useEffect(() => {
+		const preloadScreens = () => {
+			void loadClickerScreen()
+			void loadShopScreen()
+			void loadSettingsScreen()
+			void loadMetaScreen()
+		}
+
+		if (typeof window === 'undefined') return undefined
+
+		if (typeof window.requestIdleCallback === 'function') {
+			const idleId = window.requestIdleCallback(preloadScreens, { timeout: 1200 })
+			return () => window.cancelIdleCallback?.(idleId)
+		}
+
+		const timeoutId = window.setTimeout(preloadScreens, 250)
+		return () => window.clearTimeout(timeoutId)
 	}, [])
 
 	return (
@@ -47,13 +88,15 @@ export const AppWrapper = memo(function AppWrapper() {
 					<StatsBar className="stats-bar--shop" />
 					<div className="screen-bg">
 						<div className="screen__glow" />
-						<Suspense fallback={<ScreenFallback />}>
-							{activeTab === 'clicker' && <ClickerScreen />}
-							{activeTab === 'subscriptions' && <ShopScreen type="subscriptions" />}
-							{activeTab === 'upgrades' && <ShopScreen type="upgrades" />}
-							{activeTab === 'meta' && <MetaScreen />}
-							{activeTab === 'settings' && <SettingsScreen />}
-						</Suspense>
+						<div
+							key={activeTab}
+							className={`screen-stage ${visualEffectToggles.revealAnimations ? 'screen-stage--animate' : ''}`}
+							data-direction={transitionDirection}
+						>
+							<Suspense fallback={<ScreenFallback />}>
+								{renderScreen(activeTab)}
+							</Suspense>
+						</div>
 					</div>
 				</main>
 			</div>

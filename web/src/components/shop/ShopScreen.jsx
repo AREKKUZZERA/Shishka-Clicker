@@ -80,11 +80,9 @@ function groupItemsByCategory(items, type, categories) {
     .filter((category) => category.items.length > 0)
 }
 
-function renderCategorySections({ groupedItems, onBuy, onInspect, delayOffset = 0 }) {
-  let currentOffset = delayOffset
-
+function renderCategorySections({ groupedItems, onBuy, onInspect }) {
   return groupedItems.map((category) => {
-    const content = (
+    return (
       <section key={category.id} className="shop-category">
         <div className="shop-category__head">
           <h4 className="shop-category__title">{category.title}</h4>
@@ -92,7 +90,7 @@ function renderCategorySections({ groupedItems, onBuy, onInspect, delayOffset = 
         </div>
 
         <div className="shop-grid shop-grid--category">
-          {category.items.map((item, index) => (
+          {category.items.map((item) => (
             <ShopCard
               key={item.id}
               itemId={item.id}
@@ -101,15 +99,11 @@ function renderCategorySections({ groupedItems, onBuy, onInspect, delayOffset = 
               balance={item.balance}
               onBuy={onBuy}
               onInspect={onInspect}
-              delay={currentOffset + index}
             />
           ))}
         </div>
       </section>
     )
-
-    currentOffset += category.items.length
-    return content
   })
 }
 
@@ -161,7 +155,6 @@ export const ShopScreen = observer(function ShopScreen({ type }) {
                 groupedItems: unlockedByCategory,
                 onBuy,
                 onInspect: markShopItemSeen,
-                delayOffset: 0,
               })}
             </div>
           ) : (
@@ -175,7 +168,6 @@ export const ShopScreen = observer(function ShopScreen({ type }) {
                   balance={item.balance}
                   onBuy={onBuy}
                   onInspect={markShopItemSeen}
-                  delay={index}
                 />
               ))}
             </div>
@@ -197,7 +189,6 @@ export const ShopScreen = observer(function ShopScreen({ type }) {
                 groupedItems: lockedByCategory,
                 onBuy,
                 onInspect: markShopItemSeen,
-                delayOffset: unlockedItems.length,
               })}
             </div>
           ) : (
@@ -211,7 +202,6 @@ export const ShopScreen = observer(function ShopScreen({ type }) {
                   balance={item.balance}
                   onBuy={onBuy}
                   onInspect={markShopItemSeen}
-                  delay={unlockedItems.length + index}
                 />
               ))}
             </div>

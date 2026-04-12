@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useMemo, useState } from 'react'
 import { ConeIcon } from '../components/ui/ConeIcon'
 import { PrizeIcon } from '../components/ui/GameIcon'
 
@@ -39,11 +39,22 @@ const NavContext = createContext(null)
 
 export function NavProvider({ children }) {
   const [activeTab, setActiveTab] = useState('clicker')
+  const [transitionDirection, setTransitionDirection] = useState('forward')
   const currentTab = TABS.find((t) => t.id === activeTab) ?? TABS[0]
+  const setActiveTabWithDirection = useCallback((nextTab) => {
+    setActiveTab((currentTabId) => {
+      if (currentTabId === nextTab) return currentTabId
+
+      const currentIndex = TABS.findIndex((tab) => tab.id === currentTabId)
+      const nextIndex = TABS.findIndex((tab) => tab.id === nextTab)
+      setTransitionDirection(nextIndex >= currentIndex ? 'forward' : 'backward')
+      return nextTab
+    })
+  }, [])
 
   const value = useMemo(
-    () => ({ activeTab, setActiveTab, currentTab, tabs: TABS }),
-    [activeTab, currentTab],
+    () => ({ activeTab, setActiveTab: setActiveTabWithDirection, currentTab, tabs: TABS, transitionDirection }),
+    [activeTab, currentTab, setActiveTabWithDirection, transitionDirection],
   )
 
   return (

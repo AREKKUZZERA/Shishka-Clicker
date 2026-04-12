@@ -4,9 +4,35 @@ import { useNav } from '../../context/NavContext.jsx'
 import { useGameContext } from '../../context/GameContext.jsx'
 import { useSound } from '../../hooks/useSound.js'
 import switchSound from '../../assets/audio/ui/wpn_select.mp3'
+import {
+  loadClickerScreen,
+  loadMetaScreen,
+  loadSettingsScreen,
+  loadShopScreen,
+} from '../wrapper/AppWrapper.jsx'
 
 function getButtonClassName(isActive) {
   return `bottom-nav__btn ${isActive ? 'bottom-nav__btn--active' : ''}`
+}
+
+function preloadTabScreen(tabId) {
+  switch (tabId) {
+    case 'clicker':
+      void loadClickerScreen()
+      break
+    case 'subscriptions':
+    case 'upgrades':
+      void loadShopScreen()
+      break
+    case 'meta':
+      void loadMetaScreen()
+      break
+    case 'settings':
+      void loadSettingsScreen()
+      break
+    default:
+      break
+  }
 }
 
 export const BottomNav = observer(function BottomNav() {
@@ -32,6 +58,9 @@ export const BottomNav = observer(function BottomNav() {
               type="button"
               className={getButtonClassName(isActive)}
               onClick={() => handleTabChange(tab.id)}
+              onMouseEnter={() => preloadTabScreen(tab.id)}
+              onFocus={() => preloadTabScreen(tab.id)}
+              onTouchStart={() => preloadTabScreen(tab.id)}
               aria-pressed={isActive}
             >
               <span className="bottom-nav__icon">{tab.icon}</span>
