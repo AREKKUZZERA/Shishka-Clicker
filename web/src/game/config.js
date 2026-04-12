@@ -668,7 +668,7 @@ const specialAchievements = [
   },
   {
     id: 'reborn',
-    title: 'Перерождение',
+    title: 'Ребёрс',
     description: 'Выполни первый ребёрс.',
     check: (state) => state.rebirths >= 1,
     category: 'Престиж',
@@ -779,7 +779,7 @@ const levelAchievements = [
     idPrefix: 'rebirths',
     titlePrefix: 'Колесо сансары',
     descriptionPrefix: 'Сделай',
-    suffix: 'перерождений.',
+    suffix: 'ребёрсов.',
     milestones: [1, 2, 3, 5, 8, 12, 20, 35, 50],
     valueGetter: (state) => state.rebirths ?? 0,
     icon: '♻️',

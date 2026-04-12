@@ -30,7 +30,7 @@ export const PRESTIGE_UPGRADES = [
   },
   {
     id: 'rebirthCore',
-    title: 'Ядро перерождения',
+    title: 'Ядро ребёрсов',
     description: 'Даёт постоянный множитель ко всей экономике поверх обычного престижа.',
     baseCost: 3,
     costScale: 2.62,
