@@ -1,1 +1,8 @@
-{}
+{"dependencies":{"@supabase/supabase-js":"^2.103.0"}}
+{
+  "name": "shishka-clicker-root",
+  "private": true,
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.0"
+  }
+}
