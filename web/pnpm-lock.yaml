@@ -14,9 +14,6 @@ importers:
       mobx:
         specifier: ^6.15.0
         version: 6.15.0
-      mobx-react:
-        specifier: ^9.2.1
-        version: 9.2.1(mobx@6.15.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       mobx-react-lite:
         specifier: ^4.1.1
         version: 4.1.1(mobx@6.15.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
@@ -851,19 +848,6 @@ packages:
 
   mobx-react-lite@4.1.1:
     resolution: {integrity: sha512-iUxiMpsvNraCKXU+yPotsOncNNmyeS2B5DKL+TL6Tar/xm+wwNJAubJmtRSeAoYawdZqwv8Z/+5nPRHeQxTiXg==}
-    peerDependencies:
-      mobx: ^6.9.0
-      react: ^16.8.0 || ^17 || ^18 || ^19
-      react-dom: '*'
-      react-native: '*'
-    peerDependenciesMeta:
-      react-dom:
-        optional: true
-      react-native:
-        optional: true
-
-  mobx-react@9.2.1:
-    resolution: {integrity: sha512-WJNNm0FB2n0Z0u+jS1QHmmWyV8l2WiAj8V8I/96kbUEN2YbYCoKW+hbbqKKRUBqElu0llxM7nWKehvRIkhBVJw==}
     peerDependencies:
       mobx: ^6.9.0
       react: ^16.8.0 || ^17 || ^18 || ^19
@@ -1830,14 +1814,6 @@ snapshots:
       mobx: 6.15.0
       react: 19.2.5
       use-sync-external-store: 1.6.0(react@19.2.5)
-    optionalDependencies:
-      react-dom: 19.2.5(react@19.2.5)
-
-  mobx-react@9.2.1(mobx@6.15.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5):
-    dependencies:
-      mobx: 6.15.0
-      mobx-react-lite: 4.1.1(mobx@6.15.0)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
-      react: 19.2.5
     optionalDependencies:
       react-dom: 19.2.5(react@19.2.5)
 
