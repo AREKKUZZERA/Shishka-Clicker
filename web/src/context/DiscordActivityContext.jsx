@@ -18,10 +18,57 @@ import { buildDiscordPlayerId } from '../lib/playerId.js'
 
 const DiscordActivityContext = createContext(null)
 const AUTO_SYNC_INTERVAL_MS = 15000
+const PROGRESS_SCORE_EPSILON = 20
 
 function getTimeValue(value) {
   const time = Date.parse(value ?? '')
   return Number.isFinite(time) ? time : 0
+}
+
+function sumLevels(map) {
+  if (!map || typeof map !== 'object') return 0
+
+  return Object.values(map).reduce((total, value) => {
+    const nextValue = Number(value)
+    return total + (Number.isFinite(nextValue) ? nextValue : 0)
+  }, 0)
+}
+
+function countUnlockedAchievements(achievements) {
+  if (!achievements || typeof achievements !== 'object') return 0
+
+  return Object.values(achievements).reduce((total, value) => total + (value ? 1 : 0), 0)
+}
+
+function getProgressScore(gameState) {
+  if (!gameState || typeof gameState !== 'object') {
+    return 0
+  }
+
+  return (
+    Math.log10(1 + Math.max(0, Number(gameState.lifetimeShishkiEarned ?? gameState.totalShishkiEarned ?? 0))) * 120 +
+    Math.log10(1 + Math.max(0, Number(gameState.lifetimeMoneyEarned ?? gameState.totalMoneyEarned ?? 0))) * 80 +
+    Math.log10(1 + Math.max(0, Number(gameState.lifetimeKnowledgeEarned ?? gameState.totalKnowledgeEarned ?? 0))) * 95 +
+    Math.log10(1 + Math.max(0, Number(gameState.totalPrestigeShardsEarned ?? gameState.prestigeShards ?? 0))) * 220 +
+    Math.max(0, Number(gameState.rebirths ?? 0)) * 180 +
+    Math.max(0, Number(gameState.megaClicks ?? 0)) * 0.4 +
+    Math.max(0, Number(gameState.manualClicks ?? 0)) * 0.02 +
+    sumLevels(gameState.subscriptions) * 8 +
+    sumLevels(gameState.upgrades) * 5 +
+    sumLevels(gameState.prestigeUpgrades) * 30 +
+    countUnlockedAchievements(gameState.achievements) * 18
+  )
+}
+
+function getGameStateFromCloudSave(cloudSave) {
+  if (!cloudSave?.save) return null
+
+  try {
+    return normalizeImportedBundle(cloudSave.save).game
+  } catch (error) {
+    console.warn('Failed to extract cloud save payload:', error)
+    return null
+  }
 }
 
 export function DiscordActivityProvider({ children }) {
@@ -136,14 +183,19 @@ export function DiscordActivityProvider({ children }) {
       return uploaded
     }
 
+    const remoteGameState = getGameStateFromCloudSave(cloudSave)
     const remoteUpdatedAtValue = getTimeValue(cloudSave.updatedAt)
     const lastSeenRemoteValue = getTimeValue(lastSeenRemoteUpdatedAtRef.current)
+    const localProgressScore = getProgressScore(localRecord.state)
+    const remoteProgressScore = getProgressScore(remoteGameState)
+    const remoteProgressAhead = remoteProgressScore > localProgressScore + PROGRESS_SCORE_EPSILON
+    const localProgressAhead = localProgressScore > remoteProgressScore + PROGRESS_SCORE_EPSILON
 
-    if (forceDownload || remoteUpdatedAtValue > localUpdatedAtValue) {
+    if (forceDownload || remoteProgressAhead || remoteUpdatedAtValue > localUpdatedAtValue) {
       return applyRemoteSave(cloudSave)
     }
 
-    if (forceUpload || localUpdatedAtValue > remoteUpdatedAtValue) {
+    if ((forceUpload && !remoteProgressAhead) || localProgressAhead || localUpdatedAtValue > remoteUpdatedAtValue) {
       const uploaded = await uploadLatestSave({
         force: true,
         playerIdOverride: playerId,
@@ -243,7 +295,7 @@ export function DiscordActivityProvider({ children }) {
   const manualSync = useCallback(async () => {
     try {
       await synchronizeNow({
-        forceUpload: true,
+        forceUpload: false,
       })
       return true
     } catch (error) {
