@@ -17,7 +17,7 @@ import { loadGameRecord } from '../lib/storage.js'
 import { buildDiscordPlayerId } from '../lib/playerId.js'
 
 const DiscordActivityContext = createContext(null)
-const AUTO_SYNC_INTERVAL_MS = 15000
+const AUTO_SYNC_INTERVAL_MS = 5000
 const EMPTY_PROGRESS_SCORE_THRESHOLD = 25
 
 function sumLevels(map) {
@@ -214,6 +214,37 @@ export function DiscordActivityProvider({ children }) {
     return true
   }, [exportSettings, markSynced, setSyncState, state.playerId, stores.gameStore])
 
+  const flushLatestSaveOnExit = useCallback(({ playerIdOverride = null } = {}) => {
+    const playerId = playerIdOverride ?? state.playerId
+    if (!playerId) return
+
+    const localRecord = loadGameRecord()
+    const localUpdatedAt = localRecord.updatedAt
+
+    if (!localUpdatedAt || syncedLocalUpdatedAtRef.current === localUpdatedAt) {
+      return
+    }
+
+    const save = createSaveBundle({
+      gameState: stores.gameStore.exportGameSave(),
+      settings: exportSettings(),
+      appVersion: APP_VERSION,
+    })
+
+    void uploadCloudSave({
+      playerId,
+      appVersion: APP_VERSION,
+      save,
+      expectedVersion: remoteVersionRef.current,
+      force: true,
+    }).then((result) => {
+      syncedLocalUpdatedAtRef.current = localUpdatedAt
+      remoteVersionRef.current = result?.saveVersion ?? remoteVersionRef.current
+    }).catch((error) => {
+      console.warn('Failed to flush save on exit:', error)
+    })
+  }, [exportSettings, state.playerId, stores.gameStore])
+
   const synchronizeNow = useCallback(async ({ forceDownload = false, playerIdOverride = null } = {}) => {
     const playerId = playerIdOverride ?? state.playerId
     if (!playerId) return false
@@ -400,6 +431,28 @@ export function DiscordActivityProvider({ children }) {
       window.clearInterval(intervalId)
     }
   }, [state.playerId, synchronizeNow])
+
+  useEffect(() => {
+    if (!state.playerId) return undefined
+
+    const handlePageHide = () => {
+      flushLatestSaveOnExit()
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        flushLatestSaveOnExit()
+      }
+    }
+
+    window.addEventListener('pagehide', handlePageHide)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('pagehide', handlePageHide)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [flushLatestSaveOnExit, state.playerId])
 
   const manualSync = useCallback(async () => {
     try {
