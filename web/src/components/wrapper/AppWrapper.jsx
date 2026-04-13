@@ -4,7 +4,6 @@ import { DevConsole } from '../ui/DevConsole.jsx'
 import { StatsBar } from '../stats/StatsBar.jsx'
 import { memo, useEffect, useSyncExternalStore } from 'react'
 import { Header } from '../header/Header.jsx'
-import { setupDiscord } from '../../discord.js'
 import { useNav } from '../../context/NavContext.jsx'
 import { useSettingsContext } from '../../context/SettingsContext.jsx'
 import { ScreenFallback } from './ScreenFallback.jsx'
@@ -146,10 +145,6 @@ export const AppWrapper = memo(function AppWrapper() {
   const { visualEffectToggles } = useSettingsContext()
 
   useSyncExternalStore(subscribeToScreenRegistry, getScreenRegistrySnapshot, getScreenRegistrySnapshot)
-
-  useEffect(() => {
-    void setupDiscord()
-  }, [])
 
   useEffect(() => {
     void preloadTabScreen('clicker')

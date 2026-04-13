@@ -9,6 +9,7 @@ export async function uploadCloudSave({ playerId, appVersion, save }) {
       appVersion,
       save,
     }),
+    keepalive: true,
   })
 
   if (!response.ok) {

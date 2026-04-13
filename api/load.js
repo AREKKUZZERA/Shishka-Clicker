@@ -41,6 +41,8 @@ export default async function handler(req, res) {
       .from('player_saves')
       .select('save_data, updated_at, app_version')
       .eq('player_id', String(playerId))
+      .order('updated_at', { ascending: false })
+      .limit(1)
       .maybeSingle()
 
     if (error) {

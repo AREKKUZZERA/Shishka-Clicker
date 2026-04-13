@@ -12,6 +12,7 @@ import { SettingsSaveCard } from './SettingsSaveCard.jsx'
 import { SettingsAudio } from './SettingsAudio.jsx'
 import { SettingsEffects } from './SettingsEffects.jsx'
 import { SettingsAbout } from './SettingsAbout.jsx'
+import { SettingsDiscordCard } from './SettingsDiscordCard.jsx'
 
 export const SettingsScreen = observer(function SettingsScreen() {
   const { resetGame, exportGameSave, importGameSave } = useGameContext()
@@ -166,6 +167,8 @@ export const SettingsScreen = observer(function SettingsScreen() {
             exportedSaveText={exportedSaveText}
             exportTextRef={exportTextRef}
           />
+
+          <SettingsDiscordCard />
         </div>
 
         <SettingsAbout resetGame={resetGame} />
