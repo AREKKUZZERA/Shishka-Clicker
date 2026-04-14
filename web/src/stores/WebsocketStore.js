@@ -41,9 +41,7 @@ export default class WebsocketStore {
   log = (message) => console.log(`WebSocket | ${message}`)
 
   connectWithServer() {
-    socket.emit("init", {
-      username: this.username
-    })
+    this.emit("init", {})
   }
 
   init() {
