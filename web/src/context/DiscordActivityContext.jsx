@@ -468,7 +468,15 @@ export function DiscordActivityProvider({ children }) {
     if (!state.playerId || !state.saveReady || state.offlineMode) return undefined
 
     const intervalId = window.setInterval(() => {
-      void synchronizeNow()
+      void synchronizeNow().catch((error) => {
+        if (offlineModeRef.current) return
+
+        setState((current) => ({
+          ...current,
+          syncState: 'error',
+          syncError: error instanceof Error ? error.message : 'background_sync_failed',
+        }))
+      })
     }, AUTO_SYNC_INTERVAL_MS)
 
     return () => {

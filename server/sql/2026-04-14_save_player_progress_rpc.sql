@@ -63,13 +63,13 @@ begin
     return;
   end if;
 
-  update public.player_saves
+  update public.player_saves as player_saves
   set app_version = p_app_version,
       save_data = p_save_data,
       save_version = p_expected_version + 1,
       updated_at = now()
-  where player_id = p_player_id
-    and coalesce(save_version, 0) = p_expected_version
+  where player_saves.player_id = p_player_id
+    and coalesce(player_saves.save_version, 0) = p_expected_version
   returning * into v_row;
 
   if found then
@@ -117,8 +117,8 @@ begin
 
   select *
   into v_row
-  from public.player_saves
-  where player_id = p_player_id;
+  from public.player_saves as player_saves
+  where player_saves.player_id = p_player_id;
 
   return query
   select
