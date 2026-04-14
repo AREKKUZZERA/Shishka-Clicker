@@ -21,7 +21,7 @@ export default class WebsocketStore {
 	}
 
 	sendDataToServer() {
-		const name = "user" // this.user?.global_name || this.user?.username // для теста сделал user
+		const name = this.user?.global_name || this.user?.username
 
 		if (name) {
 			this.socket.emit("client_data", {
@@ -40,13 +40,13 @@ export default class WebsocketStore {
 			this.sendDataToServer()
 		}, 5 * 1000)
 
-		// runInAction(() => {
-		// 	this.socket = io("https://shishki.default-squad.ru/")
-		// })
-
 		runInAction(() => {
-			this.socket = io("http://localhost:8002/") // для тестирования локальный адрес сервера
+			this.socket = io("https://shishki.default-squad.ru/")
 		})
+
+		// runInAction(() => {
+		// 	this.socket = io("http://localhost:8002/") // для тестирования локальный адрес сервера
+		// })
 
 		this.socket.on("connect", () => {
 			this.connectSuccess()
