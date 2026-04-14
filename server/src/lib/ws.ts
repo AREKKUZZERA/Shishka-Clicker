@@ -40,11 +40,11 @@ export class ServerSocket {
 		console.log("Server socket created")
 
 		this.io.on("connection", socket => {
-			console.log("Client connected", socket)
+			console.log("Client connected", socket.id)
 			this.updateTopList()
 
 			socket.on("disconnect", async (reason) => {
-				console.log("Client disconnected:", reason)
+				console.log("Client disconnected", socket.id, reason)
 				await this.updateTopList()
 			})
 

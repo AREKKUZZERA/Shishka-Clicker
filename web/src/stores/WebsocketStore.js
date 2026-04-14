@@ -47,10 +47,7 @@ export default class WebsocketStore {
   init() {
     this.log("Initializing")
 
-    this.socket = io(WEBSOCKET_URL).onError((error) => {
-      console.warn("Не удалось подключиться к WebSocket")
-      console.error(error)
-    })
+    this.socket = io(WEBSOCKET_URL)
 
     setInterval(this.sendDataToServer, 5 * 1000)
 
@@ -74,6 +71,7 @@ export default class WebsocketStore {
 
   connectSuccess() {
     this.CURRENT_STATE = WEBSOCKET_STATE.SUCCESS
+    this.log("Connected successfully")
   }
 
   connectErrorFailure() {
