@@ -32,6 +32,25 @@ export class ServerSocket {
 		await this.initServerSocket()
 	}
 
+	static async incomingHandler(socket: any, data: any) {
+		console.log("Incoming handler", socket, data)
+
+		const events: any = {
+			"ping": (socket: any, data: any) => socket.emit("pong", data),
+			"client_data": (socket: any, data: any) => {
+				console.log("Client data", data)
+				this.addClientToMap(data)
+			},
+			"init": async (socket: any, data: any) => this.addClientToMap(data)
+		}
+
+		if (!data?.event) return
+
+		if (data.event in events) {
+			events[data.event](socket, data)
+		}
+	}
+
 	static async initServerSocket() {
 		this.io = new Server(server, {
 			cors: {
@@ -44,28 +63,16 @@ export class ServerSocket {
 
 		this.io.on("connection", socket => {
 			activityClient = socket
-
-			// backend -> iframe
-			socket.on("ws-emit", (msg) => {
-				console.log(`Received ${JSON.stringify(msg)}`)
-			})
-
 			console.log("Client connected", socket.id)
+
+			socket.on("ws-emit", async (data) => await this.incomingHandler(data, socket))
+
 			this.updateTopList()
 
 			socket.on("disconnect", async (reason) => {
 				activityClient = null
 				console.log("Client disconnected", socket.id, reason)
 				await this.updateTopList()
-			})
-
-			socket.on("client_data", data => {
-				console.log("Client data", data)
-				this.addClientToMap(data)
-			})
-
-			socket.on("ping", data => {
-				socket.emit("pong", data)
 			})
 		})
 
