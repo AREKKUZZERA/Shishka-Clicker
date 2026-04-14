@@ -25,16 +25,18 @@ function parseCookies(cookieHeader = '') {
 }
 
 function serializeCookie(name, value, { maxAge = SESSION_TTL_SECONDS, secure = process.env.NODE_ENV === 'production' } = {}) {
+  const sameSite = secure ? 'None' : 'Lax'
   const parts = [
     `${name}=${encodeURIComponent(value)}`,
     'Path=/',
     'HttpOnly',
-    'SameSite=Lax',
+    `SameSite=${sameSite}`,
     `Max-Age=${maxAge}`,
   ]
 
   if (secure) {
     parts.push('Secure')
+    parts.push('Partitioned')
   }
 
   return parts.join('; ')

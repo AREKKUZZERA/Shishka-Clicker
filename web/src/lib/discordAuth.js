@@ -1,6 +1,7 @@
 export async function exchangeDiscordCode(code) {
   const response = await fetch('/api/token', {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
