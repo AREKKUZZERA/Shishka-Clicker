@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useStores } from '../stores/StoresProvider.jsx'
+import { useGameStore, useWebsocketStore } from '../stores/StoresProvider.jsx'
 import { useSettingsContext } from './SettingsContext.jsx'
 import { setDiscordRichPresence, setupDiscord } from '../discord.js'
 import { APP_VERSION } from '../config/appMeta.js'
@@ -84,7 +84,8 @@ function buildSnapshotSummary(gameState, updatedAt, source, saveVersion = null) 
 }
 
 export function DiscordActivityProvider({ children }) {
-  const stores = useStores()
+  const gameStore = useGameStore()
+  const websocketStore = useWebsocketStore()
   const { exportSettings, importSettings } = useSettingsContext()
   const [state, setState] = useState({
     isActivity: false,
@@ -157,7 +158,7 @@ export function DiscordActivityProvider({ children }) {
     if (!cloudSave?.save) return false
 
     const imported = normalizeImportedBundle(cloudSave.save)
-    stores.gameStore.importGameSave(imported.game)
+    gameStore.importGameSave(imported.game)
 
     if (imported.settings) {
       importSettings(imported.settings)
@@ -173,7 +174,7 @@ export function DiscordActivityProvider({ children }) {
     })
 
     return true
-  }, [importSettings, markSynced, stores.gameStore])
+  }, [gameStore, importSettings, markSynced])
 
   const uploadLatestSave = useCallback(async ({
     force = false,
@@ -192,7 +193,7 @@ export function DiscordActivityProvider({ children }) {
     }
 
     const save = createSaveBundle({
-      gameState: stores.gameStore.exportGameSave(),
+      gameState: gameStore.exportGameSave(),
       settings: exportSettings(),
       appVersion: APP_VERSION,
     })
@@ -218,7 +219,7 @@ export function DiscordActivityProvider({ children }) {
     })
 
     return true
-  }, [exportSettings, markSynced, setSyncState, state.playerId, stores.gameStore])
+  }, [exportSettings, gameStore, markSynced, setSyncState, state.playerId])
 
   const flushLatestSaveOnExit = useCallback(({ playerIdOverride = null } = {}) => {
     const playerId = playerIdOverride ?? state.playerId
@@ -232,7 +233,7 @@ export function DiscordActivityProvider({ children }) {
     }
 
     const save = createSaveBundle({
-      gameState: stores.gameStore.exportGameSave(),
+      gameState: gameStore.exportGameSave(),
       settings: exportSettings(),
       appVersion: APP_VERSION,
     })
@@ -249,7 +250,7 @@ export function DiscordActivityProvider({ children }) {
     }).catch((error) => {
       console.warn('Failed to flush save on exit:', error)
     })
-  }, [exportSettings, state.playerId, stores.gameStore])
+  }, [exportSettings, gameStore, state.playerId])
 
   const synchronizeNow = useCallback(async ({ forceDownload = false, playerIdOverride = null } = {}) => {
     const playerId = playerIdOverride ?? state.playerId
@@ -391,6 +392,7 @@ export function DiscordActivityProvider({ children }) {
         if (cancelled || !session?.isActivity || !session.user?.id) {
           discordSdkRef.current = null
           lastPresenceSignatureRef.current = ''
+          websocketStore.setUser(null)
 
           setState((current) => ({
             ...current,
@@ -418,6 +420,7 @@ export function DiscordActivityProvider({ children }) {
           presenceState: 'idle',
           presenceError: null,
         }))
+        websocketStore.setUser(session.user)
 
         await synchronizeNow({ playerIdOverride: playerId })
       } catch (error) {
@@ -425,6 +428,7 @@ export function DiscordActivityProvider({ children }) {
 
         discordSdkRef.current = null
         lastPresenceSignatureRef.current = ''
+        websocketStore.setUser(null)
 
         setState((current) => ({
           ...current,
@@ -443,7 +447,7 @@ export function DiscordActivityProvider({ children }) {
     return () => {
       cancelled = true
     }
-  }, [synchronizeNow])
+  }, [synchronizeNow, websocketStore])
 
   useEffect(() => {
     if (!state.playerId) return undefined

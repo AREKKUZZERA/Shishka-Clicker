@@ -25,6 +25,7 @@ const PASSIVE_UI_SNAPSHOT_DELAY_MS = 480
 const ACTIVE_TICK_MS = 250
 const IDLE_TICK_MS = 1000
 const IDLE_THRESHOLD_MS = 1500
+const DEV_RESOURCE_KEYS = ['shishki', 'money', 'knowledge', 'prestigeShards']
 
 function buildSeenShopItems(snapshot = STARTING_STATE) {
   const safeSnapshot = snapshot ?? STARTING_STATE
@@ -60,11 +61,7 @@ function buildSeenBuyableShopItems(snapshot = STARTING_STATE) {
 
 function mergeState(saved) {
   if (!saved || typeof saved !== 'object' || Array.isArray(saved)) {
-    return {
-      ...STARTING_STATE,
-      seenShopItems: buildSeenShopItems(STARTING_STATE),
-      seenBuyableShopItems: buildSeenBuyableShopItems(STARTING_STATE),
-    }
+    return createFreshState()
   }
 
   return {
@@ -262,6 +259,62 @@ function buildUnlockPreview(state, sourceItems, type) {
   )
 }
 
+function buildEconomySnapshot(state, derived) {
+  const { aiMultiplier, prestigeMultiplier } = derived
+
+  return {
+    subscriptions: SUBSCRIPTIONS.map((item) => {
+      const level = state.subscriptions[item.id] ?? 0
+      return enrichItem(state, { ...item, currency: 'money' }, level, aiMultiplier, prestigeMultiplier)
+    }),
+    upgrades: UPGRADES.map((item) => {
+      const level = state.upgrades[item.id] ?? 0
+      return enrichItem(state, item, level, aiMultiplier, prestigeMultiplier)
+    }),
+    prestigeUpgrades: getPrestigeUpgradeCards(state),
+  }
+}
+
+function markSeenItems(state, ids) {
+  const nextIds = Array.from(new Set((ids ?? []).filter(Boolean)))
+  if (!nextIds.length) {
+    return { changed: false, state }
+  }
+
+  let changed = false
+  const seenShopItems = { ...state.seenShopItems }
+  const seenBuyableShopItems = { ...state.seenBuyableShopItems }
+
+  nextIds.forEach((id) => {
+    if (!seenShopItems[id] || !seenBuyableShopItems[id]) {
+      seenShopItems[id] = true
+      seenBuyableShopItems[id] = true
+      changed = true
+    }
+  })
+
+  if (!changed) {
+    return { changed: false, state }
+  }
+
+  return {
+    changed: true,
+    state: {
+      ...state,
+      seenShopItems,
+      seenBuyableShopItems,
+    },
+  }
+}
+
+function createFreshState() {
+  return {
+    ...STARTING_STATE,
+    seenShopItems: buildSeenShopItems(STARTING_STATE),
+    seenBuyableShopItems: buildSeenBuyableShopItems(STARTING_STATE),
+  }
+}
+
 export default class GameStore {
   rootStore
   _state = mergeState(loadGame())
@@ -360,43 +413,11 @@ export default class GameStore {
   }
 
   get economy() {
-    const { aiMultiplier, prestigeMultiplier } = this.derived
-
-    const subscriptions = SUBSCRIPTIONS.map((item) => {
-      const level = this._state.subscriptions[item.id] ?? 0
-      return enrichItem(this._state, { ...item, currency: 'money' }, level, aiMultiplier, prestigeMultiplier)
-    })
-
-    const upgrades = UPGRADES.map((item) => {
-      const level = this._state.upgrades[item.id] ?? 0
-      return enrichItem(this._state, item, level, aiMultiplier, prestigeMultiplier)
-    })
-
-    return {
-      subscriptions,
-      upgrades,
-      prestigeUpgrades: getPrestigeUpgradeCards(this._state),
-    }
+    return buildEconomySnapshot(this._state, this.derived)
   }
 
   get uiEconomy() {
-    const { aiMultiplier, prestigeMultiplier } = this.uiDerived
-
-    const subscriptions = SUBSCRIPTIONS.map((item) => {
-      const level = this.uiSnapshotState.subscriptions[item.id] ?? 0
-      return enrichItem(this.uiSnapshotState, { ...item, currency: 'money' }, level, aiMultiplier, prestigeMultiplier)
-    })
-
-    const upgrades = UPGRADES.map((item) => {
-      const level = this.uiSnapshotState.upgrades[item.id] ?? 0
-      return enrichItem(this.uiSnapshotState, item, level, aiMultiplier, prestigeMultiplier)
-    })
-
-    return {
-      subscriptions,
-      upgrades,
-      prestigeUpgrades: getPrestigeUpgradeCards(this.uiSnapshotState),
-    }
+    return buildEconomySnapshot(this.uiSnapshotState, this.uiDerived)
   }
 
   get statsBarData() {
@@ -557,6 +578,57 @@ export default class GameStore {
     this.scheduleSave()
   }
 
+  transact(updater, options) {
+    const result = unlockAchievements(updater(this._state))
+    this.commitState(result.state, result.unlockedNow, options)
+  }
+
+  buyEconomyItem(items, collectionKey, id, currencyOverride = null) {
+    this.recordActivity()
+    const item = items.find((entry) => entry.id === id)
+    if (!item) return
+
+    const unlock = getUnlockStatus(this._state, item.id)
+    if (!unlock.unlocked) return
+
+    const level = this._state[collectionKey][item.id] ?? 0
+    const cost = getScaledCost(item.baseCost, item.costScale, level)
+    const currency = currencyOverride ?? item.currency
+    const balance = this._state[currency]
+
+    if (balance < cost) return
+
+    this.transact((state) => ({
+      ...state,
+      [currency]: state[currency] - cost,
+      seenShopItems: {
+        ...state.seenShopItems,
+        [id]: true,
+      },
+      seenBuyableShopItems: {
+        ...state.seenBuyableShopItems,
+        [id]: true,
+      },
+      [collectionKey]: {
+        ...state[collectionKey],
+        [id]: (state[collectionKey][id] ?? 0) + 1,
+      },
+    }))
+  }
+
+  replaceState(nextState, { persist = false } = {}) {
+    this.clearSaveTimers()
+    this.skipNextSave = true
+
+    if (persist) {
+      saveGame(nextState)
+    }
+
+    this.achievementQueue = []
+    this._state = nextState
+    this.syncUiSnapshotNow()
+  }
+
   applyPassiveIncome(seconds) {
     if (seconds <= 0) return
 
@@ -659,75 +731,18 @@ export default class GameStore {
         isEmojiBurst ? 6 : isMega ? 3 : 1,
         Math.min(isEmojiBurst ? 68 : isMega ? 32 : 10, particleCount),
       ),
-      symbols: isEmojiBurst ? emojiExplosionPool : isMega ? ['⚡', '⚡️', '⚡', '✨'] : [emoji, '🌰'],
+      symbols: isEmojiBurst ? emojiExplosionPool : isMega ? ['⚡', '⚡️', '⚡', '⚡️'] : [emoji, '✨'],
       isMega,
       isEmojiExplosion: isEmojiBurst,
     }
   }
 
   buySubscription(id) {
-    this.recordActivity()
-    const item = SUBSCRIPTIONS.find((entry) => entry.id === id)
-    if (!item) return
-
-    const unlock = getUnlockStatus(this._state, item.id)
-    if (!unlock.unlocked) return
-
-    const level = this._state.subscriptions[item.id] ?? 0
-    const cost = getScaledCost(item.baseCost, item.costScale, level)
-    if (this._state.money < cost) return
-
-    const result = unlockAchievements({
-      ...this._state,
-      money: this._state.money - cost,
-      seenShopItems: {
-        ...this._state.seenShopItems,
-        [id]: true,
-      },
-      seenBuyableShopItems: {
-        ...this._state.seenBuyableShopItems,
-        [id]: true,
-      },
-      subscriptions: {
-        ...this._state.subscriptions,
-        [id]: level + 1,
-      },
-    })
-
-    this.commitState(result.state, result.unlockedNow)
+    this.buyEconomyItem(SUBSCRIPTIONS, 'subscriptions', id, 'money')
   }
 
   buyUpgrade(id) {
-    this.recordActivity()
-    const item = UPGRADES.find((entry) => entry.id === id)
-    if (!item) return
-
-    const unlock = getUnlockStatus(this._state, item.id)
-    if (!unlock.unlocked) return
-
-    const level = this._state.upgrades[item.id] ?? 0
-    const cost = getScaledCost(item.baseCost, item.costScale, level)
-    const balance = this._state[item.currency]
-    if (balance < cost) return
-
-    const result = unlockAchievements({
-      ...this._state,
-      [item.currency]: this._state[item.currency] - cost,
-      seenShopItems: {
-        ...this._state.seenShopItems,
-        [id]: true,
-      },
-      seenBuyableShopItems: {
-        ...this._state.seenBuyableShopItems,
-        [id]: true,
-      },
-      upgrades: {
-        ...this._state.upgrades,
-        [id]: level + 1,
-      },
-    })
-
-    this.commitState(result.state, result.unlockedNow)
+    this.buyEconomyItem(UPGRADES, 'upgrades', id)
   }
 
   buyPrestigeUpgrade(id) {
@@ -751,48 +766,16 @@ export default class GameStore {
 
   markShopItemSeen(id) {
     this.recordActivity()
-    if (!id) return
-
-    const alreadySeen = this._state.seenShopItems?.[id] && this._state.seenBuyableShopItems?.[id]
-    if (alreadySeen) return
-
-    this.commitState({
-      ...this._state,
-      seenShopItems: {
-        ...this._state.seenShopItems,
-        [id]: true,
-      },
-      seenBuyableShopItems: {
-        ...this._state.seenBuyableShopItems,
-        [id]: true,
-      },
-    })
+    const result = markSeenItems(this._state, [id])
+    if (!result.changed) return
+    this.commitState(result.state)
   }
 
   markShopItemsSeen(ids) {
     this.recordActivity()
-    const nextIds = Array.from(new Set((ids ?? []).filter(Boolean)))
-    if (!nextIds.length) return
-
-    let changed = false
-    const seenShopItems = { ...this._state.seenShopItems }
-    const seenBuyableShopItems = { ...this._state.seenBuyableShopItems }
-
-    nextIds.forEach((id) => {
-      if (!seenShopItems[id] || !seenBuyableShopItems[id]) {
-        seenShopItems[id] = true
-        seenBuyableShopItems[id] = true
-        changed = true
-      }
-    })
-
-    if (!changed) return
-
-    this.commitState({
-      ...this._state,
-      seenShopItems,
-      seenBuyableShopItems,
-    })
+    const result = markSeenItems(this._state, ids)
+    if (!result.changed) return
+    this.commitState(result.state)
   }
 
   markAutoClicker() {
@@ -834,16 +817,9 @@ export default class GameStore {
   }
 
   resetGame() {
-    this.clearSaveTimers()
-    this.skipNextSave = true
+    const nextState = createFreshState()
     clearGame()
-    this.achievementQueue = []
-    this._state = {
-      ...STARTING_STATE,
-      seenShopItems: buildSeenShopItems(STARTING_STATE),
-      seenBuyableShopItems: buildSeenBuyableShopItems(STARTING_STATE),
-    }
-    this.syncUiSnapshotNow()
+    this.replaceState(nextState)
   }
 
   exportGameSave() {
@@ -852,12 +828,7 @@ export default class GameStore {
 
   importGameSave(saveData) {
     const nextState = mergeState(saveData)
-    this.clearSaveTimers()
-    this.skipNextSave = true
-    saveGame(nextState)
-    this.achievementQueue = []
-    this._state = nextState
-    this.syncUiSnapshotNow()
+    this.replaceState(nextState, { persist: true })
   }
 
   dismissAchievement() {
@@ -865,8 +836,7 @@ export default class GameStore {
   }
 
   _devGiveResource(key, amount) {
-    const allowed = ['shishki', 'money', 'knowledge', 'prestigeShards']
-    if (!allowed.includes(key) || !Number.isFinite(amount)) return
+    if (!DEV_RESOURCE_KEYS.includes(key) || !Number.isFinite(amount)) return
 
     this.commitState({
       ...this._state,
@@ -875,8 +845,7 @@ export default class GameStore {
   }
 
   _devSetResource(key, value) {
-    const allowed = ['shishki', 'money', 'knowledge', 'prestigeShards']
-    if (!allowed.includes(key) || !Number.isFinite(value)) return
+    if (!DEV_RESOURCE_KEYS.includes(key) || !Number.isFinite(value)) return
 
     this.commitState({
       ...this._state,

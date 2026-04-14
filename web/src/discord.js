@@ -1,7 +1,5 @@
 import { DiscordSDK } from '@discord/embedded-app-sdk'
 import { exchangeDiscordCode } from './lib/discordAuth.js'
-import stores from "./stores/stores.js"
-
 
 const DISCORD_CLIENT_ID = import.meta.env.VITE_CLIENT_ID ?? import.meta.env.VITE_DISCORD_CLIENT_ID
 const DISCORD_ACTIVITY_SCOPES = ['identify', 'rpc.activities.write']
@@ -48,10 +46,8 @@ export async function setupDiscord() {
     })
 
     if (!auth) {
-      throw new Error("Authenticate command returned null")
+      throw new Error('Authenticate command returned null')
     }
-
-    stores.websocketStore.setUser(auth.user)
 
     return {
       isActivity: true,
