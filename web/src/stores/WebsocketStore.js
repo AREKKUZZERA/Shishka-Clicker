@@ -1,5 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx'
-import { socket } from '../lib/activitySocket.js'
+
+const LEADERBOARD_REFRESH_MS = 15_000
 
 export const WEBSOCKET_STATE = {
   LOADING: 'LOADING',
@@ -12,104 +13,55 @@ export default class WebsocketStore {
   data = []
   state = WEBSOCKET_STATE.LOADING
   rootStore
-  syncIntervalId = null
+  refreshIntervalId = null
 
   constructor(rootStore) {
     this.rootStore = rootStore
-    makeAutoObservable(this, { rootStore: false, syncIntervalId: false }, { autoBind: true })
+    makeAutoObservable(this, { rootStore: false, refreshIntervalId: false }, { autoBind: true })
     this.init()
   }
 
-  get username() {
-    return this.user?.global_name || this.user?.username || null
-  }
-
-  get shishkiTotal() {
-    const total = this.rootStore.gameStore?._state?.lifetimeShishkiEarned ?? 0
-    return Number.isFinite(total) ? Math.round(total) : 0
-  }
-
   init() {
-    socket.on('top_list', this.updateTopList)
-    socket.on('pong', this.connectSuccess)
-  }
-
-  startSync() {
-    if (this.syncIntervalId !== null) return
-
-    this.syncIntervalId = window.setInterval(() => {
-      this.sendDataToServer()
-    }, 5_000)
-  }
-
-  stopSync() {
-    if (this.syncIntervalId === null) return
-
-    window.clearInterval(this.syncIntervalId)
-    this.syncIntervalId = null
-  }
-
-  emit(event, data) {
-    socket.emit(event, {
-      username: this.username,
-      ...data,
-    })
-  }
-
-  ping() {
-    this.emit('ping', {})
-  }
-
-  connectWithServer() {
-    if (!this.username) return
-
-    this.emit('init', {
-      username: this.username,
-      shishki: this.shishkiTotal,
-    })
-  }
-
-  sendDataToServer() {
-    if (!this.username) return
-
-    this.emit('client_data', {
-      username: this.username,
-      shishki: this.shishkiTotal,
-    })
-  }
-
-  connectSuccess() {
-    this.state = WEBSOCKET_STATE.READY
-  }
-
-  connectErrorFailure() {
-    runInAction(() => {
-      this.state = WEBSOCKET_STATE.FAILURE
-    })
-  }
-
-  updateTopList(data) {
-    runInAction(() => {
-      this.data = Array.isArray(data) ? data : []
-    })
-  }
-
-  setUser(user) {
-    runInAction(() => {
-      this.user = user
-      this.data = user ? this.data : []
-      this.state = user ? WEBSOCKET_STATE.LOADING : WEBSOCKET_STATE.FAILURE
-    })
-
-    this.stopSync()
-
-    if (!user) {
+    if (typeof window === 'undefined') {
       return
     }
 
-    this.connectWithServer()
-    this.ping()
-    this.sendDataToServer()
-    this.startSync()
+    void this.refreshLeaderboard()
+    this.refreshIntervalId = window.setInterval(() => {
+      void this.refreshLeaderboard()
+    }, LEADERBOARD_REFRESH_MS)
+  }
+
+  async refreshLeaderboard() {
+    if (this.state !== WEBSOCKET_STATE.READY) {
+      this.state = WEBSOCKET_STATE.LOADING
+    }
+
+    try {
+      const response = await fetch('/api/leaderboard', {
+        method: 'GET',
+        credentials: 'include',
+      })
+
+      if (!response.ok) {
+        throw new Error(`leaderboard_request_failed:${response.status}`)
+      }
+
+      const payload = await response.json()
+      const leaderboard = Array.isArray(payload?.leaderboard) ? payload.leaderboard : []
+
+      runInAction(() => {
+        this.data = leaderboard
+        this.state = WEBSOCKET_STATE.READY
+      })
+    } catch {
+      runInAction(() => {
+        this.state = WEBSOCKET_STATE.FAILURE
+      })
+    }
+  }
+
+  setUser(user) {
+    this.user = user
   }
 }

@@ -7,8 +7,15 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id Int @unique @default(autoincrement())
+model PlayerSave {
+  id             Int       @id @default(autoincrement())
+  playerId       String    @unique @map("player_id")
+  playerUsername String?   @map("player_username")
+  appVersion     String?   @map("app_version")
+  saveVersion    BigInt    @default(1) @map("save_version")
+  saveData       Json      @map("save_data")
+  updatedAt      DateTime? @db.Timestamptz(6) @map("updated_at")
 
-  userId Int
+  @@index([updatedAt(sort: Desc)], map: "player_saves_updated_at_idx")
+  @@map("player_saves")
 }

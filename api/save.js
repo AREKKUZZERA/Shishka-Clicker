@@ -1,6 +1,27 @@
 import { createServerSupabase } from './_lib/supabase.js'
 import { requireSession } from './_lib/session.js'
 
+function isPlainObject(value) {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value))
+}
+
+function normalizeAppVersion(value) {
+  return typeof value === 'string' && value.trim() ? value.trim() : null
+}
+
+function normalizeExpectedVersion(value) {
+  if (value === null || value === undefined || value === '') {
+    return null
+  }
+
+  const version = Number(value)
+  if (!Number.isSafeInteger(version) || version < 0) {
+    return null
+  }
+
+  return version
+}
+
 function buildConflictPayload(currentSave) {
   return {
     ok: false,
@@ -138,18 +159,28 @@ export default async function handler(req, res) {
     const session = requireSession(req, res)
     if (!session) return
 
-    const { appVersion, save, expectedVersion = null, force = false } = req.body ?? {}
+    const { appVersion, save, expectedVersion, force = false } = req.body ?? {}
 
-    if (!save) {
+    if (!isPlainObject(save)) {
       return res.status(400).json({
         ok: false,
-        error: 'save is required',
+        error: 'invalid_save_payload',
+      })
+    }
+
+    const normalizedExpectedVersion = normalizeExpectedVersion(expectedVersion)
+
+    if (expectedVersion !== undefined && expectedVersion !== null && normalizedExpectedVersion === null) {
+      return res.status(400).json({
+        ok: false,
+        error: 'invalid_expected_version',
       })
     }
 
     const supabase = createServerSupabase()
     const playerId = String(session.playerId)
     const playerUsername = session.playerUsername ?? null
+    const normalizedAppVersion = normalizeAppVersion(appVersion)
     let result
 
     try {
@@ -157,10 +188,10 @@ export default async function handler(req, res) {
         supabase,
         playerId,
         playerUsername,
-        appVersion,
+        appVersion: normalizedAppVersion,
         save,
-        expectedVersion,
-        force,
+        expectedVersion: normalizedExpectedVersion,
+        force: Boolean(force),
       })
     } catch (error) {
       if (!isMissingSaveRpc(error)) {
@@ -174,10 +205,10 @@ export default async function handler(req, res) {
       result = await saveViaLegacyQueries({
         supabase,
         playerId,
-        appVersion,
+        appVersion: normalizedAppVersion,
         save,
-        expectedVersion,
-        force,
+        expectedVersion: normalizedExpectedVersion,
+        force: Boolean(force),
       })
     }
 

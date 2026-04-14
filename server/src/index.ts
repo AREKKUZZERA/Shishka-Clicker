@@ -2,7 +2,6 @@ import "dotenv/config"
 import express from "express"
 import cors from "cors"
 import * as http from "node:http"
-import {initSocket} from "./lib/ws.js"
 
 
 const app = express()
@@ -17,7 +16,6 @@ export const corsOptions = {
 	],
 	credentials: true
 }
-initSocket()
 
 app.disable("x-powered-by")
 app.use(cors(corsOptions))

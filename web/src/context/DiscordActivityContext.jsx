@@ -65,6 +65,27 @@ function getGameStateFromCloudSave(cloudSave) {
   }
 }
 
+function chooseSyncWinner(localGameState, remoteCloudSave) {
+  const remoteGameState = getGameStateFromCloudSave(remoteCloudSave)
+  const localScore = getProgressScore(localGameState)
+  const remoteScore = getProgressScore(remoteGameState)
+
+  if (!remoteGameState) {
+    return 'local'
+  }
+
+  if (remoteScore > localScore) {
+    return 'remote'
+  }
+
+  if (localScore > remoteScore) {
+    return 'local'
+  }
+
+  const remoteUpdatedAt = Date.parse(remoteCloudSave?.updatedAt ?? '') || 0
+  return remoteUpdatedAt > 0 ? 'remote' : 'local'
+}
+
 export function DiscordActivityProvider({ children }) {
   const gameStore = useGameStore()
   const websocketStore = useWebsocketStore()
@@ -351,6 +372,22 @@ export function DiscordActivityProvider({ children }) {
       return uploaded
     } catch (error) {
       if (error?.code === 'cloud_conflict') {
+        const localSnapshot = getLocalSnapshot()
+        const conflictSave = error.current?.save
+          ? {
+              save: error.current.save,
+              updatedAt: error.current.updatedAt ?? null,
+              appVersion: error.current.appVersion ?? null,
+              saveVersion: error.current.saveVersion ?? null,
+            }
+          : null
+
+        if (conflictSave && chooseSyncWinner(localSnapshot.state, conflictSave) === 'remote') {
+          const applied = applyRemoteSave(conflictSave)
+          if (allowLegacyMigration) clearLegacyGame()
+          return applied
+        }
+
         const uploaded = await uploadLatestSave({
           force: true,
           expectedVersionOverride: null,

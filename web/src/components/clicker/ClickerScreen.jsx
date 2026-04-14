@@ -12,12 +12,12 @@ export const ClickerScreen = observer(function ClickerScreen() {
       <div className="clicker-layout">
         <ClickerButton />
         <div className="clicker-top-list">
-          <div>TOP-5</div>
+          <div>TOP-5 игроков</div>
           {websocketStore.data.length === 0 ? (
-            <div className="clicker-top-list__empty">Рейтинг появится, когда в Activity будут активные игроки.</div>
+            <div className="clicker-top-list__empty">Рейтинг пока пуст или ещё загружается.</div>
           ) : websocketStore.data.map((user, index) => (
             <div key={`${user.username}-${index}`} className="flex gap-10">
-              <div>{user.username}</div>
+              <div>{index + 1}. {user.username}</div>
               <div>{formatNumber(user.shishki)}</div>
             </div>
           ))}
