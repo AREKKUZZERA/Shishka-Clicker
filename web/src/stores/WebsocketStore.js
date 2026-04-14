@@ -60,10 +60,13 @@ export default class WebsocketStore {
       }
     })
     this.socket.on('connect_error', (error) => {
-      this.log(`"Connect error": ${error}`)
+      this.log(`Connect error: ${error}`)
     })
     this.socket.on('top_list', this.updateTopList)
+    this.socket.on("pong", () => this.log("Ответ от сервера успешно получен и связь установлена!"))
   }
+
+  ping = () => this.emit("ping", {})
 
   emit(type, data) {
     this.socket?.emit(type, JSON.stringify(data))
@@ -72,6 +75,7 @@ export default class WebsocketStore {
   connectSuccess() {
     this.CURRENT_STATE = WEBSOCKET_STATE.SUCCESS
     this.log("Connected successfully")
+    this.ping()
   }
 
   connectErrorFailure() {

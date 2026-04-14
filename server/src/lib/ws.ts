@@ -52,6 +52,10 @@ export class ServerSocket {
 				console.log("Client data", data)
 				this.addClientToMap(data)
 			})
+
+			socket.on("ping", data => {
+				socket.emit("pong", data)
+			})
 		})
 	}
 
