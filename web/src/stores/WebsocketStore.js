@@ -45,8 +45,11 @@ export default class WebsocketStore {
   }
 
   init() {
-    setInterval(this.sendDataToServer, 5 * 1000)
+    this.log("Initializing")
+
     this.socket = io(WEBSOCKET_URL)
+
+    setInterval(this.sendDataToServer, 5 * 1000)
 
     this.socket.on('connect', this.connectSuccess)
     this.socket.on('disconnect', (reason) => {
@@ -68,6 +71,7 @@ export default class WebsocketStore {
 
   connectSuccess() {
     this.CURRENT_STATE = WEBSOCKET_STATE.SUCCESS
+    this.log("Connected successfully")
   }
 
   connectErrorFailure() {
