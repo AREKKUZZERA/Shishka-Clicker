@@ -24,7 +24,6 @@ RUN pnpm i
 
 COPY prisma/ ./prisma/
 COPY prisma.config.js ./
-COPY --from=server-build /server/generated ./generated
 COPY --from=server-build /server/dist ./dist
 
 ENV NODE_ENV=development
