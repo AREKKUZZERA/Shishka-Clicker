@@ -14,7 +14,8 @@ export const corsOptions = {
 	origin: [
 		"https://default-squad.ru",
 		"https://shishki.default-squad.ru",
-		"http://localhost:3001"
+		"http://localhost:3001",
+		"https://shishka-clicker.vercel.app"
 	],
 	credentials: true
 }

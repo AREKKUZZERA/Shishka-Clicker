@@ -63,7 +63,7 @@ export default class WebsocketStore {
 		})
 
 		this.socket.on("connect_error", (e) => {
-			this.log(e)
+			this.log(`"Connect error": ${e}`)
 		})
 
 		this.socket.on("top_list", data => {
