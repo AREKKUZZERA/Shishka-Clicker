@@ -42,13 +42,13 @@ export function SettingsDiscordCard() {
     <article className="settings-card">
       <div className="settings-card__head">
         <h3 className="settings-card__title">Discord Activity</h3>
-        <span className="settings-chip">{isActivity ? 'Connected' : 'Standalone'}</span>
+        <span className="settings-chip">{isActivity ? 'Connected' : 'Cloud Profile'}</span>
       </div>
 
       <p className="settings-card__hint settings-card__hint--block">
         {isActivity
           ? `Игрок: ${user?.username ?? 'unknown'}${user?.discriminator ? `#${user.discriminator}` : ''}`
-          : 'Приложение открыто вне Discord Activity. Облачная синхронизация Discord сейчас не используется.'}
+          : 'Приложение открыто вне Discord Activity. Для сейва используется облачный профиль этого устройства.'}
       </p>
 
       <p className="settings-card__hint settings-card__hint--block">
@@ -76,16 +76,14 @@ export function SettingsDiscordCard() {
         </div>
       ) : null}
 
-      {isActivity ? (
-        <button
-          type="button"
-          className="settings-ghost-btn"
-          onClick={handleSync}
-          disabled={isSyncing}
-        >
-          {isSyncing ? 'Синхронизация...' : 'Синхронизировать сейчас'}
-        </button>
-      ) : null}
+      <button
+        type="button"
+        className="settings-ghost-btn"
+        onClick={handleSync}
+        disabled={isSyncing}
+      >
+        {isSyncing ? 'Синхронизация...' : 'Синхронизировать сейчас'}
+      </button>
     </article>
   )
 }

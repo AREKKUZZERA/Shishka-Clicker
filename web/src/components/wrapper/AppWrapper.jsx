@@ -6,6 +6,7 @@ import { memo, useEffect, useSyncExternalStore } from 'react'
 import { Header } from '../header/Header.jsx'
 import { useNav } from '../../context/NavContext.jsx'
 import { useSettingsContext } from '../../context/SettingsContext.jsx'
+import { useDiscordActivity } from '../../context/DiscordActivityContext.jsx'
 import { SyncConflictDialog } from '../settings/SyncConflictDialog.jsx'
 import { ScreenFallback } from './ScreenFallback.jsx'
 
@@ -144,6 +145,7 @@ const AppBackground = memo(function AppBackground({ visualEffectToggles }) {
 export const AppWrapper = memo(function AppWrapper() {
   const { activeTab, transitionDirection } = useNav()
   const { visualEffectToggles } = useSettingsContext()
+  const { saveReady } = useDiscordActivity()
 
   useSyncExternalStore(subscribeToScreenRegistry, getScreenRegistrySnapshot, getScreenRegistrySnapshot)
 
@@ -184,7 +186,7 @@ export const AppWrapper = memo(function AppWrapper() {
               className={`screen-stage ${visualEffectToggles.revealAnimations ? 'screen-stage--animate' : ''}`}
               data-direction={transitionDirection}
             >
-              {renderLoadedScreen(activeTab)}
+              {saveReady ? renderLoadedScreen(activeTab) : <ScreenFallback />}
             </div>
           </div>
         </main>

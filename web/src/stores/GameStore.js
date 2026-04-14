@@ -17,7 +17,6 @@ import {
   getMegaEmojiChance,
 } from '../game/config'
 import { getPrestigeUpgradeCards, PRESTIGE_UPGRADES, getPrestigeUpgradeCost } from '../game/metaConfig'
-import { clearGame, loadGame, saveGame } from '../lib/storage'
 import { formatFullNumber, formatNumber, isNumberAbbreviated } from '../lib/format'
 
 const UI_SNAPSHOT_DELAY_MS = 120
@@ -317,11 +316,9 @@ function createFreshState() {
 
 export default class GameStore {
   rootStore
-  _state = mergeState(loadGame())
+  _state = createFreshState()
   uiSnapshotState = this._state
   achievementQueue = []
-  saveTimeoutId = null
-  saveIdleId = null
   uiRefreshTimeoutId = null
   uiRefreshDueAt = 0
   tickTimeoutId = null
@@ -329,9 +326,10 @@ export default class GameStore {
   pendingPassiveSeconds = 0
   isInteracting = false
   initialized = false
-  skipNextSave = false
   lastTickAt = 0
   lastActivityAt = 0
+  clientRevision = 0
+  lastMutationAt = null
 
   constructor(rootStore) {
     this.rootStore = rootStore
@@ -340,8 +338,6 @@ export default class GameStore {
       this,
       {
         rootStore: false,
-        saveTimeoutId: false,
-        saveIdleId: false,
         uiRefreshTimeoutId: false,
         uiRefreshDueAt: false,
         tickTimeoutId: false,
@@ -349,7 +345,6 @@ export default class GameStore {
         pendingPassiveSeconds: false,
         isInteracting: false,
         initialized: false,
-        skipNextSave: false,
         lastTickAt: false,
         lastActivityAt: false,
         syncUiSnapshotNow: false,
@@ -501,38 +496,11 @@ export default class GameStore {
     window.addEventListener('scroll', this.handleInteraction, { passive: true })
     window.addEventListener('wheel', this.handleInteraction, { passive: true })
     window.addEventListener('touchmove', this.handleInteraction, { passive: true })
-    window.addEventListener('beforeunload', this.handleSaveOnUnload)
-    window.addEventListener('pagehide', this.handleSaveOnUnload)
-    document.addEventListener('visibilitychange', this.handleVisibilityChange)
   }
 
-  clearSaveTimers() {
-    window.clearTimeout(this.saveTimeoutId)
-
-    if (this.saveIdleId && typeof window.cancelIdleCallback === 'function') {
-      window.cancelIdleCallback(this.saveIdleId)
-    }
-
-    this.saveTimeoutId = null
-    this.saveIdleId = null
-  }
-
-  scheduleSave() {
-    this.clearSaveTimers()
-
-    if (this.skipNextSave) {
-      this.skipNextSave = false
-      return
-    }
-
-    this.saveTimeoutId = window.setTimeout(() => {
-      if (typeof window.requestIdleCallback === 'function') {
-        this.saveIdleId = window.requestIdleCallback(() => saveGame(this._state), { timeout: 800 })
-        return
-      }
-
-      saveGame(this._state)
-    }, 320)
+  markStateChanged(updatedAt = new Date().toISOString()) {
+    this.clientRevision += 1
+    this.lastMutationAt = updatedAt
   }
 
   syncUiSnapshotNow() {
@@ -575,7 +543,7 @@ export default class GameStore {
       this.scheduleUiSnapshotSync(uiSync === 'passive' ? PASSIVE_UI_SNAPSHOT_DELAY_MS : UI_SNAPSHOT_DELAY_MS)
     }
 
-    this.scheduleSave()
+    this.markStateChanged()
   }
 
   transact(updater, options) {
@@ -616,17 +584,17 @@ export default class GameStore {
     }))
   }
 
-  replaceState(nextState, { persist = false } = {}) {
-    this.clearSaveTimers()
-    this.skipNextSave = true
-
-    if (persist) {
-      saveGame(nextState)
-    }
-
+  replaceState(nextState, { markDirty = false, updatedAt = null } = {}) {
     this.achievementQueue = []
     this._state = nextState
     this.syncUiSnapshotNow()
+
+    if (markDirty) {
+      this.markStateChanged(updatedAt ?? new Date().toISOString())
+      return
+    }
+
+    this.lastMutationAt = updatedAt ?? this.lastMutationAt ?? new Date().toISOString()
   }
 
   applyPassiveIncome(seconds) {
@@ -670,6 +638,13 @@ export default class GameStore {
     this.lastActivityAt = performance.now()
   }
 
+  getSaveMeta() {
+    return {
+      clientRevision: this.clientRevision,
+      updatedAt: this.lastMutationAt,
+    }
+  }
+
   handleInteraction() {
     this.recordActivity()
     this.isInteracting = true
@@ -677,20 +652,6 @@ export default class GameStore {
     this.interactionTimeoutId = window.setTimeout(() => {
       this.isInteracting = false
     }, 180)
-  }
-
-  handleSaveOnUnload() {
-    try {
-      saveGame(this._state)
-    } catch {
-      // best-effort save on unload
-    }
-  }
-
-  handleVisibilityChange() {
-    if (document.visibilityState === 'hidden') {
-      this.handleSaveOnUnload()
-    }
   }
 
   mineShishki() {
@@ -818,17 +779,16 @@ export default class GameStore {
 
   resetGame() {
     const nextState = createFreshState()
-    clearGame()
-    this.replaceState(nextState)
+    this.replaceState(nextState, { markDirty: true })
   }
 
   exportGameSave() {
     return JSON.parse(JSON.stringify(this._state))
   }
 
-  importGameSave(saveData) {
+  importGameSave(saveData, options = {}) {
     const nextState = mergeState(saveData)
-    this.replaceState(nextState, { persist: true })
+    this.replaceState(nextState, options)
   }
 
   dismissAchievement() {
