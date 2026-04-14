@@ -80,6 +80,7 @@ export default async function handler(req, res) {
     writeSession(res, {
       playerId: `discord:${String(mePayload.id)}`,
       provider: 'discord',
+      playerUsername: mePayload.username ?? null,
       discordUserId: String(mePayload.id),
     })
 

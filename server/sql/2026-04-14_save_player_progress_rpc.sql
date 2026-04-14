@@ -5,7 +5,8 @@ create or replace function public.save_player_progress(
   p_app_version text,
   p_save_data jsonb,
   p_expected_version bigint default null,
-  p_force boolean default false
+  p_force boolean default false,
+  p_player_username text default null
 )
 returns table (
   did_save boolean,
@@ -32,6 +33,7 @@ begin
   if p_force or p_expected_version is null then
     insert into public.player_saves as player_saves (
       player_id,
+      player_username,
       app_version,
       save_version,
       save_data,
@@ -39,13 +41,15 @@ begin
     )
     values (
       p_player_id,
+      p_player_username,
       p_app_version,
       1,
       p_save_data,
       now()
     )
     on conflict (player_id) do update
-      set app_version = excluded.app_version,
+      set player_username = coalesce(excluded.player_username, player_saves.player_username),
+          app_version = excluded.app_version,
           save_data = excluded.save_data,
           save_version = coalesce(player_saves.save_version, 0) + 1,
           updated_at = now()
@@ -64,7 +68,8 @@ begin
   end if;
 
   update public.player_saves as player_saves
-  set app_version = p_app_version,
+  set player_username = coalesce(p_player_username, player_saves.player_username),
+      app_version = p_app_version,
       save_data = p_save_data,
       save_version = p_expected_version + 1,
       updated_at = now()
@@ -87,6 +92,7 @@ begin
 
   insert into public.player_saves (
     player_id,
+    player_username,
     app_version,
     save_version,
     save_data,
@@ -94,6 +100,7 @@ begin
   )
   values (
     p_player_id,
+    p_player_username,
     p_app_version,
     1,
     p_save_data,
