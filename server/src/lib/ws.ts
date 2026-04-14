@@ -36,18 +36,18 @@ export class ServerSocket {
 		console.log("Incoming handler", socket, data)
 
 		const events: any = {
-			"ping": (socket: any, data: any) => socket.emit("pong", data),
-			"client_data": (socket: any, data: any) => {
+			"ping": () => this.sendToWeb(socket, "pong", data),
+			"client_data": () => {
 				console.log("Client data", data)
 				this.addClientToMap(data)
 			},
-			"init": async (socket: any, data: any) => this.addClientToMap(data)
+			"init": async () => this.addClientToMap(data)
 		}
 
 		if (!data?.event) return
 
 		if (data.event in events) {
-			events[data.event](socket, data)
+			events[data.event]()
 		}
 	}
 
@@ -65,7 +65,7 @@ export class ServerSocket {
 			activityClient = socket
 			console.log("Client connected", socket.id)
 
-			socket.on("ws-emit", async (data) => await this.incomingHandler(data, socket))
+			socket.on("ws-emit", async (data) => await this.incomingHandler(activityClient, data))
 
 			this.updateTopList()
 
@@ -75,16 +75,15 @@ export class ServerSocket {
 				await this.updateTopList()
 			})
 		})
-
-		function sendToIframe(event: string, data: any) {
-			if (!activityClient) return
-
-			activityClient.emit("message", {
-				type: "ws-event",
-				event,
-				data
-			})
-		}
 	}
 
+	static sendToWeb = (socket: any, event: string, data: any) => {
+		if (!socket) return
+
+		socket.emit("message", {
+			type: "ws-event",
+			event,
+			data
+		})
+	}
 }

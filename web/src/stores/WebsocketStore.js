@@ -40,9 +40,7 @@ export default class WebsocketStore {
 
   log = (message) => console.log(`WebSocket | ${message}`)
 
-  connectWithServer() {
-    this.emit("init", {})
-  }
+  connectWithServer = () => this.emit("init", {})
 
   init() {
     this.log("Initializing")
