@@ -33,7 +33,7 @@ app.get("/health", (req, res) => {
 	res.status(200).send("OK")
 })
 
-const port = Number(process.env.SERVER_PORT) || 8002
+const port = Number(process.env.SERVER_PORT) || 8003
 
 server.listen(port, "0.0.0.0", () => {
 	console.log("Server running on port " + port)

@@ -45,7 +45,7 @@ export default class WebsocketStore {
 		})
 
 		// runInAction(() => {
-		// 	this.socket = io("http://localhost:8002/") // для тестирования локальный адрес сервера
+		// 	this.socket = io("http://localhost:8003/") // для тестирования локальный адрес сервера
 		// })
 
 		this.socket.on("connect", () => {
@@ -63,7 +63,7 @@ export default class WebsocketStore {
 		})
 
 		this.socket.on("connect_error", (e) => {
-			this.log(`"Connect error": ${e}`)
+			this.log(`Connect error: ${e}`)
 		})
 
 		this.socket.on("top_list", data => {
