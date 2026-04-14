@@ -18,13 +18,13 @@ services:
   db:
     image: postgres:18.3-alpine
     restart: always
-    container_name: postgresql
+    container_name: postgresql_shishki
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=9h834f29f83g53g
       - POSTGRES_DB=ShishkiClicker
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql_shishki/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres -d ShishkiClicker" ]
       interval: 5s
