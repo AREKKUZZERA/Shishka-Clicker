@@ -54,8 +54,8 @@ begin
     return query
     select
       true,
-      v_row.updated_at,
-      v_row.save_version,
+      v_row.updated_at::timestamptz,
+      v_row.save_version::bigint,
       null::jsonb,
       null::timestamptz,
       null::text,
@@ -76,8 +76,8 @@ begin
     return query
     select
       true,
-      v_row.updated_at,
-      v_row.save_version,
+      v_row.updated_at::timestamptz,
+      v_row.save_version::bigint,
       null::jsonb,
       null::timestamptz,
       null::text,
@@ -106,8 +106,8 @@ begin
     return query
     select
       true,
-      v_row.updated_at,
-      v_row.save_version,
+      v_row.updated_at::timestamptz,
+      v_row.save_version::bigint,
       null::jsonb,
       null::timestamptz,
       null::text,
@@ -125,10 +125,10 @@ begin
     false,
     null::timestamptz,
     null::bigint,
-    v_row.save_data,
-    v_row.updated_at,
-    v_row.app_version,
-    v_row.save_version;
+    v_row.save_data::jsonb,
+    v_row.updated_at::timestamptz,
+    v_row.app_version::text,
+    v_row.save_version::bigint;
 end;
 $$;
 
