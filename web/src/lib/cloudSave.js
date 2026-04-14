@@ -7,6 +7,7 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = CLOUD_SAVE_TIMEOU
   try {
     return await fetch(url, {
       ...options,
+      credentials: 'include',
       signal: controller.signal,
     })
   } catch (error) {

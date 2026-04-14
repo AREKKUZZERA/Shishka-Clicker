@@ -5,7 +5,8 @@ create or replace function public.save_player_progress(
   p_app_version text,
   p_save_data jsonb,
   p_expected_version bigint default null,
-  p_force boolean default false
+  p_force boolean default false,
+  p_player_username text default null
 )
 returns table (
   did_save boolean,
@@ -32,6 +33,7 @@ begin
   if p_force or p_expected_version is null then
     insert into public.player_saves as player_saves (
       player_id,
+      player_username,
       app_version,
       save_version,
       save_data,
@@ -39,13 +41,15 @@ begin
     )
     values (
       p_player_id,
+      p_player_username,
       p_app_version,
       1,
       p_save_data,
       now()
     )
     on conflict (player_id) do update
-      set app_version = excluded.app_version,
+      set player_username = coalesce(excluded.player_username, player_saves.player_username),
+          app_version = excluded.app_version,
           save_data = excluded.save_data,
           save_version = coalesce(player_saves.save_version, 0) + 1,
           updated_at = now()
@@ -54,8 +58,8 @@ begin
     return query
     select
       true,
-      v_row.updated_at,
-      v_row.save_version,
+      v_row.updated_at::timestamptz,
+      v_row.save_version::bigint,
       null::jsonb,
       null::timestamptz,
       null::text,
@@ -63,21 +67,22 @@ begin
     return;
   end if;
 
-  update public.player_saves
-  set app_version = p_app_version,
+  update public.player_saves as player_saves
+  set player_username = coalesce(p_player_username, player_saves.player_username),
+      app_version = p_app_version,
       save_data = p_save_data,
       save_version = p_expected_version + 1,
       updated_at = now()
-  where player_id = p_player_id
-    and coalesce(save_version, 0) = p_expected_version
+  where player_saves.player_id = p_player_id
+    and coalesce(player_saves.save_version, 0) = p_expected_version
   returning * into v_row;
 
   if found then
     return query
     select
       true,
-      v_row.updated_at,
-      v_row.save_version,
+      v_row.updated_at::timestamptz,
+      v_row.save_version::bigint,
       null::jsonb,
       null::timestamptz,
       null::text,
@@ -87,6 +92,7 @@ begin
 
   insert into public.player_saves (
     player_id,
+    player_username,
     app_version,
     save_version,
     save_data,
@@ -94,6 +100,7 @@ begin
   )
   values (
     p_player_id,
+    p_player_username,
     p_app_version,
     1,
     p_save_data,
@@ -106,8 +113,8 @@ begin
     return query
     select
       true,
-      v_row.updated_at,
-      v_row.save_version,
+      v_row.updated_at::timestamptz,
+      v_row.save_version::bigint,
       null::jsonb,
       null::timestamptz,
       null::text,
@@ -117,18 +124,18 @@ begin
 
   select *
   into v_row
-  from public.player_saves
-  where player_id = p_player_id;
+  from public.player_saves as player_saves
+  where player_saves.player_id = p_player_id;
 
   return query
   select
     false,
     null::timestamptz,
     null::bigint,
-    v_row.save_data,
-    v_row.updated_at,
-    v_row.app_version,
-    v_row.save_version;
+    v_row.save_data::jsonb,
+    v_row.updated_at::timestamptz,
+    v_row.app_version::text,
+    v_row.save_version::bigint;
 end;
 $$;
 

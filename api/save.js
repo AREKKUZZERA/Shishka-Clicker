@@ -22,7 +22,7 @@ function isMissingSaveRpc(error) {
   )
 }
 
-async function saveViaRpc({ supabase, playerId, appVersion, save, expectedVersion, force }) {
+async function saveViaRpc({ supabase, playerId, playerUsername, appVersion, save, expectedVersion, force }) {
   const { data, error } = await supabase
     .rpc('save_player_progress', {
       p_player_id: playerId,
@@ -30,6 +30,7 @@ async function saveViaRpc({ supabase, playerId, appVersion, save, expectedVersio
       p_save_data: save,
       p_expected_version: expectedVersion,
       p_force: force,
+      p_player_username: playerId.startsWith('discord:') ? playerUsername ?? null : null,
     })
     .single()
 
@@ -148,12 +149,14 @@ export default async function handler(req, res) {
 
     const supabase = createServerSupabase()
     const playerId = String(session.playerId)
+    const playerUsername = session.playerUsername ?? null
     let result
 
     try {
       result = await saveViaRpc({
         supabase,
         playerId,
+        playerUsername,
         appVersion,
         save,
         expectedVersion,

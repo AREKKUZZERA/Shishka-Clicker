@@ -25,16 +25,18 @@ function parseCookies(cookieHeader = '') {
 }
 
 function serializeCookie(name, value, { maxAge = SESSION_TTL_SECONDS, secure = process.env.NODE_ENV === 'production' } = {}) {
+  const sameSite = secure ? 'None' : 'Lax'
   const parts = [
     `${name}=${encodeURIComponent(value)}`,
     'Path=/',
     'HttpOnly',
-    'SameSite=Lax',
+    `SameSite=${sameSite}`,
     `Max-Age=${maxAge}`,
   ]
 
   if (secure) {
     parts.push('Secure')
+    parts.push('Partitioned')
   }
 
   return parts.join('; ')
@@ -89,6 +91,7 @@ export function readSession(req) {
     return {
       playerId: String(payload.sub),
       provider: payload.provider ?? 'unknown',
+      playerUsername: payload.playerUsername ?? null,
       discordUserId: payload.discordUserId ?? null,
       deviceId: payload.deviceId ?? null,
     }
@@ -106,6 +109,7 @@ export function writeSession(res, session) {
   const encodedPayload = encodePayload({
     sub: String(session.playerId),
     provider: session.provider,
+    playerUsername: session.playerUsername ?? null,
     discordUserId: session.discordUserId ?? null,
     deviceId: session.deviceId ?? null,
     exp: Date.now() + SESSION_TTL_SECONDS * 1000,
