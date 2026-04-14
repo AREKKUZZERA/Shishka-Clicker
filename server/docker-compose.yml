@@ -3,7 +3,7 @@ services:
     container_name: shishki_server
     restart: always
     env_file:
-      - ./server/.env
+      - .env
     build:
       context: .
       dockerfile: Dockerfile
