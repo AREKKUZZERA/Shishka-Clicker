@@ -13,7 +13,7 @@ services:
       db:
         condition: service_healthy
     command:
-      sh -c "cd /server && npx prisma migrate deploy && node ./dist/index.js"
+      sh -c "cd /server && npx prisma migrate deploy && pnpm exec prisma generate && node ./dist/index.js"
 
   db:
     image: postgres:18.3-alpine
