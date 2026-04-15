@@ -4,9 +4,9 @@ import { useWebsocketStore } from '../../stores/StoresProvider.jsx'
 import { formatNumber } from '../../lib/format.js'
 
 const LEADERBOARD_TABS = [
-  { id: 'shishki', label: 'ШИШКИ', valueLabel: 'за всё время' },
-  { id: 'shards', label: 'ОСКОЛКИ', valueLabel: 'всего получено' },
-  { id: 'clicks', label: 'КЛИКИ', valueLabel: 'за всё время' },
+  { id: 'shishki', label: 'шишки', valueLabel: 'за всё время' },
+  { id: 'shards', label: 'осколки', valueLabel: 'всего получено' },
+  { id: 'clicks', label: 'клики', valueLabel: 'за всё время' },
 ]
 
 function getStateCopy(state) {

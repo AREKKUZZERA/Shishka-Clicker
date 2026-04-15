@@ -11,6 +11,10 @@
   },
   "dependencies": {
     "@discord/embedded-app-sdk": "^2.4.1",
+    "@pxlkit/core": "^1.2.3",
+    "@pxlkit/gamification": "^1.2.3",
+    "@pxlkit/social": "^1.2.3",
+    "@pxlkit/ui": "^1.2.3",
     "mobx": "^6.15.0",
     "mobx-react-lite": "^4.1.1",
     "react": "^19.2.4",

@@ -1,4 +1,8 @@
 import { isValidElement, memo, useEffect, useMemo, useRef } from 'react'
+import { PxlKitIcon } from '@pxlkit/core'
+import { Coin, Gem, Lightning, Scroll, Trophy } from '@pxlkit/gamification'
+import { Community } from '@pxlkit/social'
+import { Robot } from '@pxlkit/ui'
 import { formatNumber } from '../../lib/format'
 import { ContributionBar } from './ContributionBar.jsx'
 import { ConeIcon } from '../ui/ConeIcon'
@@ -15,6 +19,17 @@ const ICON_MAP = {
   rebirth: '♻️',
   shards: '💎',
   reward: '🔮',
+}
+
+const PIXEL_ICON_MAP = {
+  money: Coin,
+  knowledge: Scroll,
+  mega: Lightning,
+  prize: Trophy,
+  rebirth: Community,
+  shards: Gem,
+  reward: Trophy,
+  robot: Robot,
 }
 
 function buildAnimatedDigits(previousValue, nextValue) {
@@ -45,6 +60,7 @@ function getChangedDigitIndexes(previousValue, nextValue) {
 export const StatCard = memo(function StatCard({
   icon = null,
   iconKey = '',
+  variant = 'default',
   label,
   value,
   hint,
@@ -68,10 +84,22 @@ export const StatCard = memo(function StatCard({
   const resolvedIcon = typeof icon === 'string'
     ? ICON_MAP[icon] ?? icon
     : icon ?? (iconKey ? ICON_MAP[iconKey] ?? iconKey : null)
+  const pixelIcon = iconKey ? PIXEL_ICON_MAP[iconKey] ?? null : null
+  const iconNode = variant === 'pixel' && pixelIcon
+    ? (
+      <PxlKitIcon
+        icon={pixelIcon}
+        size={18}
+        colorful
+        className="stat-card__pixel-icon"
+        aria-label={label ?? iconKey}
+      />
+    )
+    : resolvedIcon
   const items = compact ? (contributions?.items?.slice(0, 3) ?? []) : (contributions?.items ?? [])
   const total = items.reduce((sum, entry) => sum + entry.value, 0) ?? 0
   const topContributors = compact ? items.slice(0, 3) : []
-  const cardClassName = ['stat-card', compact ? 'stat-card--compact' : '', className].filter(Boolean).join(' ')
+  const cardClassName = ['stat-card', `stat-card--${variant}`, compact ? 'stat-card--compact' : '', className].filter(Boolean).join(' ')
   const valueClasses = ['stat-card__value', valueClassName].filter(Boolean).join(' ')
   const hintClasses = ['stat-card__hint', hintClassName].filter(Boolean).join(' ')
   const animatedDigits = useMemo(
@@ -131,7 +159,7 @@ export const StatCard = memo(function StatCard({
     <div ref={cardRef} className={cardClassName} style={{ animationDelay: `${delay * 60}ms` }}>
       {(resolvedIcon || label) && (
         <div className="stat-card__head">
-          {resolvedIcon ? <span className="stat-card__icon">{resolvedIcon}</span> : null}
+          {iconNode ? <span className="stat-card__icon">{iconNode}</span> : null}
           {label ? <span className="stat-card__label">{label}</span> : null}
         </div>
       )}

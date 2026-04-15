@@ -11,6 +11,18 @@ importers:
       '@discord/embedded-app-sdk':
         specifier: ^2.4.1
         version: 2.4.1
+      '@pxlkit/core':
+        specifier: ^1.2.3
+        version: 1.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      '@pxlkit/gamification':
+        specifier: ^1.2.3
+        version: 1.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      '@pxlkit/social':
+        specifier: ^1.2.3
+        version: 1.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      '@pxlkit/ui':
+        specifier: ^1.2.3
+        version: 1.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       mobx:
         specifier: ^6.15.0
         version: 6.15.0
@@ -220,6 +232,21 @@ packages:
 
   '@oxc-project/types@0.123.0':
     resolution: {integrity: sha512-YtECP/y8Mj1lSHiUWGSRzy/C6teUKlS87dEfuVKT09LgQbUsBW1rNg+MiJ4buGu3yuADV60gbIvo9/HplA56Ew==}
+
+  '@pxlkit/core@1.2.3':
+    resolution: {integrity: sha512-ow8tWMEIcwaJYd76IkdUVuowG+YPJVChINIkCjI5MCJa9LvM2yOa47tuHorunnLUZnxROD6GSKonFBfFiBtK6w==}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+
+  '@pxlkit/gamification@1.2.3':
+    resolution: {integrity: sha512-H7L/n3syHFh5tlEeOoBhP4kTgwulRYDXNr5ykAFkkYPbI+xTcfXWfUzNr/HK8QzcrHkEr7JD777/mtvTaB5pQw==}
+
+  '@pxlkit/social@1.2.3':
+    resolution: {integrity: sha512-lqvvPPqm/ABiWkxYYNr8FjpfRprp8AnZYFpiWgZjytygirma3PeZuRQ+JYpO056eXv0OFR2rQleYhOn4emUJHA==}
+
+  '@pxlkit/ui@1.2.3':
+    resolution: {integrity: sha512-cTkGoiO+yTJ4z9AHFhpRDuIg+xwM8QIM8cTc2SOUq6hkGXQKvAQwUMuUfyxo9rElZLMjxtcA1cuY7qXsuFUryA==}
 
   '@rolldown/binding-android-arm64@1.0.0-rc.13':
     resolution: {integrity: sha512-5ZiiecKH2DXAVJTNN13gNMUcCDg4Jy8ZjbXEsPnqa248wgOVeYRX0iqXXD5Jz4bI9BFHgKsI2qmyJynstbmr+g==}
@@ -1308,6 +1335,32 @@ snapshots:
     optional: true
 
   '@oxc-project/types@0.123.0': {}
+
+  '@pxlkit/core@1.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
+    dependencies:
+      react: 19.2.5
+      react-dom: 19.2.5(react@19.2.5)
+
+  '@pxlkit/gamification@1.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
+    dependencies:
+      '@pxlkit/core': 1.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+    transitivePeerDependencies:
+      - react
+      - react-dom
+
+  '@pxlkit/social@1.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
+    dependencies:
+      '@pxlkit/core': 1.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+    transitivePeerDependencies:
+      - react
+      - react-dom
+
+  '@pxlkit/ui@1.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)':
+    dependencies:
+      '@pxlkit/core': 1.2.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+    transitivePeerDependencies:
+      - react
+      - react-dom
 
   '@rolldown/binding-android-arm64@1.0.0-rc.13':
     optional: true
