@@ -4,9 +4,9 @@ import { useWebsocketStore } from '../../stores/StoresProvider.jsx'
 import { formatNumber } from '../../lib/format.js'
 
 const LEADERBOARD_TABS = [
-  { id: 'shishki', label: 'Шишки', valueLabel: 'за всё время' },
-  { id: 'shards', label: 'Осколки', valueLabel: 'всего получено' },
-  { id: 'clicks', label: 'Клики', valueLabel: 'за всё время' },
+  { id: 'shishki', label: 'ШИШКИ', valueLabel: 'за всё время' },
+  { id: 'shards', label: 'ОСКОЛКИ', valueLabel: 'всего получено' },
+  { id: 'clicks', label: 'КЛИКИ', valueLabel: 'за всё время' },
 ]
 
 function getStateCopy(state) {
@@ -48,7 +48,6 @@ export const LeaderboardWidget = observer(function LeaderboardWidget() {
           <div className="leaderboard-widget__head">
             <div>
               <div className="leaderboard-widget__kicker">Рейтинг</div>
-              <div className="leaderboard-widget__title">Топ-5</div>
             </div>
             <div className="leaderboard-widget__summary">
               <span>{activeMeta.label}</span>
