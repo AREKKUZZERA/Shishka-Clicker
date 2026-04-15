@@ -18,6 +18,7 @@ import { resolvePlayerId } from '../lib/playerId.js'
 const DiscordActivityContext = createContext(null)
 const AUTO_SYNC_INTERVAL_MS = 2500
 const EMPTY_PROGRESS_SCORE_THRESHOLD = 25
+const BOOT_SYNC_GRACE_MS = 6000
 
 function sumLevels(map) {
   if (!map || typeof map !== 'object') return 0
@@ -111,6 +112,38 @@ export function DiscordActivityProvider({ children }) {
   const lastPresenceSignatureRef = useRef('')
   const discordBootstrapStartedRef = useRef(false)
   const offlineModeRef = useRef(false)
+
+  const waitForBootGrace = useCallback((promise, timeoutMs) => (
+    new Promise((resolve) => {
+      let settled = false
+      const timeoutId = window.setTimeout(() => {
+        if (settled) return
+        settled = true
+        resolve('timeout')
+      }, timeoutMs)
+
+      Promise.resolve(promise)
+        .then(() => {
+          if (settled) return
+          settled = true
+          window.clearTimeout(timeoutId)
+          resolve('resolved')
+        })
+        .catch((error) => {
+          if (settled) return
+          settled = true
+          window.clearTimeout(timeoutId)
+
+          setState((current) => ({
+            ...current,
+            syncState: 'error',
+            syncError: error instanceof Error ? error.message : 'initial_sync_failed',
+          }))
+
+          resolve('rejected')
+        })
+    })
+  ), [])
 
   const setSyncState = useCallback((patch) => {
     setState((current) => ({
@@ -448,7 +481,6 @@ export function DiscordActivityProvider({ children }) {
         discordSdkRef.current = session?.discordSdk ?? null
         lastPresenceSignatureRef.current = ''
         websocketStore.setUser(isActivity ? session.user : null)
-        websocketStore.start()
 
         setState((current) => ({
           ...current,
@@ -464,12 +496,11 @@ export function DiscordActivityProvider({ children }) {
           presenceError: null,
         }))
 
-        const leaderboardPromise = websocketStore.refreshLeaderboard()
         const syncPromise = synchronizeNow({
           allowLegacyMigration: true,
         })
 
-        await Promise.allSettled([syncPromise, leaderboardPromise])
+        await waitForBootGrace(syncPromise, BOOT_SYNC_GRACE_MS)
 
         if (cancelled || offlineModeRef.current) return
 
@@ -477,6 +508,9 @@ export function DiscordActivityProvider({ children }) {
           ...current,
           saveReady: true,
         }))
+
+        websocketStore.start()
+        void websocketStore.refreshLeaderboard()
       } catch (error) {
         if (cancelled || offlineModeRef.current) return
 
@@ -505,7 +539,7 @@ export function DiscordActivityProvider({ children }) {
     return () => {
       cancelled = true
     }
-  }, [synchronizeNow, websocketStore])
+  }, [synchronizeNow, waitForBootGrace, websocketStore])
 
   useEffect(() => {
     if (!state.playerId || !state.saveReady || state.offlineMode) return undefined
