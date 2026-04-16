@@ -1,5 +1,6 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 
+
 const LEADERBOARD_REFRESH_MS = 15_000
 
 export const WEBSOCKET_STATE = {

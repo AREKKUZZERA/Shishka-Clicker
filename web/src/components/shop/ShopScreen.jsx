@@ -4,6 +4,7 @@ import { Coin, Gem, MagicWand, PxlKitIcon, Scroll, SocialStar, Target, Trophy, C
 import { useGameStore } from '../../stores/StoresProvider.jsx'
 import { ShopCard } from './ShopCard'
 
+
 const pxl = (icon, label, size = 18) => (
   <PxlKitIcon icon={icon} size={size} colorful className="pixel-inline-icon" aria-label={label} />
 )

@@ -26,6 +26,7 @@ import denySound from '../../assets/audio/ui/wpn_denyselect.mp3'
 import { LockBadge } from './LockBadge.jsx'
 import { ConeIcon } from '../ui/ConeIcon'
 
+
 const pxl = (icon, label, size = 22) => (
   <PxlKitIcon icon={icon} size={size} colorful className="pixel-inline-icon" aria-label={label} />
 )
