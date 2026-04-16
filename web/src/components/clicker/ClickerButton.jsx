@@ -15,8 +15,11 @@ import { useSettingsVisuals } from '../../context/SettingsContext'
 import { useNav } from '../../context/NavContext'
 import { useSound } from '../../hooks/useSound'
 import { formatNumber } from '../../lib/format'
-import racoonDefaultImage from '../../assets/racoon-default_128x128.png'
-import racoonAltImage from '../../assets/racoon-default_128x128_2.png'
+import racoonDefaultImage from '../../assets/racoon-pose-128x128.png'
+import racoonAltImage from '../../assets/racoon-pose-128x128_2.png'
+import racoonIdleImage from '../../assets/racoon-pose-idle-128x128.png'
+import racoonMegaImage from '../../assets/racoon-pose-mega-128x128.png'
+import racoonMegaAltImage from '../../assets/racoon-pose-mega2-128x128.png'
 import coneImage from '../../assets/cone.png'
 import coneV2Image from '../../assets/conev2.png'
 import shishkaSound from '../../assets/audio/ui/shishka.mp3'
@@ -776,11 +779,13 @@ const ClickerEffectsOverlay = memo(ClickerEffectsOverlayInner)
 
 export const ClickerButton = observer(function ClickerButton() {
   const [visualState, setVisualState] = useState('idle')
+  const [heroPose, setHeroPose] = useState('idle')
   const [clickerLabel, setClickerLabel] = useState(() =>
     pickRandom(GREETING_LABELS),
   )
   const [isLabelShaking, setIsLabelShaking] = useState(false)
-  const [isAltHeroImage, setIsAltHeroImage] = useState(false)
+  const [normalHeroFrame, setNormalHeroFrame] = useState(0)
+  const [megaHeroFrame, setMegaHeroFrame] = useState(0)
 
   const visualTimeoutRef = useRef(null)
   const idleTimeoutRef = useRef(null)
@@ -846,7 +851,12 @@ export const ClickerButton = observer(function ClickerButton() {
 
   const isCharged =
     visualEffectToggles.clickAnimations && visualState !== 'idle'
-  const heroImage = isAltHeroImage ? racoonAltImage : racoonDefaultImage
+  const heroImage =
+    heroPose === 'idle'
+      ? racoonIdleImage
+      : heroPose === 'mega'
+        ? [racoonMegaImage, racoonMegaAltImage][megaHeroFrame]
+        : [racoonDefaultImage, racoonAltImage][normalHeroFrame]
 
   useEffect(() => {
     return () => {
@@ -891,6 +901,7 @@ export const ClickerButton = observer(function ClickerButton() {
   function scheduleIdleLabel() {
     if (idleTimeoutRef.current) window.clearTimeout(idleTimeoutRef.current)
     idleTimeoutRef.current = window.setTimeout(() => {
+      setHeroPose('idle')
       setClickerLabel(pickRandom(IDLE_LABELS))
       lastTierIndexRef.current = -1
       setIsLabelShaking(false)
@@ -946,7 +957,6 @@ export const ClickerButton = observer(function ClickerButton() {
       return
     }
 
-    setIsAltHeroImage((current) => !current)
     play()
 
     const result = mineShishki()
@@ -955,6 +965,14 @@ export const ClickerButton = observer(function ClickerButton() {
       : result.isMega
         ? 'mega'
         : 'tap'
+    const nextHeroPose = result.isMega || result.isEmojiExplosion ? 'mega' : 'tap'
+
+    setHeroPose(nextHeroPose)
+    if (nextHeroPose === 'mega') {
+      setMegaHeroFrame((current) => (current + 1) % 2)
+    } else {
+      setNormalHeroFrame((current) => (current + 1) % 2)
+    }
 
     if (visualEffectToggles.clickAnimations) {
       armVisualState(nextVisualState)
