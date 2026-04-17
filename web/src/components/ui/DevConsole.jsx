@@ -52,7 +52,7 @@ const COMMANDS_DESC = {
 }
 
 const EMPTY_LOG_HINT = {
-  disabled: ['Введите секретную команду для активации читов.', 'Или help для списка базовых команд.'],
+  disabled: ['Короче, читы - бан, кемперство - бан, оскорбление - бан, оскорбление администрации - расстрел потом бан. Всем удачи.', 'Введите help для помощи.'],
   enabled: ['Введите help для списка команд.', 'Доступны give, set, status и sv.cheats false.'],
 }
 
@@ -199,9 +199,6 @@ const DevConsolePanel = observer(function DevConsolePanel() {
             />
             <span>PXL.CONSOLE</span>
           </span>
-          <span className={`dev-console__status dev-console__status--${cheatsEnabled ? 'armed' : 'idle'}`}>
-            {cheatsEnabled ? 'ARMED' : 'IDLE'}
-          </span>
         </div>
         <div className="dev-console__meta">
           <span>LINES {log.length}</span>
@@ -210,8 +207,7 @@ const DevConsolePanel = observer(function DevConsolePanel() {
       </div>
 
       <div className="dev-console__subheader">
-        <span>Backquote toggles terminal</span>
-        <span>{cheatsEnabled ? 'Developer controls online' : 'Secret command required'}</span>
+        <span>{cheatsEnabled ? 'Developer console' : 'APPYДОР'}</span>
       </div>
 
       <div className="dev-console__log">
@@ -243,7 +239,7 @@ const DevConsolePanel = observer(function DevConsolePanel() {
       ) : null}
 
       <form className="dev-console__input-row" onSubmit={handleSubmit}>
-        <span className="dev-console__prompt">root@pixel:~$</span>
+        <span className="dev-console__prompt">root@pixel:</span>
         <input
           ref={inputRef}
           className="dev-console__input"
