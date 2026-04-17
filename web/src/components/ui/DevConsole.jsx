@@ -49,7 +49,6 @@ const COMMANDS_DESC = {
   date: 'показывает текущую дату',
   clear: 'очищает консоль',
   help: 'выводит список команд',
-  'sv.cheats true': 'включает dev-панель',
 }
 
 const EMPTY_LOG_HINT = {
@@ -83,7 +82,7 @@ const DevConsolePanel = observer(function DevConsolePanel() {
     },
     'sv.cheats true': () => {
       setCheatsEnabled(true)
-      pushLog('Читы активированы. Админ-панель открыта.', 'success')
+      pushLog('success')
     },
   }
 
@@ -120,7 +119,7 @@ const DevConsolePanel = observer(function DevConsolePanel() {
         return
       }
 
-      pushLog('Не угадал, такого нет.', 'error')
+      pushLog('error')
       await flashWrongOverlay()
       return
     }
@@ -171,7 +170,7 @@ const DevConsolePanel = observer(function DevConsolePanel() {
       return
     }
 
-    pushLog('Неизвестная команда. Введите help.', 'error')
+    pushLog('error')
     await flashWrongOverlay()
   }
 
