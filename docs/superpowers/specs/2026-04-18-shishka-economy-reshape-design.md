@@ -1,0 +1,456 @@
+# Shishka Economy Reshape Design
+
+**Date:** 2026-04-18
+**Status:** Draft approved in chat, written for review
+**Scope:** Full economy reshape for the clicker loop, prestige loop, market loop, content tone, and save format
+
+## Goal
+
+Rebuild the game economy around a Cookie Clicker style progression loop while preserving the existing post-ironic identity of the project.
+
+The new economy must:
+
+- center the run around one primary production currency;
+- add a prestige loop with repeatable quotas and manual reset timing;
+- add a rare long-tail meta resource similar in role to sugar lumps;
+- add a dedicated market and investment layer on top of the core clicker loop;
+- replace the current tone with harsher бытовая post-irony about marketplace life, credit traps, AI automation, gray economy, delivery chaos, reselling, info hustle, and warehouse absurdity;
+- intentionally break compatibility with old saves.
+
+## Non-Goals
+
+- No migration of old player progress.
+- No use of direct real brand names in content text.
+- No political satire.
+- No attempt to preserve the current `money` and `knowledge` economy as a first-class system.
+
+## Design Direction
+
+The project should follow Cookie Clicker structurally, but not aesthetically or textually.
+
+The target result is not a clone with renamed cookies. It is a Russian post-ironic satire about runaway marketplace capitalism, warehouse hell, shady logistics, AI-generated sludge, and gray-market speculation, with `шишки` as the center of the absurd machine.
+
+## Content Tone
+
+Tone rules:
+
+- harsh бытовая post-irony;
+- absurd capitalism, debt treadmill, fulfillment chaos, reseller folklore;
+- references to recognizable Russian realities through parody and transparent archetypes, not direct brands;
+- no direct political satire;
+- no clean corporate/product tone;
+- jokes must feel written from inside the ecosystem, not as detached internet memes.
+
+Examples of allowed thematic areas:
+
+- pickup point hell;
+- warehouse sorting and shortages;
+- fake discounts and cashback bugs;
+- gray imports;
+- resellers and scarcity hype;
+- info hustle and marketplace gurus;
+- AI automation and content farms;
+- credit pressure and installment traps;
+- courier rush and last-mile chaos.
+
+Examples of naming style:
+
+- `ПВЗ на окраине`
+- `Фиолетовый гигант`
+- `Жёлтый маркет`
+- `Серый завоз`
+- `Инфошум`
+- `Кредитный конвейер`
+
+## Core Economy
+
+### Run Currency
+
+`Shishki` become the only primary run currency.
+
+They are used for:
+
+- manual clicking income;
+- passive production income;
+- buying buildings;
+- buying run upgrades;
+- buying market goods;
+- interacting with market commissions and brokers.
+
+The game should no longer rely on `money` and `knowledge` as parallel run balances.
+
+### Prestige Currency
+
+`Heavenly Shishki` replace the current prestige shard role.
+
+They are earned only by closing run quotas and are spent only in the meta layer around rebirth.
+
+### Rare Meta Resource
+
+`Tar Lumps` act as the long-tail rare resource in the role of sugar lumps.
+
+They are not meant to be farmed as a normal run balance. They accumulate over time and are used for building leveling and late optimization.
+
+### Market Layer
+
+The market is not a separate wallet. It is a trading layer that operates using `shishki`.
+
+The player buys and sells absurd investment goods whose prices fluctuate by archetype.
+
+## Run Loop
+
+The new run loop:
+
+1. Click for `shishki`.
+2. Buy buildings for `shishki/sec`.
+3. Buy upgrades that amplify clicking, buildings, events, and market behavior.
+4. Unlock and use the market for spikes, speculation, and timing plays.
+5. Trigger and exploit random event windows.
+6. Close quota milestones for `heavenly shishki`.
+7. Choose when to rebirth.
+8. Spend `heavenly shishki`, repeat at larger scale.
+
+## Building System
+
+Buildings become the main production backbone, replacing the current central role of `subscriptions`.
+
+Each building:
+
+- costs `15%` more than the previous purchase of the same building, matching Cookie Clicker style scaling;
+- adds base `shishki/sec`;
+- can be affected by upgrades;
+- can be leveled with `tar lumps` up to level `10`;
+- grants milestone perks at building level `1`, `5`, and `10`.
+
+Proposed building ladder:
+
+1. `Сборщик шишек у гаражей`
+2. `ПВЗ на окраине`
+3. `Серая сортировка`
+4. `Бригада самозанятых`
+5. `Ларёк перепродажи`
+6. `Смоляной цех`
+7. `Подпольный фулфилмент`
+8. `Фабрика карточек товара`
+9. `Агентство инфошума`
+10. `Кредитный конвейер`
+11. `Автопарк последней мили`
+12. `Храм оптимизации`
+13. `Нейро-ферма контента`
+14. `Биржа серого импорта`
+15. `Министерство шишечной логистики`
+
+## Upgrade System
+
+Run upgrades remain as a separate layer, but are rewritten around the new economy.
+
+Upgrade categories:
+
+- click power upgrades;
+- building-specific multipliers;
+- cross-building synergy upgrades;
+- event-strength upgrades;
+- market and commission upgrades;
+- late-run accelerators.
+
+Upgrade names and descriptions must follow the approved tone, using marketplace and gray-economy satire instead of the current student-and-AI framing.
+
+## Market and Investments
+
+The market opens after the player buys the first `Ларёк перепродажи`.
+
+The player trades goods using `shishki`. Market play should be optional but strong enough to reward skill and timing.
+
+Goods should have recognizable archetypes:
+
+- stable;
+- volatile;
+- hype-driven;
+- trash-tier;
+- manipulated;
+- rare scarcity goods.
+
+Proposed goods set:
+
+- `Остатки с ПВЗ`
+- `Паль`
+- `Параллельный завоз`
+- `Кэшбэк-купоны`
+- `Возвратный товар`
+- `Курьерские слоты`
+- `Дефицитные коробки`
+- `Инфокурс по маркетплейсам`
+- `Нейро-обложки`
+- `Серые расходники`
+
+Supporting systems:
+
+- broker count or broker tier to reduce fees;
+- per-good behavior profile;
+- commission on trade;
+- unlock pacing by run progression;
+- event hooks that temporarily distort one market segment.
+
+The market should feel like a satire of speculative marketplace folklore, not a realistic finance sim.
+
+## Random Event Layer
+
+The event layer replaces the role of golden cookies.
+
+Events appear as short windows that reward clicking, timing, or opportunistic switching.
+
+Proposed event themes:
+
+- `Ошибочный кэшбэк`
+- `Серый завоз`
+- `Распродажа с багом`
+- `Склад прорвало товаром`
+- `Инфоцыганский прогрев`
+- `Нейросеть выдала конверсию`
+- `Возврат без возврата`
+- `Курьер успел`
+- `Карточку не забанили`
+
+Effect categories:
+
+- instant `shishki` burst;
+- temporary production multiplier;
+- temporary click multiplier;
+- temporary purchase discount;
+- temporary market spike;
+- chained timing event with escalating rewards.
+
+## Prestige and Rebirth
+
+### Quota Rule
+
+Each run has a quota: accumulate `X shishki during the current life`.
+
+Closing a quota immediately grants `+1 heavenly shishka`.
+
+After a quota is closed, the next quota target rises immediately inside the same life. This means the player can close multiple quotas before rebirthing.
+
+### Rebirth Timing
+
+Rebirth is manual.
+
+The player decides when to reset. They may rebirth after closing one quota or continue pushing for additional quota closures before resetting.
+
+### Rebirth Reset
+
+Rebirth resets:
+
+- current `shishki`;
+- owned buildings;
+- run upgrades;
+- market portfolio and temporary market state;
+- short-term event state.
+
+Rebirth keeps:
+
+- `heavenly shishki`;
+- `tar lumps`;
+- prestige upgrades purchased with `heavenly shishki`;
+- achievements and lifetime statistics.
+
+### Prestige Spending
+
+`Heavenly shishki` can only be spent in the meta layer after rebirth.
+
+Example prestige upgrades:
+
+- `Небесная смола` for global production multiplier;
+- `Культ складского чуда` for a stronger early ramp;
+- `Серая аккредитация` for earlier market access;
+- `Гиперлогистика` for stronger random events;
+- `Налоговая слепота` for lower market fees;
+- `Конвейер абсурда` for late building scaling;
+- `Пыль архивов` for faster tar lump progression.
+
+## Tar Lumps
+
+`Tar lumps` are the long-tail optimization resource.
+
+Rules:
+
+- grow on a real-time cadence, not as normal run income;
+- spent to level buildings from `0` to `10`;
+- building levels persist through rebirths and grant permanent structural perks to the associated building line;
+- key breakpoints are at `1`, `5`, and `10`.
+
+Examples of building specialization unlocks:
+
+- pickup point building gains a chance for `lost package` style bonus events;
+- fulfillment building reduces market friction for a subset of goods;
+- AI content farm amplifies hype-based event effects.
+
+## Save and Versioning
+
+Old saves will not be migrated.
+
+Required changes:
+
+- new local save key;
+- new save export version;
+- updated import validation that rejects legacy economy payloads as incompatible;
+- cloud save payload continues to use JSON, but the client-side schema changes completely.
+
+This is an intentional hard break in progression continuity.
+
+## State Model Changes
+
+### Remove From Primary Run State
+
+- `money`
+- `knowledge`
+- `moneyPerSecond`
+- `knowledgePerSecond`
+- any economy logic centered on these balances
+
+### Keep and Rename
+
+- `shishki`
+- `manualClicks`
+- lifetime and total `shishki` metrics
+- `prestigeShards` -> `heavenlyShishki`
+
+### Add
+
+- `tarLumps`
+- `buildings`
+- `market`
+- `eventState`
+- quota progression fields for current life
+- new prestige upgrade tree aligned to `heavenlyShishki`
+
+## UI Mapping
+
+### Clicker Screen
+
+Show:
+
+- current `shishki`;
+- `shishki/sec`;
+- current quota progress;
+- `heavenly shishki`;
+- `tar lumps`;
+- active event state.
+
+### Shop Screen
+
+Rewrite as:
+
+- buildings tab/section;
+- upgrades tab/section.
+
+### Meta Screen
+
+Rewrite around:
+
+- quota chain;
+- rebirth action;
+- `heavenly shishki`;
+- prestige upgrade tree;
+- `tar lumps` and building levels.
+
+### Market Screen
+
+Add a dedicated screen for:
+
+- price board;
+- owned positions;
+- fees and broker effects;
+- market event modifiers.
+
+### Dev Console
+
+Rewrite resource commands to support only the new economy model.
+
+## Code Mapping
+
+### `web/src/game/config.js`
+
+Becomes the main definition source for:
+
+- new starting state;
+- building definitions;
+- run upgrade definitions;
+- market goods;
+- event definitions;
+- tar lump rules.
+
+### `web/src/game/metaConfig.js`
+
+Rewritten to define:
+
+- quota growth per life;
+- quota closure reward logic;
+- rebirth preview;
+- prestige upgrade costs and effects;
+- `heavenly shishki` progression.
+
+### `web/src/stores/GameStore.js`
+
+This file becomes the main implementation site for:
+
+- production from buildings;
+- click logic under the new economy;
+- quota chain updates;
+- rebirth reset rules;
+- market transactions;
+- event spawning and resolution;
+- tar lump progression;
+- new save shape handling.
+
+### UI Components
+
+Primary rewrites expected in:
+
+- `web/src/components/shop/ShopScreen.jsx`
+- `web/src/components/meta/MetaScreen.jsx`
+- `web/src/components/clicker/ProgressOverview.jsx`
+- `web/src/components/ui/DevConsole.jsx`
+
+New market-specific components are expected:
+
+- `MarketScreen`
+- `MarketTicker`
+- `MarketPortfolio`
+- `MarketTradePanel`
+
+## Testing Requirements
+
+The implementation plan must cover tests or verification for:
+
+- building price scaling;
+- passive income calculation;
+- quota closure and repeated quota chaining in one life;
+- rebirth reset behavior;
+- `heavenly shishki` retention and spending;
+- tar lump accumulation and building leveling;
+- market buy/sell pricing and fee rules;
+- event spawning and event reward application;
+- legacy save rejection;
+- new save export/import round-trip.
+
+## Open Decisions Already Resolved
+
+- Use parody and transparent archetypes instead of direct real brand names.
+- Tone is harsher post-irony focused on household economic absurdity.
+- No direct political satire.
+- Cookie Clicker structure is the base, but the identity remains unique to this project.
+- Old saves are intentionally invalidated.
+- The new economy is centered on one run currency plus prestige, rare meta resource, and market layer.
+
+## Implementation Readiness
+
+This spec is focused enough for a single implementation plan.
+
+The recommended execution order is:
+
+1. Rewrite data model and config.
+2. Rewrite `GameStore` economy core.
+3. Rewrite run/meta UI around the new model.
+4. Add market screen and systems.
+5. Rewrite content text and flavor.
+6. Break old save compatibility and verify new save shape.
