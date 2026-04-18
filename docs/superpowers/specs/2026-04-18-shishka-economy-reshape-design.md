@@ -150,10 +150,64 @@ Upgrade categories:
 - building-specific multipliers;
 - cross-building synergy upgrades;
 - event-strength upgrades;
+- media campaign and hype upgrades;
 - market and commission upgrades;
 - late-run accelerators.
 
 Upgrade names and descriptions must follow the approved tone, using marketplace and gray-economy satire instead of the current student-and-AI framing.
+
+## Media Hype Layer
+
+The game should include a mid-to-late run system of paid hype campaigns built around parody rap-ambassador archetypes.
+
+This system must not use direct real artist names. It should use transparent cultural archetypes and industry parody.
+
+The media hype layer is not a separate currency. It is a strategic `shishki` sink that creates temporary power windows across the main economy.
+
+The system unlocks through `Агентство инфошума` and is amplified by later media-related upgrades.
+
+### Media Campaign Rules
+
+- the player spends `shishki` to launch a campaign;
+- each campaign runs for a short timed window, for example `60-180 seconds`;
+- each campaign boosts one or more systems;
+- stronger campaigns unlock deeper in progression;
+- some campaigns distort market prices and event rates instead of giving raw production only.
+
+### Campaign Effect Types
+
+- temporary click multiplier;
+- temporary `shishki/sec` multiplier;
+- increased event spawn chance;
+- stronger chain-event rewards;
+- temporary hype spike for selected market goods;
+- temporary discount for a subset of buildings or upgrades.
+
+### Rap-Ambassador Archetypes
+
+- `Ледяной флексер` for short aggressive click bursts and fast hype.
+- `Воскресный пророк` for longer production boosts and chain-event support.
+- `Плохой парень с промо` for market manipulation and speculative spikes.
+- `Мрачный романтик района` for slow but efficient income scaling.
+- `Шумный фитмейкер` for event chaos, cheaper mid-tier ramps, and burst windows.
+
+### Market Integration
+
+Media campaigns can temporarily inflate or destabilize specific goods, such as:
+
+- `Инфокурс по маркетплейсам`
+- `Нейро-обложки`
+- `Дефицитные коробки`
+- `Параллельный завоз`
+
+This makes the system an intentional bridge between:
+
+- production;
+- event timing;
+- market speculation;
+- satirical worldbuilding.
+
+The result should feel like paid viral noise, fake momentum, suspicious promo circuits, and recommendation-feed absurdity rather than celebrity fandom.
 
 ## Market and Investments
 
