@@ -32,7 +32,6 @@ import {
   buildDevConsoleResources,
   buildClickerFieldData,
   buildEconomySnapshot,
-  buildProgressOverviewData,
 } from './gameStoreSnapshots.js'
 import { createFreshState, mergeState } from './gameStoreState.js'
 
@@ -230,7 +229,6 @@ export default class GameStore {
         statsBarData: computed.struct,
         bottomNavAlerts: computed.struct,
         clickerMetrics: computed.struct,
-        progressOverviewData: computed.struct,
         clickerFieldData: computed.struct,
         devConsoleResources: computed.struct,
       },
@@ -359,10 +357,6 @@ export default class GameStore {
       emojiMegaChanceText: '0%',
       emojiBurstStreak: 0,
     }
-  }
-
-  get progressOverviewData() {
-    return buildProgressOverviewData(resolveUiState(this.uiSnapshotState), this.uiDerived)
   }
 
   get clickerFieldData() {

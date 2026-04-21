@@ -4,14 +4,18 @@
   gap: var(--ui-shop-grid-gap);
 }
 
-.shop-categories {
-  display: grid;
-  gap: var(--ui-shop-section-gap);
-}
-
 .shop-screen {
+  --screen-density: var(--ui-density-shop);
+  --shop-card-pad: calc(var(--ui-card-pad) * var(--screen-density));
+  --shop-card-gap: calc(var(--ui-card-gap) * var(--screen-density));
+  --shop-section-gap: calc(var(--ui-section-gap) * var(--screen-density));
   width: min(100%, 92rem);
   margin-inline: auto;
+}
+
+.shop-categories {
+  display: grid;
+  gap: var(--shop-section-gap);
 }
 
 .shop-category {
@@ -189,10 +193,10 @@
   --card-rarity-border-alpha: 0.22;
   --btn-accent-rgb: var(--card-tone-rgb);
   min-height: 100%;
-  padding: 0.76rem;
+  padding: calc(var(--ui-card-pad) * var(--screen-density));
   display: grid;
   grid-template-rows: auto 1fr auto;
-  gap: 0.62rem;
+  gap: calc(var(--ui-card-gap) * var(--screen-density));
   isolation: isolate;
   contain: layout style paint;
   transform: translateZ(0);
@@ -516,7 +520,7 @@
 .shop-card__desc {
   margin-top: 0.08rem;
   color: rgb(var(--white-rgb) / 0.72);
-  font-size: 0.74rem;
+  font-size: var(--ui-body-size-sm);
   line-height: 1.28;
 }
 
@@ -604,7 +608,7 @@
   padding-top: 0.34rem;
   border-top: 2px dashed rgb(var(--white-rgb) / 0.12);
   color: rgb(var(--white-rgb) / 0.66);
-  font-size: 0.72rem;
+  font-size: var(--ui-body-size-sm);
   line-height: 1.28;
   text-wrap: pretty;
   overflow-wrap: anywhere;
@@ -694,7 +698,7 @@
 
 .shop-card__lock-text {
   color: rgb(var(--white-rgb) / 0.7);
-  font-size: 0.8rem;
+  font-size: var(--ui-body-size-sm);
   line-height: 1.36;
   overflow-wrap: anywhere;
 }
@@ -778,7 +782,7 @@
   width: 100%;
   position: relative;
   overflow: hidden;
-  min-height: 2.45rem;
+  min-height: var(--ui-control-height);
   border-radius: 0;
   border: 2px solid rgb(var(--btn-accent-rgb) / 0.24);
   box-shadow:

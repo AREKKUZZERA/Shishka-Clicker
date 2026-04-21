@@ -1051,6 +1051,7 @@
 
 .meta-screen {
   --meta-gap: 0.78rem;
+  --screen-density: var(--ui-density-meta);
   display: grid;
   gap: var(--meta-gap);
 }
@@ -1101,8 +1102,7 @@
     );
 }
 
-.meta-screen .meta-section-head::after,
-.meta-screen .achievement-category__head::after {
+.meta-screen .meta-section-head::after {
   background: linear-gradient(
     90deg,
     rgb(var(--accent-fuchsia-rgb) / 0.94),
@@ -1111,9 +1111,7 @@
   );
 }
 
-.meta-screen .meta-card,
-.meta-screen .achievement-category,
-.meta-screen .prestige-lab-card {
+.meta-screen .meta-card {
   background:
     linear-gradient(
       180deg,
@@ -1152,10 +1150,7 @@
 .meta-screen .prestige-lab__summary,
 .meta-screen .prestige-lab__grid,
 .meta-screen .meta-lifetime-grid,
-.meta-screen .achievement-category-grid,
-.meta-screen .achievement-grid,
-.meta-screen .meta-card,
-.meta-screen .achievement-category {
+.meta-screen .meta-card {
   gap: var(--meta-gap);
 }
 
@@ -1323,6 +1318,10 @@
   --pixel-panel-pad-compact: 0.82rem;
 }
 
+.settings-screen {
+  --screen-density: var(--ui-density-settings);
+}
+
 .settings-screen .settings-layout,
 .settings-screen .settings-layout__main,
 .settings-screen .settings-layout__side,
@@ -1338,25 +1337,22 @@
 .meta-screen .prestige-steps,
 .meta-screen .prestige-lab__summary,
 .meta-screen .prestige-lab__grid,
-.meta-screen .meta-lifetime-grid,
-.meta-screen .achievement-category-grid,
-.meta-screen .achievement-grid {
+.meta-screen .meta-lifetime-grid {
   gap: var(--pixel-panel-gap);
 }
 
 .settings-screen :is(.settings-card, .settings-info-box, .settings-save-text-box),
-.meta-screen :is(.meta-card, .prestige-lab-card, .achievement-category) {
+.meta-screen .meta-card {
   display: grid;
-  padding: var(--pixel-panel-pad);
+  padding: calc(var(--ui-panel-pad) * var(--screen-density));
   border-radius: 0;
-  gap: var(--pixel-panel-gap);
+  gap: calc(var(--ui-grid-gap) * var(--screen-density));
 }
 
 .settings-screen .settings-link-tile,
-.meta-screen .prestige-step,
-.meta-screen .achievement-card {
+.meta-screen .prestige-step {
   display: grid;
-  padding: var(--pixel-panel-pad-compact);
+  padding: calc(var(--ui-panel-pad-compact) * var(--screen-density));
   border-radius: 0;
 }
 
@@ -1372,15 +1368,14 @@
     4px 4px 0 0 rgb(var(--black-rgb) / 0.14);
 }
 
-.meta-screen :is(.meta-card, .prestige-lab-card, .achievement-category) {
+.meta-screen .meta-card {
   box-shadow:
     inset 0 0 0 1px rgb(var(--black-rgb) / 0.18),
     4px 4px 0 0 rgb(var(--black-rgb) / 0.14);
 }
 
 .settings-screen .settings-card__head,
-.meta-screen .prestige-lab-card__head,
-.meta-screen .achievement-category__head {
+.meta-screen .meta-section-head {
   display: flex;
   align-items: start;
   justify-content: space-between;
@@ -1393,7 +1388,7 @@
 }
 
 .settings-screen .settings-card__title,
-.meta-screen :is(.prestige-step__title, .prestige-lab-card__title) {
+.meta-screen .prestige-step__title {
   margin: 0;
 }
 

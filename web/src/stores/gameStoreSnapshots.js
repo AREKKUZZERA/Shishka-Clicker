@@ -5,7 +5,7 @@ import {
   RAP_CAMPAIGNS,
   RUN_UPGRADES,
 } from '../game/economyConfig.js'
-import { getPrestigeUpgradeCards, getQuotaPreview } from '../game/metaConfig.js'
+import { getPrestigeUpgradeCards } from '../game/metaConfig.js'
 import {
   getCampaignLaunchCost,
   getBuildingCost,
@@ -299,20 +299,6 @@ export function buildEconomySnapshot(state, derived) {
     brokerLevel: getEffectiveBrokerLevel(state),
     shishkiPerSecond: derived.shishkiPerSecond,
     clickPower: derived.clickPower,
-  }
-}
-
-export function buildProgressOverviewData(state, derived) {
-  const quota = getQuotaPreview(state)
-
-  return {
-    currentRunShishki: state.currentRunShishki,
-    currentQuotaTarget: quota.current,
-    nextQuotaTarget: quota.next,
-    rebirthsText: formatNumber(state.rebirths),
-    heavenlyShishkiText: formatNumber(state.heavenlyShishki),
-    tarLumpsText: formatNumber(state.tarLumps),
-    shishkiPerSecondText: formatNumber(derived.shishkiPerSecond),
   }
 }
 

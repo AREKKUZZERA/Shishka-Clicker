@@ -69,7 +69,7 @@ const DevConsolePanel = observer(function DevConsolePanel() {
         },
       )
     },
-    'sv.www true`': () => {
+    'sv.www true': () => {
       setCheatsEnabled(true)
       pushLog('success')
     },

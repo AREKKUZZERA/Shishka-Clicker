@@ -100,6 +100,20 @@
   --ui-screen-header-gap: 0.5rem;
   --ui-screen-header-margin: 1.05rem;
   --ui-screen-header-pad-bottom: 0.68rem;
+  --ui-section-gap: 0.78rem;
+  --ui-panel-pad: 0.88rem;
+  --ui-panel-pad-compact: 0.72rem;
+  --ui-card-pad: 0.78rem;
+  --ui-card-gap: 0.62rem;
+  --ui-grid-gap: 0.62rem;
+  --ui-control-height: 2.5rem;
+  --ui-chip-height: 1.8rem;
+  --ui-title-size-lg: clamp(1.16rem, 2.4vw, 1.72rem);
+  --ui-title-size-md: clamp(0.98rem, 1.8vw, 1.22rem);
+  --ui-title-size-sm: 0.94rem;
+  --ui-body-size-md: 0.84rem;
+  --ui-body-size-sm: 0.78rem;
+  --ui-micro-size: 0.68rem;
   --ui-shop-grid-gap: 0.62rem;
   --ui-shop-section-gap: 0.75rem;
   --ui-shop-category-padding: 0.72rem;
@@ -113,6 +127,11 @@
   --ui-nav-button-min-height: 3.35rem;
   --ui-nav-button-pad-y: 0.5rem;
   --ui-nav-button-pad-x: 0.34rem;
+  --ui-density-shop: 0.96;
+  --ui-density-meta: 1.02;
+  --ui-density-settings: 1.04;
+  --ui-density-market: 1;
+  --ui-density-clicker: 1.06;
 
   /* ── Motion ─────────────────────────────── */
   --ease-standard: cubic-bezier(0.22, 1, 0.36, 1);

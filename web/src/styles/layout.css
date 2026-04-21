@@ -308,12 +308,9 @@
 .screen__kicker,
 .meta-card__kicker,
 .settings-card__label,
-.achievement-category__kicker,
-.prestige-lab-card__kicker,
 .meta-section-head__kicker,
 .shop-card__effect-label,
-.shop-card__price-label,
-.achievement-card__head {
+.shop-card__price-label {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -326,15 +323,14 @@
 
 .screen__kicker,
 .meta-card__kicker,
-.meta-section-head__kicker,
-.prestige-lab-card__kicker {
+.meta-section-head__kicker {
   color: var(--accent-primary-strong);
 }
 
 .screen__title {
   color: var(--text-strong);
   font-family: var(--font-display);
-  font-size: clamp(1.16rem, 2.4vw, 1.72rem);
+  font-size: var(--ui-title-size-lg);
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.035em;
@@ -344,16 +340,13 @@
 .screen__desc,
 .meta-card__hint,
 .settings-card__hint,
-.achievement-card__desc,
 .prestige-step__text,
-.prestige-lab-card__desc,
-.prestige-lab-card__next,
 .settings-link-tile__hint,
 .shop-card__desc,
 .shop-card__effect-next,
 .shop-card__lock-text {
   color: var(--text-muted);
-  font-size: 0.84rem;
+  font-size: var(--ui-body-size-md);
   line-height: 1.48;
 }
 
@@ -369,6 +362,7 @@
   --screen-accent-rgb: var(--accent-primary-rgb);
   --screen-accent-secondary-rgb: var(--accent-emerald-rgb);
   --btn-accent-rgb: var(--accent-primary-rgb);
+  --screen-density: var(--ui-density-clicker);
 }
 
 .pixel-tabbar {
@@ -384,7 +378,7 @@
 
 .pixel-tabbar__btn {
   position: relative;
-  min-height: 2.5rem;
+  min-height: var(--ui-control-height);
   padding: 0.55rem 0.9rem;
   border: 2px solid rgb(var(--white-rgb) / 0.12);
   background:
@@ -550,8 +544,8 @@
 .clicker-deck {
   width: 100%;
   display: grid;
-  gap: 0.8rem;
-  padding: 1rem;
+  gap: calc(var(--ui-grid-gap) * var(--screen-density));
+  padding: calc(var(--ui-panel-pad) * var(--screen-density));
   border: 2px solid rgb(var(--accent-primary-rgb) / 0.24);
   background:
     repeating-linear-gradient(
@@ -830,11 +824,12 @@
 
 .market-panel {
   display: grid;
-  gap: 0.55rem;
+  gap: calc(var(--ui-grid-gap) * var(--screen-density));
 }
 
 .market-screen {
   --screen-accent-rgb: var(--accent-primary-rgb);
+  --screen-density: var(--ui-density-market);
 }
 
 .market-screen__header {
@@ -1270,7 +1265,7 @@
 
 .market-panel {
   align-content: start;
-  padding: 0.64rem;
+  padding: calc(var(--ui-panel-pad) * var(--screen-density));
   border: 2px solid rgb(var(--white-rgb) / 0.08);
   background:
     linear-gradient(
@@ -2361,6 +2356,7 @@
 
 .pixel-surface {
   position: relative;
+  padding: var(--ui-panel-pad);
   border-radius: 0 !important;
   border: 2px solid rgb(var(--white-rgb) / 0.09) !important;
   background:
@@ -2903,13 +2899,13 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  min-height: 1.8rem;
+  min-height: var(--ui-chip-height);
   padding: 0.3rem 0.65rem;
   border-radius: 0;
   border: 2px solid var(--border-soft);
   background: rgb(var(--white-rgb) / 0.05);
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: var(--ui-body-size-sm);
   line-height: 1;
   box-shadow: inset 0 0 0 1px rgb(var(--black-rgb) / 0.14);
 }
