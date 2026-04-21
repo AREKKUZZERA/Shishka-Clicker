@@ -59,8 +59,8 @@
 
 .clicker-layout__pane--hero {
   background:
-    linear-gradient(180deg, rgb(var(--accent-primary-rgb) / 0.09), transparent 24%),
-    linear-gradient(180deg, rgb(var(--surface-2-rgb) / 0.88), rgb(var(--surface-1-rgb) / 0.82));
+    linear-gradient(180deg, rgb(var(--accent-primary-rgb) / 0.06), transparent 18%),
+    rgb(var(--white-rgb) / 0.015);
 }
 
 .clicker-layout__stats,
@@ -377,21 +377,11 @@
 .clicker-btn--pixel {
   border: 2px solid rgb(var(--white-rgb) / 0.09);
   border-radius: 0;
-  padding: clamp(0.56rem, 1vw, 0.82rem);
-  background:
-    linear-gradient(
-      180deg,
-      rgb(var(--accent-primary-rgb) / 0.08),
-      transparent 22%
-    ),
-    linear-gradient(
-      180deg,
-      rgb(var(--surface-2-rgb) / 0.96),
-      rgb(var(--surface-1-rgb) / 0.92)
-    );
+  padding: 0;
+  background: transparent;
   box-shadow:
     inset 0 0 0 2px rgb(var(--black-rgb) / 0.18),
-    0 18px 42px rgb(var(--black-rgb) / 0.18);
+    0 18px 42px rgb(var(--black-rgb) / 0.12);
 }
 
 .clicker-btn__pixel-corner {
@@ -473,10 +463,11 @@
 }
 
 .clicker-btn__core {
-  position: relative;
-  width: min(100%, 15.8rem);
-  aspect-ratio: 1;
-  margin-inline: auto;
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  margin-inline: 0;
   display: grid;
   place-items: center;
   z-index: 1;
@@ -507,7 +498,7 @@
 }
 
 .clicker-btn--pixel .clicker-btn__core-ring--outer {
-  inset: 4%;
+  inset: 0;
   border: 1px solid rgb(var(--accent-primary-rgb) / 0.34);
   background:
     linear-gradient(
@@ -530,11 +521,10 @@
     right / 1px 220% no-repeat;
   box-shadow:
     inset 0 0 0 1px rgb(var(--white-rgb) / 0.05),
-    0 0 24px rgb(var(--btn-accent-rgb) / 0.12),
-    0 0 40px rgb(var(--btn-accent-rgb) / 0.06);
+    0 0 24px rgb(var(--btn-accent-rgb) / 0.08);
   animation:
     heroSquareLineFloat 3.4s ease-in-out infinite,
-    heroScannerSweep 4.6s linear infinite;
+    heroCloudDriftRight 36s linear infinite;
 }
 
 .clicker-btn--pixel .clicker-btn__core-ring--inner {
@@ -543,67 +533,69 @@
 
 .clicker-btn__hero-shell {
   position: relative;
-  width: 88%;
-  aspect-ratio: 1;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
   display: grid;
   place-items: center;
-  border-radius: 50%;
-  overflow: visible;
+  border-radius: 0;
+  overflow: hidden;
   border: 0;
-  background: radial-gradient(
-    circle at center,
-    rgb(var(--btn-accent-rgb) / 0.18),
-    transparent 64%
-  );
-  box-shadow: 0 22px 52px rgb(var(--black-rgb) / 0.22);
+  background: transparent;
+  box-shadow: none;
   z-index: 2;
 }
 
 .clicker-btn--pixel .clicker-btn__hero-shell {
-  width: 80%;
-  border: 2px solid rgb(var(--accent-primary-rgb) / 0.42);
+  width: 100%;
+  height: 100%;
+  border: 0;
   border-radius: 0;
   background:
+    linear-gradient(180deg, #7ec8f5 0%, #8fcbf4 46%, #d9c5aa 46%, #d9c5aa 57%, #627f42 57%, #2b4d1e 100%),
+    linear-gradient(150deg, rgb(95 117 162 / 0.95) 0 28%, transparent 28%),
+    linear-gradient(28deg, transparent 42%, rgb(122 149 198 / 0.88) 42% 57%, transparent 57%),
+    linear-gradient(-18deg, transparent 47%, rgb(232 205 180 / 0.98) 47% 68%, transparent 68%),
+    linear-gradient(12deg, transparent 59%, rgb(76 110 53 / 0.96) 59% 80%, transparent 80%),
     linear-gradient(
-      135deg,
-      rgb(var(--accent-primary-rgb) / 0.12),
-      transparent 42%
-    ),
-    linear-gradient(180deg, rgb(var(--white-rgb) / 0.06), transparent 24%),
-    radial-gradient(
-      circle at center,
-      rgb(var(--btn-accent-rgb) / 0.24),
-      rgb(var(--surface-strong-rgb) / 0.96)
+      0deg,
+      transparent 0%,
+      transparent 74%,
+      rgb(var(--black-rgb) / 0.14) 100%
     );
   box-shadow:
-    inset 0 0 0 2px rgb(var(--black-rgb) / 0.2),
-    inset 0 0 0 3px rgb(var(--accent-primary-rgb) / 0.08),
-    0 0 0 4px rgb(var(--btn-accent-rgb) / 0.05),
-    6px 6px 0 0 rgb(var(--black-rgb) / 0.18),
-    0 18px 32px rgb(var(--black-rgb) / 0.14);
+    inset 0 0 0 2px rgb(var(--black-rgb) / 0.14),
+    inset 0 0 0 3px rgb(var(--accent-primary-rgb) / 0.08);
   isolation: isolate;
 }
 
 .clicker-btn__hero-shell::before {
   content: '';
   position: absolute;
-  inset: 8%;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgb(var(--btn-accent-rgb) / 0.34),
-    transparent 64%
-  );
-  animation: innerGlow 2.6s ease-in-out infinite;
-  will-change: transform, opacity;
-  contain: layout style;
+  inset: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 10% 18%, rgb(var(--white-rgb) / 0.9) 0 2.2rem, transparent 2.25rem),
+    radial-gradient(circle at 14% 20%, rgb(var(--white-rgb) / 0.92) 0 1.6rem, transparent 1.65rem),
+    radial-gradient(circle at 19% 19%, rgb(var(--white-rgb) / 0.88) 0 1.9rem, transparent 1.95rem),
+    radial-gradient(circle at 42% 15%, rgb(var(--white-rgb) / 0.88) 0 2.4rem, transparent 2.45rem),
+    radial-gradient(circle at 47% 17%, rgb(var(--white-rgb) / 0.92) 0 1.7rem, transparent 1.75rem),
+    radial-gradient(circle at 53% 14%, rgb(var(--white-rgb) / 0.84) 0 2rem, transparent 2.05rem),
+    radial-gradient(circle at 76% 20%, rgb(var(--white-rgb) / 0.86) 0 2.1rem, transparent 2.15rem),
+    radial-gradient(circle at 81% 18%, rgb(var(--white-rgb) / 0.92) 0 1.5rem, transparent 1.55rem),
+    radial-gradient(circle at 86% 19%, rgb(var(--white-rgb) / 0.88) 0 1.8rem, transparent 1.85rem);
+  background-repeat: repeat-x;
+  background-size: 160% 100%;
+  background-position: 0 0;
+  animation: heroCloudDriftRight 30s linear infinite;
+  will-change: background-position;
   z-index: 0;
 }
 
 .clicker-btn--pixel .clicker-btn__hero-shell::after {
   content: '';
   position: absolute;
-  inset: 0.3rem;
+  inset: 0.34rem;
   border: 1px dashed rgb(var(--accent-primary-rgb) / 0.2);
   pointer-events: none;
   z-index: 1;
@@ -611,27 +603,21 @@
 
 .clicker-btn__hero-grid {
   position: absolute;
-  inset: 0.7rem;
+  inset: 0;
   background:
     linear-gradient(
-      90deg,
-      transparent 0,
-      transparent calc(50% - 0.5px),
-      rgb(var(--white-rgb) / 0.04) calc(50% - 0.5px),
-      rgb(var(--white-rgb) / 0.04) calc(50% + 0.5px),
-      transparent calc(50% + 0.5px),
-      transparent 100%
-    ),
-    linear-gradient(
       180deg,
-      transparent 0,
-      transparent calc(50% - 0.5px),
-      rgb(var(--white-rgb) / 0.035) calc(50% - 0.5px),
-      rgb(var(--white-rgb) / 0.035) calc(50% + 0.5px),
-      transparent calc(50% + 0.5px),
-      transparent 100%
+      transparent 0%,
+      transparent 62%,
+      rgb(41 71 28 / 0.18) 62% 72%,
+      rgb(23 49 18 / 0.45) 72% 100%
+    ),
+    radial-gradient(circle at 12% 88%, rgb(91 109 150 / 0.92) 0 1.2rem, transparent 1.25rem),
+    radial-gradient(circle at 28% 90%, rgb(91 109 150 / 0.82) 0 1rem, transparent 1.05rem),
+    radial-gradient(circle at 73% 88%, rgb(91 109 150 / 0.88) 0 1.1rem, transparent 1.15rem),
+    radial-gradient(circle at 88% 89%, rgb(91 109 150 / 0.78) 0 0.95rem, transparent 1rem)
     );
-  opacity: 0.8;
+  opacity: 1;
   pointer-events: none;
   z-index: 1;
 }
@@ -680,13 +666,13 @@
 }
 
 .clicker-btn__hero {
-  width: 126%;
+  width: min(100%, 78%);
   aspect-ratio: 1;
   object-fit: contain;
   filter: drop-shadow(0 16px 28px rgb(var(--black-rgb) / 0.26));
   position: relative;
   z-index: 1;
-  transform: translateY(-8%);
+  transform: translateY(-3%);
 }
 
 @keyframes heroSquareLineFloat {
@@ -701,16 +687,16 @@
   }
 }
 
-@keyframes heroScannerSweep {
+@keyframes heroCloudDriftRight {
   0% {
     background-position:
-      -140% 0,
-      100% -140%;
+      0 0,
+      0 0;
   }
   100% {
     background-position:
-      180% 0,
-      100% 180%;
+      160% 0,
+      160% 0;
   }
 }
 
@@ -1278,7 +1264,8 @@
   }
 
   .clicker-btn__core {
-    width: min(100%, 12.8rem);
+    inset: 0;
+    width: auto;
   }
 
   .clicker-wrap__metrics {
@@ -3878,7 +3865,8 @@
   }
 
   .clicker-btn__core {
-    width: min(100%, 12rem);
+    inset: 0;
+    width: auto;
   }
 
   .clicker-btn__label {
@@ -3987,11 +3975,13 @@
   }
 
   .clicker-btn__core {
-    width: min(100%, 10.6rem);
+    inset: 0;
+    width: auto;
   }
 
   .clicker-btn__hero-shell {
-    width: 78%;
+    width: 100%;
+    height: 100%;
   }
 
   .clicker-btn__label {
