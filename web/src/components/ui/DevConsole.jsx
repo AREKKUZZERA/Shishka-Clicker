@@ -69,19 +69,10 @@ const DevConsolePanel = observer(function DevConsolePanel() {
         },
       )
     },
-    'sv.www true': () => {
+    'sv.www true`': () => {
       setCheatsEnabled(true)
       pushLog('success')
     },
-    'sv.cheats true': () => {
-      pushLog('Пошел нахуй гнида :)', 'warn')
-    },
-    'sv_cheats true': () => {
-      pushLog('Ты даун?', 'warn')
-    },
-    'sv_cheats 1': () => {
-      pushLog('....?', 'warn')
-    },    
   }
 
 
