@@ -549,7 +549,6 @@
 
 .clicker-deck {
   width: 100%;
-  max-width: 72rem;
   display: grid;
   gap: 0.8rem;
   padding: 1rem;

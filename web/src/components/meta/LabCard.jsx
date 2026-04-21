@@ -42,13 +42,13 @@ export const LabCard = ({ item, canBuy, onBuy }) => {
         </div>
         <button
           type="button"
-          className="shop-card__btn"
+          className="shop-card__btn prestige-lab-card__btn"
           disabled={!canBuy}
           aria-disabled={!canBuy}
           data-state={canBuy ? 'ready' : 'denied'}
           onClick={onBuy}
         >
-          {canBuy ? 'Улучшить за осколки' : 'Не хватает осколков'}
+          {canBuy ? 'Улучшить' : 'Не хватает'}
         </button>
       </div>
     </article>
