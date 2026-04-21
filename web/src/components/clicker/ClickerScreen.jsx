@@ -76,9 +76,12 @@ export const ClickerScreen = observer(function ClickerScreen() {
           <ClickerButton />
         </div>
 
-        <section className="clicker-deck pixel-surface" aria-label="Пульт прогресса">
+        <section
+          className="clicker-deck clicker-deck-layout__panel pixel-surface"
+          aria-label="Пульт прогресса"
+        >
           <header className="clicker-deck__header">
-            <div>
+            <div className="clicker-deck__copy">
               <h3 className="clicker-deck__title">Прогресс, покупки и мета-петля</h3>
             </div>
             <div className="clicker-deck__status">
@@ -87,7 +90,11 @@ export const ClickerScreen = observer(function ClickerScreen() {
             </div>
           </header>
 
-          <div className="pixel-tabbar pixel-tabbar--deck" role="tablist" aria-label="Панели прогресса">
+          <div
+            className="pixel-tabbar pixel-tabbar--deck clicker-deck__tabs"
+            role="tablist"
+            aria-label="Панели прогресса"
+          >
             {CLICKER_DECK_TABS.map((tab) => {
               const isActive = tab.id === safeActiveDeckTab
               const isLocked = !deckLocks[tab.id]?.unlocked

@@ -6,30 +6,11 @@ const DISCORD_AUTHORIZE_TIMEOUT_MS = 10000
 const DISCORD_AUTHENTICATE_TIMEOUT_MS = 10000
 const DISCORD_TOKEN_EXCHANGE_TIMEOUT_MS = 10000
 
-function isDiscordEmbeddedContext() {
-  if (typeof window === 'undefined') {
-    return false
-  }
-
-  const params = new URLSearchParams(window.location.search)
-  if (
-    params.has('frame_id') ||
-    params.has('instance_id') ||
-    params.has('referrer_id')
-  ) {
-    return true
-  }
-
-  const referrer = document.referrer ?? ''
-  if (/discord(app)?\.com|discordsays\.com/i.test(referrer)) {
-    return true
-  }
-
-  try {
-    return window.parent !== window || Boolean(window.opener)
-  } catch {
-    return true
-  }
+export function shouldLoadDiscordSdk({
+  hasWindow = typeof window !== 'undefined',
+  clientId = DISCORD_CLIENT_ID,
+} = {}) {
+  return hasWindow && Boolean(clientId)
 }
 
 function withTimeout(promise, timeoutMs, label) {
@@ -51,11 +32,7 @@ let discordSdkPromise = null
 let discordSdkInstance = null
 
 async function loadDiscordSdk() {
-  if (typeof window === 'undefined' || !DISCORD_CLIENT_ID) {
-    return null
-  }
-
-  if (!isDiscordEmbeddedContext()) {
+  if (!shouldLoadDiscordSdk()) {
     return null
   }
 

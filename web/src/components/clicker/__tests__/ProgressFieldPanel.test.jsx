@@ -196,5 +196,8 @@ describe('ProgressFieldPanel', () => {
     expect(html).toContain('Мета')
     expect(html).toContain('disabled=""')
     expect(html).toContain('clicker-wrap--scene')
+    expect(html).toContain('clicker-deck-layout__panel')
+    expect(html).toContain('clicker-deck__copy')
+    expect(html).toContain('clicker-deck__tabs')
   })
 })
