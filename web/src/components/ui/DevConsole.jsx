@@ -73,23 +73,15 @@ const DevConsolePanel = observer(function DevConsolePanel() {
       setCheatsEnabled(true)
       pushLog('success')
     },
-  }
-
-    const commands = {
-    date: () => pushLog(new Date().toLocaleString(), 'info'),
-    clear: () => setLog([]),
-    help: () => {
-      pushLog('AVAILABLE COMMANDS', 'meta')
-      Object.entries(DEV_CONSOLE_COMMANDS_DESC).forEach(
-        ([command, description]) => {
-          pushLog(`${command} :: ${description}`, 'info')
-        },
-      )
-    },
     'sv.cheats true': () => {
-      setCheatsEnabled(false)
-      pushLog('Пошел нахуй гнида :)')
+      pushLog('Пошел нахуй гнида :)', 'warn')
     },
+    'sv_cheats true': () => {
+      pushLog('Ты даун?', 'warn')
+    },
+    'sv_cheats 1': () => {
+      pushLog('....?', 'warn')
+    },    
   }
 
 
