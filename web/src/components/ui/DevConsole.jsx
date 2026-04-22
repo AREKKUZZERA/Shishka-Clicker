@@ -119,19 +119,6 @@ const DevConsolePanel = observer(function DevConsolePanel({
     ])
   }, [])
 
-  const commands = {
-    date: () => pushLog(new Date().toLocaleString(), 'info'),
-    clear: () => setLog([]),
-    help: () => {
-      pushLog('AVAILABLE COMMANDS', 'meta')
-      Object.entries(USER_CONSOLE_COMMANDS_DESC).forEach(
-        ([command, description]) => {
-          pushLog(`${command} :: ${description}`, 'help')
-        },
-      )
-    },
-  }
-
   useEffect(() => {
     const timerId = window.setTimeout(() => inputRef.current?.focus(), 50)
     return () => {
@@ -184,8 +171,23 @@ const DevConsolePanel = observer(function DevConsolePanel({
         return false
       }
 
-      if (cmd in commands) {
-        commands[cmd]()
+      if (cmd === 'date') {
+        pushLog(new Date().toLocaleString(), 'info')
+        return true
+      }
+
+      if (cmd === 'clear') {
+        setLog([])
+        return true
+      }
+
+      if (cmd === 'help') {
+        pushLog('AVAILABLE COMMANDS', 'meta')
+        Object.entries(USER_CONSOLE_COMMANDS_DESC).forEach(
+          ([command, description]) => {
+            pushLog(`${command} :: ${description}`, 'help')
+          },
+        )
         return true
       }
 
@@ -204,7 +206,7 @@ const DevConsolePanel = observer(function DevConsolePanel({
 
       return false
     },
-    [cheatsEnabled, commands, flashXackerOverlay, pushLog, setCheatsMode],
+    [cheatsEnabled, flashXackerOverlay, pushLog, setCheatsMode],
   )
 
   const handleSubmit = async (event) => {

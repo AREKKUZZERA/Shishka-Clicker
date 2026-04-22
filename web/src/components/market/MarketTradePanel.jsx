@@ -1,10 +1,57 @@
+import { useEffect, useState } from 'react'
 import { useSound } from '../../hooks/useSound.js'
 import buySound from '../../assets/audio/ui/wpn_select.mp3'
 import sellSound from '../../assets/audio/ui/button3.wav'
 import denySound from '../../assets/audio/ui/wpn_denyselect.mp3'
+import yanixImg from '../../assets/shopcard/warpups/yanix.png'
+import voskresenskiiImg from '../../assets/shopcard/warpups/voskresenskii.png'
 import { formatNumber } from '../../lib/format.js'
 import { LockBadge } from '../shop/LockBadge.jsx'
 import { EntityPlaceholderIcon } from '../ui/EntityPlaceholderIcon.jsx'
+
+const CAMPAIGN_MEDIA = {
+  iceFlexer: yanixImg,
+  sundayProphet: voskresenskiiImg,
+}
+
+function CampaignMediaPreview({ campaign, onOpen, state = 'available' }) {
+  const campaignImage = CAMPAIGN_MEDIA[campaign.id]
+
+  if (!campaignImage) {
+    return (
+      <span
+        className="market-entity-slot"
+        aria-hidden="true"
+        data-field-code={campaign.fieldCode}
+      >
+        <EntityPlaceholderIcon
+          code={campaign.fieldCode}
+          label={campaign.title}
+          type="campaign"
+          state={state}
+          size={32}
+        />
+      </span>
+    )
+  }
+
+  return (
+    <button
+      type="button"
+      className="market-entity-slot market-entity-slot--media"
+      onClick={() => onOpen(campaign)}
+      aria-label={`Открыть изображение ${campaign.title}`}
+      title={`Открыть изображение ${campaign.title}`}
+      data-field-code={campaign.fieldCode}
+    >
+      <img
+        src={campaignImage}
+        alt={campaign.title}
+        className="market-entity-media"
+      />
+    </button>
+  )
+}
 
 export function MarketTradePanel({
   goods,
@@ -18,10 +65,29 @@ export function MarketTradePanel({
   const { play: playBuySound } = useSound(buySound, { volume: 0.14 })
   const { play: playSellSound } = useSound(sellSound, { volume: 0.18 })
   const { play: playDenySound } = useSound(denySound, { volume: 0.14 })
+  const [expandedCampaign, setExpandedCampaign] = useState(null)
   const unlockedGoods = goods.filter((good) => good.unlocked)
   const lockedGoods = goods.filter((good) => !good.unlocked)
   const unlockedCampaigns = campaigns.filter((campaign) => campaign.unlocked)
   const lockedCampaigns = campaigns.filter((campaign) => !campaign.unlocked)
+
+  useEffect(() => {
+    if (!expandedCampaign) {
+      return undefined
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') {
+        setExpandedCampaign(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [expandedCampaign])
 
   function handleBuy(goodId, quantity, enabled) {
     if (!enabled) {
@@ -209,25 +275,17 @@ export function MarketTradePanel({
                       key={campaign.id}
                       className="market-entity-row market-action-tile market-action-tile--campaign"
                     >
-                      <span
-                        className="market-entity-slot"
-                        aria-hidden="true"
-                        data-field-code={campaign.fieldCode}
-                      >
-                        <EntityPlaceholderIcon
-                          code={campaign.fieldCode}
-                          label={campaign.title}
-                          type="campaign"
-                          state={
-                            campaign.active
-                              ? 'active'
-                              : disabled
-                                ? 'owned'
-                                : 'available'
-                          }
-                          size={32}
-                        />
-                      </span>
+                      <CampaignMediaPreview
+                        campaign={campaign}
+                        onOpen={setExpandedCampaign}
+                        state={
+                          campaign.active
+                            ? 'active'
+                            : disabled
+                              ? 'owned'
+                              : 'available'
+                        }
+                      />
                       <span className="market-action-tile__body">
                         <strong>{campaign.title}</strong>
                         <span>
@@ -271,19 +329,11 @@ export function MarketTradePanel({
                     key={campaign.id}
                     className="market-entity-row market-action-tile market-action-tile--locked shop-card--locked"
                   >
-                    <span
-                      className="market-entity-slot"
-                      aria-hidden="true"
-                      data-field-code={campaign.fieldCode}
-                    >
-                      <EntityPlaceholderIcon
-                        code={campaign.fieldCode}
-                        label={campaign.title}
-                        type="campaign"
-                        state="locked"
-                        size={32}
-                      />
-                    </span>
+                    <CampaignMediaPreview
+                      campaign={campaign}
+                      onOpen={setExpandedCampaign}
+                      state="locked"
+                    />
                     <span className="market-action-tile__body">
                       <strong>{campaign.title}</strong>
                       <LockBadge item={campaign} />
@@ -293,6 +343,27 @@ export function MarketTradePanel({
               </div>
             </section>
           ) : null}
+        </div>
+      ) : null}
+      {expandedCampaign ? (
+        <div
+          className="market-media-lightbox"
+          role="presentation"
+          onClick={() => setExpandedCampaign(null)}
+        >
+          <div
+            className="market-media-lightbox__dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-label={expandedCampaign.title}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <img
+              src={CAMPAIGN_MEDIA[expandedCampaign.id]}
+              alt={expandedCampaign.title}
+              className="market-media-lightbox__image"
+            />
+          </div>
         </div>
       ) : null}
     </section>

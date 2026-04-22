@@ -138,11 +138,14 @@ describe('MarketScreen', () => {
     expect(html).toContain('8K')
     expect(html).toContain('прод 5')
     expect(html).toContain('слить')
+    expect(html).toContain('Открыть изображение Ледяной флексер')
+    expect(html).toContain('yanix.png')
+    expect(html).toContain('Открыть изображение Воскресный пророк')
+    expect(html).toContain('voskresenskii.png')
     expect(html).toContain('Закрытые активы')
     expect(html).toContain('Инфокурс по маркетплейсам')
     expect(html).not.toContain('undefined / undefined')
     expect(html).toContain('>MP<')
-    expect(html).toContain('>CI<')
   })
 
   it('renders a locked-state message before the market is unlocked', () => {
