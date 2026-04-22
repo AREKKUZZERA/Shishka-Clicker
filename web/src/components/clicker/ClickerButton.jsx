@@ -116,7 +116,7 @@ export const ClickerButton = observer(function ClickerButton() {
 
     setIsLabelShaking(tps >= 7)
 
-    if (tps >= 11) {
+    if (tps >= 11 && typeof markAutoClicker === 'function') {
       markAutoClicker()
     }
 

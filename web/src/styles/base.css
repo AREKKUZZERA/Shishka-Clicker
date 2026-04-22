@@ -88,6 +88,7 @@ html {
   font-size: var(--ui-root-font-size);
   scroll-behavior: smooth;
   scrollbar-width: none;
+  cursor: url('../assets/dark-cur_ani_files/pointer.cur'), auto;
 }
 
 html::-webkit-scrollbar {
@@ -209,16 +210,21 @@ button {
 }
 
 button:not(:disabled) {
-  cursor: pointer;
+  cursor: url('../assets/dark-cur_ani_files/link.cur'), pointer;
 }
 
-button:disabled {
-  cursor: not-allowed;
+button:disabled,
+button[aria-disabled='true'],
+[role='button'][aria-disabled='true'],
+.is-disabled,
+.is-denied {
+  cursor: url('../assets/dark-cur_ani_files/unavailable.cur'), not-allowed !important;
 }
 
 a {
   color: inherit;
   text-decoration: none;
+  cursor: url('../assets/dark-cur_ani_files/link.cur'), pointer;
 }
 
 p,
@@ -238,6 +244,12 @@ b {
 
 textarea {
   resize: vertical;
+}
+
+input,
+textarea,
+[contenteditable='true'] {
+  cursor: url('../assets/dark-cur_ani_files/beam.cur'), text;
 }
 
 input[type='range'] {
@@ -269,6 +281,21 @@ input[type='range'] {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgb(var(--accent-primary-rgb) / 0.52);
+}
+
+[data-cursor='zoom'],
+.cursor-zoom {
+  cursor: url('../assets/dark-cur_ani_files/precision.cur'), zoom-in;
+}
+
+[data-cursor='resize-ew'],
+.cursor-resize-ew {
+  cursor: url('../assets/dark-cur_ani_files/dgn1.cur'), ew-resize;
+}
+
+[data-cursor='resize-ns'],
+.cursor-resize-ns {
+  cursor: url('../assets/dark-cur_ani_files/dgn2.cur'), ns-resize;
 }
 
 .settings-file-input {

@@ -8,10 +8,10 @@ import {
 import { getPrestigeUpgradeCards } from '../game/metaConfig.js'
 import {
   getCampaignLaunchCost,
-  getBuildingCost,
+  getBuildingPurchaseCost,
   getBuildingPerkSummary,
   getEffectiveBrokerLevel,
-  getRunUpgradeCost,
+  getRunUpgradePurchaseCost,
 } from '../game/economyMath.js'
 import { formatNumber } from '../lib/format.js'
 
@@ -72,30 +72,90 @@ function getUpgradeUnlockRule(state, item) {
       buildingId: 'garagePicker',
       buildingTitle: 'Сборщик шишек у гаражей',
     },
+    doubleSwing: {
+      threshold: 180,
+      buildingId: 'garagePicker',
+      buildingTitle: 'Сборщик шишек у гаражей',
+    },
     quietLogistics: {
       threshold: 500,
       buildingId: 'pickupPoint',
       buildingTitle: 'ПВЗ на окраине',
+    },
+    bulkDeal: {
+      threshold: 900,
+      buildingId: 'pickupPoint',
+      buildingTitle: 'ПВЗ на окраине',
+    },
+    brokenCounter: {
+      threshold: 2_000,
+      buildingId: 'greySorting',
+      buildingTitle: 'Серая сортировка',
     },
     grayTenderLoop: {
       threshold: 3_000,
       buildingId: 'greySorting',
       buildingTitle: 'Серая сортировка',
     },
+    warmBackground: {
+      threshold: 5_000,
+      buildingId: 'resaleStall',
+      buildingTitle: 'Ларёк перепродажи',
+    },
+    warehouseConcession: {
+      threshold: 6_500,
+      buildingId: 'selfEmployedCrew',
+      buildingTitle: 'Бригада самозанятых',
+    },
     streetPromoBurst: {
       threshold: 10_000,
       buildingId: 'resaleStall',
       buildingTitle: 'Ларёк перепродажи',
+    },
+    districtWarmup: {
+      threshold: 12_000,
+      buildingId: 'resaleStall',
+      buildingTitle: 'Ларёк перепродажи',
+    },
+    handTrained: {
+      threshold: 10_000,
+      buildingId: 'packingLine',
+      buildingTitle: 'Смоляной цех',
+    },
+    quietDetour: {
+      threshold: 12_000,
+      buildingId: 'packingLine',
+      buildingTitle: 'Смоляной цех',
     },
     tarCacheMerge: {
       threshold: 40_000,
       buildingId: 'packingLine',
       buildingTitle: 'Смоляной цех',
     },
+    nightSlotSale: {
+      threshold: 20_000,
+      buildingId: 'nightWarehouse',
+      buildingTitle: 'Подпольный фулфилмент',
+    },
+    feedOnStandby: {
+      threshold: 30_000,
+      buildingId: 'nightWarehouse',
+      buildingTitle: 'Подпольный фулфилмент',
+    },
+    mediaTail: {
+      threshold: 45_000,
+      buildingId: 'nightWarehouse',
+      buildingTitle: 'Подпольный фулфилмент',
+    },
     streetContractWave: {
       threshold: 150_000,
       buildingId: 'nightWarehouse',
       buildingTitle: 'Подпольный фулфилмент',
+    },
+    adOverdrive: {
+      threshold: 200_000,
+      buildingId: 'routerBrokerage',
+      buildingTitle: 'Агентство инфошума',
     },
     shadowCourierLine: {
       threshold: 750_000,
@@ -249,7 +309,7 @@ function getCampaignUnlockRule(state, item) {
 export function buildEconomySnapshot(state, derived) {
   const buildings = BUILDINGS.map((item, index) => {
     const owned = state.buildings[item.id] ?? 0
-    const cost = getBuildingCost(item.baseCost, owned)
+    const cost = getBuildingPurchaseCost(state, item, owned)
     const unlock = getBuildingUnlockRule(state, item, index)
 
     return {
@@ -269,7 +329,7 @@ export function buildEconomySnapshot(state, derived) {
   const upgrades = RUN_UPGRADES.map((item) => {
     const unlock = getUpgradeUnlockRule(state, item)
     const level = state.upgrades[item.id] ?? 0
-    const cost = getRunUpgradeCost(item.cost, level)
+    const cost = getRunUpgradePurchaseCost(state, item, level)
 
     return {
       ...item,

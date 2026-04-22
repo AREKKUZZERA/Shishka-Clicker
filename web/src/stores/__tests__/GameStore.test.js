@@ -427,8 +427,27 @@ describe('GameStore', () => {
     )
 
     expect(store.state.upgrades.warehouseRhythm).toBe(1)
-    expect(store.state.shishki).toBe(880)
-    expect(boughtUpgrade?.cost).toBe(138)
+    expect(store.state.shishki).toBe(600)
+    expect(boughtUpgrade?.cost).toBe(460)
+  })
+
+  it('applies upgrade discounts when buying a run upgrade', () => {
+    const base = createFreshState()
+    const store = createStore()
+
+    store.importGameSave({
+      ...base,
+      shishki: 1_000,
+      upgrades: {
+        ...base.upgrades,
+        nightSlotSale: 1,
+      },
+    })
+
+    store.buyUpgrade('warehouseRhythm')
+
+    expect(store.state.upgrades.warehouseRhythm).toBe(1)
+    expect(store.state.shishki).toBe(620)
   })
 
   it('refuses to buy prestige upgrades before the first rebirth', () => {
@@ -469,6 +488,35 @@ describe('GameStore', () => {
 
     expect(store.state.buildings.garagePicker).toBe(1)
     expect(store.state.shishki).toBeGreaterThan(0)
+  })
+
+  it('extends campaign duration from campaign duration upgrades', () => {
+    const base = createFreshState()
+    const store = createStore()
+    const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(5_000)
+
+    store.importGameSave({
+      ...base,
+      shishki: 50_000,
+      market: {
+        ...base.market,
+        unlocked: true,
+      },
+      buildings: {
+        ...base.buildings,
+        resaleStall: 2,
+      },
+      upgrades: {
+        ...base.upgrades,
+        mediaTail: 1,
+      },
+    })
+
+    store.activateCampaign('iceFlexer')
+
+    expect(store.state.activeCampaign?.id).toBe('iceFlexer')
+    expect(store.state.activeCampaign?.endsAt).toBe(113_000)
+    nowSpy.mockRestore()
   })
 
   it('starts a new life with a small prestige-backed seed reserve', () => {

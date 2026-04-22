@@ -13,15 +13,17 @@ import {
   applyMarketTrade,
   deriveProduction,
   getBuildingById,
-  getBuildingCost,
+  getBuildingPurchaseCost,
   getCampaignById,
   getCampaignLaunchCost,
+  getCampaignWindow,
   getEventSpawnChance,
   getEventPresentation,
   getEventRewardMultiplier,
+  getEventWindow,
   rollEventDefinition,
   resolveQuotaClosures,
-  getRunUpgradeCost,
+  getRunUpgradePurchaseCost,
 } from '../game/economyMath.js'
 import { getEventVisual } from '../game/marketEventVisuals.js'
 import {
@@ -156,11 +158,10 @@ function spawnTimedEvent(
     {
       ...clearedState,
       activeEvent: {
-        ...definition,
+        ...getEventWindow(clearedState, definition, now),
         ...getEventMarketPayload(definition.id),
         chainStep: definition.kind === 'chain' ? 0 : undefined,
         rewardShishki: Math.round(baseReward * rewardMultiplier),
-        endsAt: now + definition.durationMs,
       },
     },
     Math.round(baseReward * rewardMultiplier),
@@ -181,10 +182,6 @@ function getBuildingLevelCost(level) {
   }
 
   return 1
-}
-
-function getPurchaseDiscount(state) {
-  return Math.max(0, Math.min(0.6, state?.activeEvent?.purchaseDiscount ?? 0))
 }
 
 function buildEventToastPayload(event) {
@@ -510,13 +507,7 @@ export default class GameStore {
     }
 
     const owned = this._state.buildings[id] ?? 0
-    const cost = Math.max(
-      1,
-      Math.floor(
-        getBuildingCost(building.baseCost, owned) *
-          (1 - getPurchaseDiscount(this._state)),
-      ),
-    )
+    const cost = getBuildingPurchaseCost(this._state, building, owned)
     if (this._state.shishki < cost) {
       return
     }
@@ -547,13 +538,7 @@ export default class GameStore {
     const upgrade = RUN_UPGRADES.find((item) => item.id === id)
     const level = this._state.upgrades[id] ?? 0
     const cost = upgrade
-      ? Math.max(
-          1,
-          Math.floor(
-            getRunUpgradeCost(upgrade.cost, level) *
-              (1 - getPurchaseDiscount(this._state)),
-          ),
-        )
+      ? getRunUpgradePurchaseCost(this._state, upgrade, level)
       : null
 
     if (!upgrade || !upgradeCard?.unlocked || this._state.shishki < cost) {
@@ -687,10 +672,9 @@ export default class GameStore {
       ...this._state,
       shishki: this._state.shishki - launchCost,
       activeCampaign: {
-        ...campaign,
+        ...getCampaignWindow(this._state, campaign, Date.now()),
         label: getEventPresentation(campaignId),
         launchCost,
-        endsAt: Date.now() + campaign.durationMs,
       },
     })
   }
@@ -811,11 +795,10 @@ export default class GameStore {
         unlocked: true,
       },
       activeEvent: {
-        ...definition,
+        ...getEventWindow(this._state, definition, Date.now()),
         ...getEventMarketPayload(definition.id),
         chainStep: definition.kind === 'chain' ? 0 : undefined,
         rewardShishki: definition.chainRewardShishki ?? 0,
-        endsAt: Date.now() + definition.durationMs,
       },
     })
 
@@ -844,10 +827,9 @@ export default class GameStore {
         unlocked: true,
       },
       activeCampaign: {
-        ...campaign,
+        ...getCampaignWindow(this._state, campaign, Date.now()),
         label: getEventPresentation(campaignId),
         launchCost: 0,
-        endsAt: Date.now() + campaign.durationMs,
       },
     })
 

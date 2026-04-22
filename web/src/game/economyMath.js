@@ -207,6 +207,86 @@ export function getRunUpgradeCost(baseCost, level) {
   return Math.floor(baseCost * Math.pow(1.15, level) + 1e-9)
 }
 
+export function getRunUpgradeBonus(state, kind) {
+  return RUN_UPGRADES.reduce((total, upgrade) => {
+    if (upgrade.kind !== kind) {
+      return total
+    }
+
+    return total + (state?.upgrades?.[upgrade.id] ?? 0) * upgrade.value
+  }, 0)
+}
+
+export function getPurchaseDiscount(state) {
+  return Math.max(0, Math.min(0.6, state?.activeEvent?.purchaseDiscount ?? 0))
+}
+
+export function getBuildingPurchaseCost(state, building, owned) {
+  const buildingDiscount = Math.min(
+    0.5,
+    getRunUpgradeBonus(state, 'buildingDiscount'),
+  )
+  const purchaseDiscount = getPurchaseDiscount(state)
+
+  return Math.max(
+    1,
+    Math.floor(
+      getBuildingCost(building.baseCost, owned) *
+        (1 - Math.min(0.9, buildingDiscount + purchaseDiscount)),
+    ),
+  )
+}
+
+export function getRunUpgradePurchaseCost(state, upgrade, level) {
+  const upgradeDiscount = Math.min(
+    0.5,
+    getRunUpgradeBonus(state, 'upgradeDiscount'),
+  )
+  const purchaseDiscount = getPurchaseDiscount(state)
+
+  return Math.max(
+    1,
+    Math.floor(
+      getRunUpgradeCost(upgrade.cost, level) *
+        (1 - Math.min(0.9, upgradeDiscount + purchaseDiscount)),
+    ),
+  )
+}
+
+function getCampaignEffectMultiplier(state) {
+  const buildingPotencyBonus = getBuildingPerkValue(
+    'nightWarehouse',
+    state?.buildingLevels?.nightWarehouse ?? 0,
+    'campaignPotency',
+  )
+
+  return (
+    1 +
+    buildingPotencyBonus +
+    getRunUpgradeBonus(state, 'campaignEffectBoost')
+  )
+}
+
+function getEventDurationMultiplier(state) {
+  return 1 + getRunUpgradeBonus(state, 'eventDurationBoost')
+}
+
+function getCampaignDurationMultiplier(state) {
+  return 1 + getRunUpgradeBonus(state, 'campaignDurationBoost')
+}
+
+function getNegativeEventReduction(state) {
+  return Math.min(0.5, getRunUpgradeBonus(state, 'eventNegativeReduction'))
+}
+
+function getAdjustedEventModifier(value, state) {
+  if (!Number.isFinite(value) || value >= 0) {
+    return value
+  }
+
+  return value * (1 - getNegativeEventReduction(state))
+}
+
 export function getQuotaTarget(baseQuota, quotaGrowth, quotaIndex) {
   return Math.floor(baseQuota * Math.pow(quotaGrowth, quotaIndex))
 }
@@ -220,20 +300,8 @@ export function deriveProduction(state) {
       total + owned * building.baseOutput * getBuildingLevelMultiplier(level)
     )
   }, 0)
-  const globalUpgradeBonus = RUN_UPGRADES.reduce((total, upgrade) => {
-    if (upgrade.kind !== 'globalMultiplier') {
-      return total
-    }
-
-    return total + (state?.upgrades?.[upgrade.id] ?? 0) * upgrade.value
-  }, 0)
-  const clickUpgradeBonus = RUN_UPGRADES.reduce((total, upgrade) => {
-    if (upgrade.kind !== 'clickMultiplier') {
-      return total
-    }
-
-    return total + (state?.upgrades?.[upgrade.id] ?? 0) * upgrade.value
-  }, 0)
+  const globalUpgradeBonus = getRunUpgradeBonus(state, 'globalMultiplier')
+  const clickUpgradeBonus = getRunUpgradeBonus(state, 'clickMultiplier')
   const prestigeProductionBonus =
     (state?.prestigeUpgrades?.heavenlyTar ?? 0) *
       (PRESTIGE_UPGRADE_BY_ID.heavenlyTar?.value ?? 0) +
@@ -265,17 +333,19 @@ export function deriveProduction(state) {
       )
     )
   }, 0)
-  const campaignPotencyBonus = getBuildingPerkValue(
-    'nightWarehouse',
-    state?.buildingLevels?.nightWarehouse ?? 0,
-    'campaignPotency',
+  const activeEventProductionBoost = getAdjustedEventModifier(
+    state?.activeEvent?.productionBoost ?? 0,
+    state,
   )
-  const activeEventProductionBoost = state?.activeEvent?.productionBoost ?? 0
-  const activeEventClickBoost = state?.activeEvent?.clickBoost ?? 0
+  const activeEventClickBoost = getAdjustedEventModifier(
+    state?.activeEvent?.clickBoost ?? 0,
+    state,
+  )
+  const campaignEffectMultiplier = getCampaignEffectMultiplier(state)
   const activeCampaignProductionBoost =
-    (state?.activeCampaign?.productionBoost ?? 0) * (1 + campaignPotencyBonus)
+    (state?.activeCampaign?.productionBoost ?? 0) * campaignEffectMultiplier
   const activeCampaignClickBoost =
-    (state?.activeCampaign?.clickBoost ?? 0) * (1 + campaignPotencyBonus)
+    (state?.activeCampaign?.clickBoost ?? 0) * campaignEffectMultiplier
   const globalMultiplier =
     1 +
     globalUpgradeBonus +
@@ -353,13 +423,7 @@ export function resolveQuotaClosures({
 }
 
 export function accrueTarLumps(state, elapsedMs) {
-  const tarUpgradeBonus = RUN_UPGRADES.reduce((total, upgrade) => {
-    if (upgrade.kind !== 'tarLumpMultiplier') {
-      return total
-    }
-
-    return total + (state?.upgrades?.[upgrade.id] ?? 0) * upgrade.value
-  }, 0)
+  const tarUpgradeBonus = getRunUpgradeBonus(state, 'tarLumpMultiplier')
   const buildingTarBonus = getBuildingPerkValue(
     'packingLine',
     state?.buildingLevels?.packingLine ?? 0,
@@ -393,7 +457,10 @@ export function advanceMarketPrices(state, random = Math.random) {
     const anchorPull = ((good.basePrice - currentPrice) / good.basePrice) * 0.08
     const campaignBoost =
       good.profile === 'hype' && state.activeCampaign
-        ? 0.025 + (state.activeCampaign.eventBoost ?? 0) * 0.08
+        ? 0.025 +
+          (state.activeCampaign.eventBoost ?? 0) *
+            getCampaignEffectMultiplier(state) *
+            0.08
         : 0
     const activeEventBoost =
       state.activeEvent?.marketBoostGoodId === good.id
@@ -591,8 +658,9 @@ export function getBuildingPerkSummary(id, level = 0) {
 }
 
 export function getEventSpawnChance(state, seconds) {
-  const baseChance =
-    seconds * (0.018 + (state?.activeCampaign?.eventBoost ?? 0) * 0.06)
+  const campaignEventBoost =
+    (state?.activeCampaign?.eventBoost ?? 0) * getCampaignEffectMultiplier(state)
+  const baseChance = seconds * (0.018 + campaignEventBoost * 0.06)
   const pickupPointBonus = getBuildingPerkValue(
     'pickupPoint',
     state?.buildingLevels?.pickupPoint ?? 0,
@@ -608,8 +676,9 @@ export function getEventSpawnChance(state, seconds) {
       )
     )
   }, 0)
+  const upgradeBonus = getRunUpgradeBonus(state, 'eventPositiveChance')
 
-  return Math.min(0.45, baseChance + pickupPointBonus + rareBonus)
+  return Math.min(0.45, baseChance + pickupPointBonus + rareBonus + upgradeBonus)
 }
 
 export function getEventPresentation(id) {
@@ -622,8 +691,15 @@ export function getCampaignLaunchCost(state, campaign) {
     state?.buildingLevels?.packingLine ?? 0,
     'campaignDiscount',
   )
+  const upgradeDiscount = Math.min(
+    0.5,
+    getRunUpgradeBonus(state, 'campaignDiscount'),
+  )
 
-  return Math.max(1, Math.floor(campaign.cost * (1 - campaignDiscount)))
+  return Math.max(
+    1,
+    Math.floor(campaign.cost * (1 - Math.min(0.8, campaignDiscount + upgradeDiscount))),
+  )
 }
 
 export function getEventRewardMultiplier(state) {
@@ -672,4 +748,24 @@ export function rollEventDefinition(random = Math.random, state = null) {
   }
 
   return weighted[weighted.length - 1]?.event ?? EVENT_DEFINITIONS[0]
+}
+
+export function getEventWindow(state, definition, now = Date.now()) {
+  return {
+    ...definition,
+    durationMs: Math.floor(definition.durationMs * getEventDurationMultiplier(state)),
+    endsAt:
+      now +
+      Math.floor(definition.durationMs * getEventDurationMultiplier(state)),
+  }
+}
+
+export function getCampaignWindow(state, campaign, now = Date.now()) {
+  return {
+    ...campaign,
+    durationMs: Math.floor(campaign.durationMs * getCampaignDurationMultiplier(state)),
+    endsAt:
+      now +
+      Math.floor(campaign.durationMs * getCampaignDurationMultiplier(state)),
+  }
 }

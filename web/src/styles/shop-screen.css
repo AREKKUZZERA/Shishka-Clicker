@@ -445,27 +445,6 @@
   min-width: 0;
 }
 
-.shop-card__emoji {
-  width: 2.2rem;
-  height: 2.2rem;
-  display: grid;
-  place-items: center;
-  border-radius: 0;
-  border: 2px solid rgb(var(--card-tone-rgb) / 0.24);
-  background: linear-gradient(
-    180deg,
-    rgb(var(--card-tone-rgb) / 0.2),
-    rgb(var(--surface-1-rgb) / 0.98)
-  );
-  font-size: 1rem;
-  box-shadow: inset 0 0 0 2px rgb(var(--black-rgb) / 0.18);
-}
-
-.shop-card__emoji .pixel-inline-icon {
-  width: 1.22rem;
-  height: 1.22rem;
-}
-
 .shop-card__chips {
   display: flex;
   flex-wrap: wrap;
@@ -481,6 +460,11 @@
   border-radius: 0;
   border-width: 2px;
   box-shadow: inset 0 0 0 1px rgb(var(--black-rgb) / 0.14);
+  border-color: rgb(var(--card-tone-rgb) / 0.2);
+  white-space: nowrap;
+  font-size: 0.6rem;
+  padding: 0.2rem 0.46rem;
+  background: rgb(var(--white-rgb) / 0.05);
 }
 
 .shop-card__meta {
@@ -489,15 +473,6 @@
   justify-content: space-between;
   gap: 0.54rem;
   flex-wrap: nowrap;
-}
-
-.shop-card__tier,
-.shop-card__level {
-  border-color: rgb(var(--card-tone-rgb) / 0.2);
-  white-space: nowrap;
-  font-size: 0.6rem;
-  padding: 0.2rem 0.46rem;
-  background: rgb(var(--white-rgb) / 0.05);
 }
 
 .shop-card__level {
@@ -664,11 +639,6 @@
   height: 1rem;
 }
 
-.shop-card__lock-progress {
-  color: var(--text-base);
-  font-size: 0.82rem;
-}
-
 .shop-card__shortage {
   margin-top: 0.32rem;
   color: var(--accent-danger);
@@ -683,6 +653,8 @@
 }
 
 .shop-card__lock-progress {
+  color: var(--text-base);
+  font-size: 0.82rem;
   display: grid;
   gap: 0.3rem;
   margin-top: 0.55rem;
@@ -961,7 +933,7 @@
 @media (min-width: 1600px) {
   .shop-grid,
   .shop-grid--category {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.8rem;
   }
 }
 
@@ -1028,14 +1000,6 @@
 
   .shop-card__badge-wrap {
     gap: 0.45rem;
-    grid-template-columns: 32px minmax(0, 1fr);
-  }
-
-  .shop-card__emoji {
-    width: 1.95rem;
-    height: 1.95rem;
-    border-radius: 0;
-    font-size: 0.9rem;
   }
 
   .shop-card__meta {
@@ -1178,13 +1142,6 @@
     gap: 0.55rem;
   }
 
-  .shop-card__emoji {
-    width: 2rem;
-    height: 2rem;
-    border-radius: 0;
-    font-size: 0.94rem;
-  }
-
   .shop-card__title {
     font-size: 0.9rem;
     line-height: 1.08;
@@ -1312,14 +1269,7 @@
   }
 
   .shop-card__badge-wrap {
-    grid-template-columns: 32px minmax(0, 1fr);
     gap: 0.38rem;
-  }
-
-  .shop-card__emoji {
-    width: 1.7rem;
-    height: 1.7rem;
-    font-size: 0.8rem;
   }
 
   .shop-card__title {

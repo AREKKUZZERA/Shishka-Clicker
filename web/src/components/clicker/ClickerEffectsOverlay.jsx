@@ -21,6 +21,7 @@ import {
 } from './clickEffects'
 
 const EFFECTS_VIEWPORT_PADDING = 420
+const EFFECTS_HIDE_GRACE_MS = 96
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value))
@@ -167,10 +168,14 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
     visualEffectToggles,
     visualEffectsFactor,
   } = useSettingsVisuals()
+  const canUseDOM = typeof document !== 'undefined'
 
   const canvasRef = useRef(null)
   const ctxRef = useRef(null)
   const rafRef = useRef(0)
+  const scheduleDrawRef = useRef(() => {})
+  const hideTimeoutRef = useRef(0)
+  const lastSpawnAtRef = useRef(0)
   const sizeRef = useRef({ left: 0, top: 0, width: 0, height: 0, dpr: 1 })
   const imagesRef = useRef({ cone: null, altCone: null })
   const textSpriteCacheRef = useRef(new Map())
@@ -213,9 +218,11 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
   }, [isVisible])
 
   useEffect(() => {
+    if (!canUseDOM) return undefined
+
     imagesRef.current.cone = loadImage(coneImage)
     imagesRef.current.altCone = loadImage(coneV2Image)
-  }, [])
+  }, [canUseDOM])
 
   const syncOverlayBounds = useCallback(() => {
     const canvas = canvasRef.current
@@ -253,8 +260,42 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
     ctxRef.current = ctx
   }, [anchorRef])
 
+  const cancelPendingHide = useCallback(() => {
+    if (hideTimeoutRef.current) {
+      window.clearTimeout(hideTimeoutRef.current)
+      hideTimeoutRef.current = 0
+    }
+  }, [])
+
+  const queueHideOverlay = useCallback(() => {
+    cancelPendingHide()
+    hideTimeoutRef.current = window.setTimeout(() => {
+      hideTimeoutRef.current = 0
+
+      const activeEffects = effectsRef.current
+      const hasCanvasEffects =
+        activeEffects.particles.length > 0 ||
+        activeEffects.coneSprites.length > 0 ||
+        activeEffects.shockwaves.length > 0 ||
+        activeEffects.bursts.length > 0
+
+      if (hasCanvasEffects) {
+        scheduleDrawRef.current()
+        return
+      }
+
+      if (Date.now() - lastSpawnAtRef.current < EFFECTS_HIDE_GRACE_MS) {
+        scheduleDrawRef.current()
+        return
+      }
+
+      visibilityRef.current = false
+      setIsVisible(false)
+    }, EFFECTS_HIDE_GRACE_MS)
+  }, [cancelPendingHide])
+
   useEffect(() => {
-    if (!isVisible) return undefined
+    if (!canUseDOM) return undefined
 
     const resizeOverlay = () => {
       syncOverlayBounds()
@@ -267,15 +308,25 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
       window.removeEventListener('resize', resizeOverlay)
       ctxRef.current = null
     }
-  }, [isVisible, syncOverlayBounds])
+  }, [canUseDOM, syncOverlayBounds])
 
   const scheduleDraw = useCallback(() => {
     if (rafRef.current) return
 
     const drawFrame = (time) => {
       rafRef.current = 0
-      const ctx = ctxRef.current
-      if (!ctx) return
+      let ctx = ctxRef.current
+      if (!ctx) {
+        syncOverlayBounds()
+        ctx = ctxRef.current
+      }
+
+      if (!ctx) {
+        if (visibilityRef.current) {
+          rafRef.current = window.requestAnimationFrame(drawFrame)
+        }
+        return
+      }
 
       const now = performance.timeOrigin + time
       const { left, top, width, height } = sizeRef.current
@@ -480,16 +531,21 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
       if (hasCanvasEffects) {
         rafRef.current = window.requestAnimationFrame(drawFrame)
       } else if (visibilityRef.current) {
-        setIsVisible(false)
+        queueHideOverlay()
       }
     }
 
     rafRef.current = window.requestAnimationFrame(drawFrame)
-  }, [])
+  }, [queueHideOverlay, syncOverlayBounds])
+
+  useEffect(() => {
+    scheduleDrawRef.current = scheduleDraw
+  }, [scheduleDraw])
 
   useEffect(() => {
     return () => {
       if (rafRef.current) window.cancelAnimationFrame(rafRef.current)
+      if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current)
     }
   }, [])
 
@@ -518,6 +574,8 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
         shockwavePoint,
       }) {
         const now = Date.now()
+        lastSpawnAtRef.current = now
+        cancelPendingHide()
         syncOverlayBounds()
 
         const nextEffects = buildClickSpawnState({
@@ -532,6 +590,7 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
         })
 
         if (!visibilityRef.current) {
+          visibilityRef.current = true
           setIsVisible(true)
         }
 
@@ -582,15 +641,15 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
         }
       },
     }),
-    [scheduleDraw, syncOverlayBounds],
+    [cancelPendingHide, scheduleDraw, syncOverlayBounds],
   )
 
-  if (!isVisible) return null
+  if (!canUseDOM) return null
 
   return createPortal(
     <canvas
       ref={canvasRef}
-      className="clicker-particles clicker-effects-canvas"
+      className={`clicker-particles clicker-effects-canvas ${isVisible ? 'clicker-effects-canvas--active' : 'clicker-effects-canvas--idle'}`.trim()}
       aria-hidden="true"
     />,
     document.body,

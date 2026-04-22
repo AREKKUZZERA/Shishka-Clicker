@@ -74,9 +74,9 @@ describe('ShopScreen', () => {
                     title: 'Складской ритм',
                     fieldCode: 'run_warehouse_rhythm',
                     kind: 'globalMultiplier',
-                    value: 0.25,
+                    value: 0.12,
                     level: 1,
-                    cost: 138,
+                    cost: 400,
                     canBuy: true,
                     unlocked: true,
                   },
@@ -92,9 +92,45 @@ describe('ShopScreen', () => {
       </SettingsProvider>,
     )
 
-    expect(html).toContain('+25% к производству за уровень')
+    expect(html).toContain('+12% к производству за уровень')
     expect(html).toContain('Эффект: Буст производства')
     expect(html).not.toContain('globalMultiplier')
+  })
+
+  it('renders readable labels for discount and campaign upgrade kinds', () => {
+    const html = renderToStaticMarkup(
+      <SettingsProvider>
+        <StoresContext.Provider
+          value={{
+            gameStore: {
+              uiEconomy: {
+                subscriptions: [],
+                upgrades: [
+                  {
+                    id: 'districtWarmup',
+                    title: 'Прогрев района',
+                    fieldCode: 'run_district_warmup',
+                    kind: 'campaignDiscount',
+                    value: 0.08,
+                    level: 1,
+                    cost: 12_000,
+                    canBuy: true,
+                    unlocked: true,
+                  },
+                ],
+              },
+              buySubscription: () => {},
+              buyUpgrade: () => {},
+            },
+          }}
+        >
+          <ShopScreen initialView="upgrades" />
+        </StoresContext.Provider>
+      </SettingsProvider>,
+    )
+
+    expect(html).toContain('Скидка на кампании')
+    expect(html).toContain('-8% к цене кампаний за уровень')
   })
 
   it('moves price into the purchase button and shows tar level as УС badge', () => {

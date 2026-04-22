@@ -13,12 +13,16 @@ import {
   advanceMarketPrices,
   applyMarketTrade,
   deriveProduction,
+  getBuildingPurchaseCost,
   getBuildingPerkSummary,
   getBuildingCost,
   getCampaignById,
+  getCampaignLaunchCost,
   getEventById,
   getEventPresentation,
+  getEventSpawnChance,
   getQuotaTarget,
+  getRunUpgradePurchaseCost,
   resolveQuotaClosures,
 } from '../economyMath.js'
 import {
@@ -165,6 +169,34 @@ describe('economy schema', () => {
     expect(getEventById('cashbackGlitchChain')?.rarity).toBe('rare')
   })
 
+  it('defines the expanded run-upgrade pool', () => {
+    expect(RUN_UPGRADES).toHaveLength(20)
+    expect(RUN_UPGRADES).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: 'doubleSwing',
+          kind: 'clickMultiplier',
+          fieldCode: 'run_double_swing',
+        }),
+        expect.objectContaining({
+          id: 'bulkDeal',
+          kind: 'buildingDiscount',
+          fieldCode: 'run_bulk_deal',
+        }),
+        expect.objectContaining({
+          id: 'warmBackground',
+          kind: 'eventPositiveChance',
+          fieldCode: 'run_warm_background',
+        }),
+        expect.objectContaining({
+          id: 'districtWarmup',
+          kind: 'campaignDiscount',
+          fieldCode: 'run_district_warmup',
+        }),
+      ]),
+    )
+  })
+
   it('keeps event descriptions player-facing instead of dev placeholders', () => {
     expect(getEventPresentation('districtHype')).not.toMatch(
       /production|push|burst|spike|instant/i,
@@ -183,6 +215,37 @@ describe('economy math', () => {
     expect(getBuildingCost(100, 0)).toBe(100)
     expect(getBuildingCost(100, 1)).toBe(115)
     expect(getBuildingCost(100, 2)).toBe(132)
+  })
+
+  it('applies building discount upgrades to building prices', () => {
+    const state = {
+      ...STARTING_STATE,
+      upgrades: {
+        ...STARTING_STATE.upgrades,
+        bulkDeal: 1,
+        warehouseConcession: 1,
+      },
+    }
+
+    expect(getBuildingPurchaseCost(state, BUILDINGS[0], 0)).toBe(13)
+  })
+
+  it('applies upgrade discount upgrades to run-upgrade prices', () => {
+    const state = {
+      ...STARTING_STATE,
+      upgrades: {
+        ...STARTING_STATE.upgrades,
+        nightSlotSale: 1,
+      },
+    }
+
+    expect(
+      getRunUpgradePurchaseCost(
+        state,
+        RUN_UPGRADES.find((item) => item.id === 'warehouseRhythm'),
+        0,
+      ),
+    ).toBe(380)
   })
 
   it('sets the first quota target to one million shishki', () => {
@@ -263,6 +326,24 @@ describe('economy math', () => {
     )
 
     expect(result.tarLumps).toBe(1)
+  })
+
+  it('adds event-positive chance from upgrades', () => {
+    const boostedState = {
+      ...STARTING_STATE,
+      market: {
+        ...STARTING_STATE.market,
+        unlocked: true,
+      },
+      upgrades: {
+        ...STARTING_STATE.upgrades,
+        warmBackground: 1,
+      },
+    }
+
+    expect(getEventSpawnChance(boostedState, 1)).toBeGreaterThan(
+      getEventSpawnChance(STARTING_STATE, 1),
+    )
   })
 
   it('lets packing line levels accelerate tar lump cadence further', () => {
@@ -502,6 +583,43 @@ describe('economy math', () => {
 
     expect(deriveProduction(leveledState).shishkiPerSecond).toBeGreaterThan(
       deriveProduction(baseState).shishkiPerSecond,
+    )
+  })
+
+  it('discounts campaign launch cost from upgrades', () => {
+    const state = {
+      ...STARTING_STATE,
+      upgrades: {
+        ...STARTING_STATE.upgrades,
+        districtWarmup: 1,
+      },
+    }
+
+    expect(getCampaignLaunchCost(state, RAP_CAMPAIGNS[0])).toBe(2300)
+  })
+
+  it('reduces negative event penalties from event reduction upgrades', () => {
+    const penalizedState = {
+      ...STARTING_STATE,
+      buildings: {
+        ...STARTING_STATE.buildings,
+        garagePicker: 10,
+      },
+      activeEvent: {
+        ...getEventById('tarStorm'),
+        endsAt: Date.now() + 1_000,
+      },
+    }
+    const protectedState = {
+      ...penalizedState,
+      upgrades: {
+        ...STARTING_STATE.upgrades,
+        quietDetour: 1,
+      },
+    }
+
+    expect(deriveProduction(protectedState).shishkiPerSecond).toBeGreaterThan(
+      deriveProduction(penalizedState).shishkiPerSecond,
     )
   })
 

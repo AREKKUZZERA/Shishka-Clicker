@@ -475,6 +475,7 @@
 
 .clicker-btn:active {
   transform: none;
+  cursor: url('../assets/dark-cur_ani_files/link2.cur'), pointer;
 }
 
 .clicker-btn--mega {
@@ -487,13 +488,6 @@
 
 .clicker-btn--charged {
   box-shadow: inset 0 0 0 999px rgb(var(--accent-primary-rgb) / 0.035);
-}
-
-.shop-card__glow,
-.shop-card__shine {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
 }
 
 .clicker-btn__core {
@@ -3520,10 +3514,6 @@
 
   .meta-section-head {
     align-items: stretch;
-  }
-
-  .screen__header {
-    margin-bottom: 0.88rem;
   }
 
   .progress-stats {

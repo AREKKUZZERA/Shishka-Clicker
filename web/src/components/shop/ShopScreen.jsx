@@ -26,6 +26,14 @@ const PURCHASE_VIEWS = {
 const UPGRADE_KIND_LABELS = {
   globalMultiplier: 'Буст производства',
   clickMultiplier: 'Буст клика',
+  buildingDiscount: 'Скидка на здания',
+  eventPositiveChance: 'Шанс хорошего события',
+  eventNegativeReduction: 'Защита от плохих событий',
+  campaignDiscount: 'Скидка на кампании',
+  upgradeDiscount: 'Скидка на усиления',
+  eventDurationBoost: 'Длительность событий',
+  campaignDurationBoost: 'Длительность кампаний',
+  campaignEffectBoost: 'Сила кампаний',
   tarLumpMultiplier: 'Ускорение комочков',
 }
 
@@ -46,6 +54,44 @@ function getPurchaseDescription(item, isBuildingsView) {
 
   if (item.kind === 'clickMultiplier') {
     return `+${formatNumber(item.value ?? 0)} к клику за уровень`
+  }
+
+  if (
+    item.kind === 'buildingDiscount' ||
+    item.kind === 'campaignDiscount' ||
+    item.kind === 'upgradeDiscount'
+  ) {
+    const target =
+      item.kind === 'buildingDiscount'
+        ? 'зданий'
+        : item.kind === 'campaignDiscount'
+          ? 'кампаний'
+          : 'усилений'
+
+    return `-${formatNumber((item.value ?? 0) * 100)}% к цене ${target} за уровень`
+  }
+
+  if (item.kind === 'eventPositiveChance') {
+    return `+${formatNumber((item.value ?? 0) * 100)}% к шансу хорошего события за уровень`
+  }
+
+  if (item.kind === 'eventNegativeReduction') {
+    return `-${formatNumber((item.value ?? 0) * 100)}% к силе плохих событий за уровень`
+  }
+
+  if (
+    item.kind === 'eventDurationBoost' ||
+    item.kind === 'campaignDurationBoost' ||
+    item.kind === 'campaignEffectBoost'
+  ) {
+    const target =
+      item.kind === 'eventDurationBoost'
+        ? 'длительности событий'
+        : item.kind === 'campaignDurationBoost'
+          ? 'длительности кампаний'
+          : 'силе кампаний'
+
+    return `+${formatNumber((item.value ?? 0) * 100)}% к ${target} за уровень`
   }
 
   return `Эффект за уровень: ${formatNumber(item.value ?? 0)}`
