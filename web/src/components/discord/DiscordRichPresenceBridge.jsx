@@ -27,11 +27,33 @@ export const DiscordRichPresenceBridge = observer(
         return undefined
       }
 
-      const timeoutId = window.setTimeout(() => {
-        void updateRichPresence(presence)
+      let cancelled = false
+      let timeoutId = 0
+      let attempt = 0
+
+      const tryUpdatePresence = async () => {
+        const applied = await updateRichPresence(presence)
+
+        if (cancelled || applied) {
+          return
+        }
+
+        attempt += 1
+        if (attempt >= 5) {
+          return
+        }
+
+        timeoutId = window.setTimeout(() => {
+          void tryUpdatePresence()
+        }, 1200)
+      }
+
+      timeoutId = window.setTimeout(() => {
+        void tryUpdatePresence()
       }, 500)
 
       return () => {
+        cancelled = true
         window.clearTimeout(timeoutId)
       }
     }, [isActivity, presence, status, updateRichPresence])

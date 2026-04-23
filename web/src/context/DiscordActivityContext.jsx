@@ -161,6 +161,31 @@ function chooseSyncWinner(localGameState, remoteCloudSave) {
 
 export { classifyCloudSave, chooseSyncWinner }
 
+export function getDiscordPresenceBlocker({
+  isActivity,
+  status,
+  hasDiscordSdk,
+  hasActivity,
+}) {
+  if (!isActivity) {
+    return 'discord_activity_unavailable'
+  }
+
+  if (status !== 'ready') {
+    return 'discord_presence_not_ready'
+  }
+
+  if (!hasDiscordSdk) {
+    return 'discord_sdk_unavailable'
+  }
+
+  if (!hasActivity) {
+    return 'discord_presence_payload_missing'
+  }
+
+  return null
+}
+
 export function DiscordActivityProvider({ children }) {
   const gameStore = useGameStore()
   const websocketStore = useWebsocketStore()
@@ -690,12 +715,18 @@ export function DiscordActivityProvider({ children }) {
 
   const updateRichPresence = useCallback(
     async (activity) => {
-      if (
-        !state.isActivity ||
-        state.status !== 'ready' ||
-        !discordSdkRef.current ||
-        !activity
-      ) {
+      const blocker = getDiscordPresenceBlocker({
+        isActivity: state.isActivity,
+        status: state.status,
+        hasDiscordSdk: Boolean(discordSdkRef.current),
+        hasActivity: Boolean(activity),
+      })
+
+      if (blocker) {
+        setState((current) => ({
+          ...current,
+          presenceError: blocker,
+        }))
         return false
       }
 

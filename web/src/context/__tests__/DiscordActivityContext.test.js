@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   classifyCloudSave,
   chooseSyncWinner,
+  getDiscordPresenceBlocker,
   getProgressScore,
 } from '../DiscordActivityContext.jsx'
 import { createSaveBundle } from '../../lib/saveTransfer.js'
@@ -96,5 +97,40 @@ describe('DiscordActivityContext sync helpers', () => {
     expect(
       chooseSyncWinner(localSave.payload.game, createLegacyCloudSave()),
     ).toBe('local')
+  })
+})
+
+describe('getDiscordPresenceBlocker', () => {
+  it('reports missing activity mode before attempting setActivity', () => {
+    expect(
+      getDiscordPresenceBlocker({
+        isActivity: false,
+        status: 'ready',
+        hasDiscordSdk: true,
+        hasActivity: true,
+      }),
+    ).toBe('discord_activity_unavailable')
+  })
+
+  it('reports missing sdk instance when activity mode is active', () => {
+    expect(
+      getDiscordPresenceBlocker({
+        isActivity: true,
+        status: 'ready',
+        hasDiscordSdk: false,
+        hasActivity: true,
+      }),
+    ).toBe('discord_sdk_unavailable')
+  })
+
+  it('returns null when all presence preconditions are satisfied', () => {
+    expect(
+      getDiscordPresenceBlocker({
+        isActivity: true,
+        status: 'ready',
+        hasDiscordSdk: true,
+        hasActivity: true,
+      }),
+    ).toBe(null)
   })
 })
