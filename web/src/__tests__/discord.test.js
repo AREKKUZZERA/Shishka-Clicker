@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { shouldLoadDiscordSdk } from '../discord.js'
+import {
+  formatDiscordCommandError,
+  shouldLoadDiscordSdk,
+} from '../discord.js'
 
 describe('shouldLoadDiscordSdk', () => {
   it('loads the Discord SDK whenever a browser runtime and client id are available', () => {
@@ -27,5 +30,25 @@ describe('shouldLoadDiscordSdk', () => {
         clientId: '',
       }),
     ).toBe(false)
+  })
+})
+
+describe('formatDiscordCommandError', () => {
+  it('includes status, code, method, and path when available', () => {
+    const error = {
+      message: 'Forbidden',
+      status: 403,
+      code: 50001,
+      method: 'POST',
+      path: '/interactions',
+    }
+
+    expect(formatDiscordCommandError(error)).toBe(
+      'Forbidden [status=403, code=50001, POST /interactions]',
+    )
+  })
+
+  it('falls back to a stable unknown error message', () => {
+    expect(formatDiscordCommandError(null)).toBe('unknown_error')
   })
 })

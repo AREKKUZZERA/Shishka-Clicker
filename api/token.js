@@ -1,10 +1,18 @@
 import { writeSession } from './_lib/session.js'
+import {
+  buildDiscordTokenExchangeParams,
+  resolveDiscordRedirectUri,
+} from '../shared/discordOAuth.js'
 
 const DISCORD_API_URL = 'https://discord.com/api/oauth2/token'
 const DISCORD_ME_API_URL = 'https://discord.com/api/users/@me'
 
 function getDiscordClientId() {
   return process.env.VITE_CLIENT_ID ?? process.env.VITE_DISCORD_CLIENT_ID
+}
+
+function getDiscordRedirectUri() {
+  return resolveDiscordRedirectUri(process.env)
 }
 
 export default async function handler(req, res) {
@@ -17,6 +25,7 @@ export default async function handler(req, res) {
 
   const clientId = getDiscordClientId()
   const clientSecret = process.env.DISCORD_CLIENT_SECRET
+  const redirectUri = getDiscordRedirectUri()
   const { code } = req.body ?? {}
 
   if (!clientId) {
@@ -46,11 +55,11 @@ export default async function handler(req, res) {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        client_id: clientId,
-        client_secret: clientSecret,
-        grant_type: 'authorization_code',
-        code: String(code),
+      body: buildDiscordTokenExchangeParams({
+        clientId,
+        clientSecret,
+        code,
+        redirectUri,
       }),
     })
 

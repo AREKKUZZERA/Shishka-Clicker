@@ -1,5 +1,8 @@
+import { resolveDiscordRedirectUri } from '../../shared/discordOAuth.js'
+
 const DISCORD_CLIENT_ID =
   import.meta.env.VITE_CLIENT_ID ?? import.meta.env.VITE_DISCORD_CLIENT_ID
+const DISCORD_REDIRECT_URI = resolveDiscordRedirectUri(import.meta.env)
 const DISCORD_ACTIVITY_SCOPES = ['identify', 'rpc.activities.write']
 const DISCORD_READY_TIMEOUT_MS = 5000
 const DISCORD_AUTHORIZE_TIMEOUT_MS = 10000
@@ -13,8 +16,39 @@ export function shouldLoadDiscordSdk({
   return hasWindow && Boolean(clientId)
 }
 
+export function formatDiscordCommandError(error) {
+  if (!error) {
+    return 'unknown_error'
+  }
+
+  const message =
+    typeof error === 'object' && error !== null && 'message' in error
+      ? error.message
+      : error instanceof Error
+        ? error.message
+        : String(error)
+
+  const details = []
+
+  if (typeof error === 'object' && error !== null) {
+    if ('status' in error && error.status != null) {
+      details.push(`status=${error.status}`)
+    }
+
+    if ('code' in error && error.code != null) {
+      details.push(`code=${error.code}`)
+    }
+
+    if ('method' in error && 'path' in error && error.method && error.path) {
+      details.push(`${error.method} ${error.path}`)
+    }
+  }
+
+  return details.length > 0 ? `${message} [${details.join(', ')}]` : message
+}
+
 function toDiscordError(stage, error) {
-  const message = error instanceof Error ? error.message : 'unknown_error'
+  const message = formatDiscordCommandError(error)
   return new Error(`${stage}: ${message}`)
 }
 
@@ -86,6 +120,7 @@ export async function setupDiscord() {
       discordSdk.commands.authorize({
         client_id: DISCORD_CLIENT_ID,
         response_type: 'code',
+        redirect_uri: DISCORD_REDIRECT_URI,
         state: 'discord-activity',
         prompt: 'none',
         scope: DISCORD_ACTIVITY_SCOPES,
