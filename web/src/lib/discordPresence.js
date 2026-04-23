@@ -27,7 +27,7 @@ function countUnlockedAchievements(achievements) {
   )
 }
 
-function buildPresenceState(activeTab, gameState, economy) {
+export function buildDiscordPresenceSource({ gameState, economy }) {
   const achievementCount = countUnlockedAchievements(gameState?.achievements)
   const buildingCount = sumLevels(gameState?.buildings)
   const upgradeLevels = sumLevels(gameState?.upgrades)
@@ -38,30 +38,56 @@ function buildPresenceState(activeTab, gameState, economy) {
   const shishkiPerSecond = Number(economy?.shishkiPerSecond ?? 0)
   const clickPower = Number(economy?.clickPower ?? 1)
 
+  return {
+    achievementCountText: formatNumber(achievementCount),
+    buildingCountText: formatNumber(buildingCount),
+    upgradeLevelsText: formatNumber(upgradeLevels),
+    marketPositionsText: formatNumber(marketPositions),
+    shishkiText: formatNumber(shishki),
+    heavenlyShishkiText: formatNumber(heavenlyShishki),
+    tarLumpsText: formatNumber(tarLumps),
+    shishkiPerSecondText: formatNumber(shishkiPerSecond),
+    clickPowerText: formatNumber(clickPower),
+  }
+}
+
+function buildPresenceState(activeTab, source) {
+  const {
+    achievementCountText = '0',
+    buildingCountText = '0',
+    upgradeLevelsText = '0',
+    marketPositionsText = '0',
+    shishkiText = '0',
+    heavenlyShishkiText = '0',
+    tarLumpsText = '0',
+    shishkiPerSecondText = '0',
+    clickPowerText = '1',
+  } = source ?? {}
+
   const partsByTab = {
     clicker: [
-      `Шишки/с: ${formatNumber(shishkiPerSecond)}`,
-      `Клик: ${formatNumber(clickPower)}`,
+      `Шишки/с: ${shishkiPerSecondText}`,
+      `Клик: ${clickPowerText}`,
     ],
     purchases: [
-      `Построек: ${formatNumber(buildingCount)}`,
-      `Апгрейдов: ${formatNumber(upgradeLevels)}`,
+      `Построек: ${buildingCountText}`,
+      `Апгрейдов: ${upgradeLevelsText}`,
     ],
     market: [
-      `Позиции: ${formatNumber(marketPositions)}`,
-      `Шишки: ${formatNumber(shishki)}`,
+      `Позиции: ${marketPositionsText}`,
+      `Шишки: ${shishkiText}`,
     ],
     meta: [
-      `Небесные: ${formatNumber(heavenlyShishki)}`,
-      `Комки: ${formatNumber(tarLumps)}`,
+      `Небесные: ${heavenlyShishkiText}`,
+      `Комки: ${tarLumpsText}`,
     ],
-    settings: [`Ачивок: ${formatNumber(achievementCount)}`, `v${APP_VERSION}`],
+    settings: [`Ачивок: ${achievementCountText}`, `v${APP_VERSION}`],
   }
 
   return (
     partsByTab[activeTab] ?? [
-      `Шишки/с: ${formatNumber(shishkiPerSecond)}`,
-      `Ачивок: ${formatNumber(achievementCount)}`,
+      `Шишки/с: ${shishkiPerSecondText}`,
+      `Ачивок: ${achievementCountText}`,
     ]
   )
     .filter(Boolean)
@@ -84,12 +110,15 @@ export function buildDiscordRichPresence({
   activeTab,
   gameState,
   economy,
+  presenceSource = null,
   startedAt,
 }) {
+  const source =
+    presenceSource ?? buildDiscordPresenceSource({ gameState, economy })
   const activity = {
     type: 0,
     details: PRESENCE_DETAILS_BY_TAB[activeTab] ?? 'Играет в Shishka Clicker',
-    state: buildPresenceState(activeTab, gameState, economy),
+    state: buildPresenceState(activeTab, source),
     timestamps: {
       start: startedAt,
     },

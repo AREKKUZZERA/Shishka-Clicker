@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   buildClickerFieldData,
+  buildDevConsoleResources,
   buildEconomySnapshot,
 } from '../gameStoreSnapshots.js'
 import { createFreshState } from '../gameStoreState.js'
@@ -73,6 +74,25 @@ describe('gameStoreSnapshots', () => {
       buildingUnlockGoal: 5,
       buildingUnlockProgress: 4,
       unlockProgressPercent: expect.closeTo(39.6825, 4),
+    })
+  })
+
+  it('builds preformatted dev console resources', () => {
+    const base = createFreshState()
+    const resources = buildDevConsoleResources({
+      ...base,
+      shishki: 12_500,
+      heavenlyShishki: 7,
+      tarLumps: 3,
+    })
+
+    expect(resources).toEqual({
+      shishki: 12_500,
+      shishkiText: '12,5K',
+      heavenlyShishki: 7,
+      heavenlyShishkiText: '7',
+      tarLumps: 3,
+      tarLumpsText: '3',
     })
   })
 })

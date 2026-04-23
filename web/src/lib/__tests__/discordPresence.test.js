@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
+  buildDiscordPresenceSource,
   buildDiscordRichPresence,
   getExternalPresenceImageUrl,
 } from '../discordPresence.js'
@@ -27,6 +28,19 @@ describe('buildDiscordRichPresence', () => {
 
     expect(presence.details).toBe('Торгует серым дефицитом')
     expect(presence.state).toBe('Позиции: 7 • Шишки: 5,1K')
+  })
+
+  it('can build presence from a preformatted presence source', () => {
+    const presence = buildDiscordRichPresence({
+      activeTab: 'clicker',
+      presenceSource: {
+        shishkiPerSecondText: '32',
+        clickPowerText: '5',
+      },
+      startedAt: 1_700_000_000,
+    })
+
+    expect(presence.state).toBe('Шишки/с: 32 • Клик: 5')
   })
 
   it('uses heavenly shishki and tar lumps on the meta tab', () => {
@@ -62,6 +76,47 @@ describe('buildDiscordRichPresence', () => {
     })
 
     expect(presence.assets).toBeUndefined()
+  })
+})
+
+describe('buildDiscordPresenceSource', () => {
+  it('normalizes economy values to display-level strings', () => {
+    expect(
+      buildDiscordPresenceSource({
+        gameState: {
+          shishki: 5_129,
+          heavenlyShishki: 9,
+          tarLumps: 4,
+          buildings: {
+            garagePicker: 3,
+          },
+          upgrades: {
+            warehouseRhythm: 1,
+          },
+          market: {
+            positions: {
+              parallelImport: 2,
+            },
+          },
+          achievements: {
+            firstQuota: true,
+          },
+        },
+        economy: {
+          shishkiPerSecond: 32,
+          clickPower: 5,
+        },
+      }),
+    ).toEqual(
+      expect.objectContaining({
+        shishkiText: '5,1K',
+        heavenlyShishkiText: '9',
+        tarLumpsText: '4',
+        marketPositionsText: '2',
+        shishkiPerSecondText: '32',
+        clickPowerText: '5',
+      }),
+    )
   })
 })
 

@@ -3,8 +3,6 @@ export const IDLE_TIMEOUT = 4500
 
 export const VISUAL_DURATIONS = {
   tap: 240,
-  mega: 680,
-  prism: 1300,
 }
 
 export const TAP_SPEED_TIERS = [
@@ -120,4 +118,8 @@ export function getTierForTps(tps) {
   }
 
   return TAP_SPEED_TIERS[0]
+}
+
+export function getVisualStateForResult() {
+  return 'tap'
 }

@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { appendWithCapInPlace, hasActiveCanvasEffects } from '../clickEffects'
+import {
+  appendWithCapInPlace,
+  buildClickSpawnState,
+  hasActiveCanvasEffects,
+} from '../clickEffects'
 
 describe('appendWithCapInPlace', () => {
   it('keeps only the newest effects when the cap is exceeded', () => {
@@ -28,9 +32,7 @@ describe('hasActiveCanvasEffects', () => {
   it('returns true when any effect bucket has entries', () => {
     expect(
       hasActiveCanvasEffects({
-        particles: [],
-        coneSprites: [{ id: 'cone' }],
-        shockwaves: [],
+        particles: [{ id: 'particle' }],
         bursts: [],
       }),
     ).toBe(true)
@@ -40,10 +42,49 @@ describe('hasActiveCanvasEffects', () => {
     expect(
       hasActiveCanvasEffects({
         particles: [],
-        coneSprites: [],
-        shockwaves: [],
         bursts: [],
       }),
     ).toBe(false)
+  })
+})
+
+describe('buildClickSpawnState', () => {
+  it('keeps regular click burst text and shishka particle payload', () => {
+    const spawnState = buildClickSpawnState({
+      result: {
+        amount: 12,
+        particleCount: 12,
+        symbols: ['🌰', '✨'],
+      },
+      pointerPoint: { x: 100, y: 120 },
+      particlePoint: { x: 100, y: 120 },
+      burstPoint: { x: 100, y: 120 },
+      config: {
+        visualEffectCaps: {
+          burstCap: 10,
+          particleCap: 10,
+        },
+        visualEffectScaling: {
+          burstSpawnScale: 1,
+          particleSpawnScale: 1,
+        },
+        visualEffectToggles: {
+          floatingNumbers: true,
+          particles: true,
+        },
+      },
+      now: 1_000,
+      pools: {
+        particles: [],
+        bursts: [],
+      },
+    })
+
+    expect(spawnState.burst?.entry.value).toBe('+12')
+    expect(spawnState.particles).toHaveLength(1)
+    expect(spawnState.particles[0]).toMatchObject({
+      symbol: 'shishka',
+      iconData: null,
+    })
   })
 })

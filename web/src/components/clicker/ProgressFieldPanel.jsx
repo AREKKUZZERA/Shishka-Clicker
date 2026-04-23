@@ -1,6 +1,11 @@
+import { memo } from 'react'
 import { ProgressSprite } from './ProgressSprite.jsx'
 
-export function ProgressFieldPanel({ title, items, className = '' }) {
+export const ProgressFieldPanel = memo(function ProgressFieldPanel({
+  title,
+  items,
+  className = '',
+}) {
   const fieldItems = items ?? []
 
   return (
@@ -19,4 +24,4 @@ export function ProgressFieldPanel({ title, items, className = '' }) {
       </div>
     </section>
   )
-}
+})

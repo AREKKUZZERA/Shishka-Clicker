@@ -9,13 +9,11 @@ import {
 } from 'react'
 import { createPortal } from 'react-dom'
 import { useSettingsVisuals } from '../../context/SettingsContext'
-import coneImage from '../../assets/cone.png'
 import coneV2Image from '../../assets/conev2.png'
 import {
   appendWithCapInPlace,
   buildClickSpawnState,
   easeOutCubic,
-  easeOutQuad,
   hasActiveCanvasEffects,
   MAX_CANVAS_DPR,
   pruneExpiredInPlace,
@@ -111,9 +109,7 @@ function drawCanvasBurst(ctx, burst, now) {
   const eased = easeOutCubic(progress)
   const y = burst.y - 28 - 74 * eased
   const amount = String(burst.value).match(/\+\S+/)?.[0] ?? burst.value
-  const badge =
-    burst.type === 'emoji' ? 'EMOJI' : burst.type === 'mega' ? 'MEGA' : null
-  const fontSize = burst.type === 'emoji' ? 17 : burst.type === 'mega' ? 16 : 15
+  const fontSize = 15
   const alpha =
     progress < 0.12
       ? progress / 0.12
@@ -130,31 +126,9 @@ function drawCanvasBurst(ctx, burst, now) {
   ctx.shadowOffsetX = 2
   ctx.shadowOffsetY = 2
 
-  let cursorX = burst.x
-  if (badge) {
-    ctx.font = '900 10px "Space Mono", monospace'
-    const badgeWidth = Math.ceil(ctx.measureText(badge).width) + 16
-    ctx.fillStyle =
-      burst.type === 'emoji'
-        ? 'rgba(255, 91, 211, 0.28)'
-        : 'rgba(255, 196, 53, 0.24)'
-    ctx.fillRect(cursorX - 10, y - 10, badgeWidth, 16)
-    ctx.strokeStyle = 'rgba(255,255,255,0.16)'
-    ctx.lineWidth = 2
-    ctx.strokeRect(cursorX - 10, y - 10, badgeWidth, 16)
-    ctx.fillStyle = 'rgba(255,255,255,0.94)'
-    ctx.fillText(badge, cursorX - 2, y)
-    cursorX += badgeWidth + 5
-  }
-
   ctx.font = `900 ${fontSize}px "Unbounded", sans-serif`
-  ctx.fillStyle =
-    burst.type === 'emoji'
-      ? '#ffd7f4'
-      : burst.type === 'mega'
-        ? '#ffffff'
-        : '#ffbe32'
-  ctx.fillText(amount, cursorX, y)
+  ctx.fillStyle = '#ffbe32'
+  ctx.fillText(amount, burst.x, y)
   ctx.restore()
 }
 
@@ -178,19 +152,15 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
   const hideTimeoutRef = useRef(0)
   const lastSpawnAtRef = useRef(0)
   const sizeRef = useRef({ left: 0, top: 0, width: 0, height: 0, dpr: 1 })
-  const imagesRef = useRef({ cone: null, altCone: null })
+  const imagesRef = useRef({ altCone: null })
   const textSpriteCacheRef = useRef(new Map())
   const effectsRef = useRef({
     particles: [],
-    coneSprites: [],
-    shockwaves: [],
     bursts: [],
   })
   const visibilityRef = useRef(false)
   const poolsRef = useRef({
     particles: [],
-    coneSprites: [],
-    shockwaves: [],
     bursts: [],
   })
   const configRef = useRef({
@@ -220,8 +190,6 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
 
   useEffect(() => {
     if (!canUseDOM) return undefined
-
-    imagesRef.current.cone = loadImage(coneImage)
     imagesRef.current.altCone = loadImage(coneV2Image)
   }, [canUseDOM])
 
@@ -335,35 +303,7 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
         now,
         poolsRef.current.particles,
       )
-      pruneExpiredInPlace(
-        activeEffects.coneSprites,
-        now,
-        poolsRef.current.coneSprites,
-      )
-      pruneExpiredInPlace(
-        activeEffects.shockwaves,
-        now,
-        poolsRef.current.shockwaves,
-      )
       pruneExpiredInPlace(activeEffects.bursts, now, poolsRef.current.bursts)
-
-      for (const wave of activeEffects.shockwaves) {
-        if (now < wave.createdAt) continue
-
-        const progress = clamp((now - wave.createdAt) / wave.lifetime, 0, 1)
-        const eased = easeOutCubic(progress)
-        const radius = 54 + 74 * eased
-        const alpha = 0.8 * (1 - progress)
-
-        ctx.save()
-        ctx.globalAlpha = alpha
-        ctx.lineWidth = 2 + (1 - progress) * 1.4
-        ctx.strokeStyle = wave.color
-        ctx.beginPath()
-        ctx.arc(wave.x, wave.y, radius, 0, Math.PI * 2)
-        ctx.stroke()
-        ctx.restore()
-      }
 
       for (const particle of activeEffects.particles) {
         const progress = clamp(
@@ -376,26 +316,12 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
           : easeOutCubic(progress)
         const alpha = particle.isNormalConeDrop
           ? Math.max(0, 1 - progress * 1.45)
-          : particle.isEmojiExplosion
-            ? progress < 0.1
-              ? progress / 0.1
-              : progress > 0.48
-                ? 1 - easeOutQuad((progress - 0.48) / 0.52)
-                : 1
-            : particle.isMega
-              ? progress < 0.12
-                ? progress / 0.12
-                : progress > 0.52
-                  ? 1 - easeOutQuad((progress - 0.52) / 0.48)
-                  : 1
-              : progress < 0.12
-                ? progress / 0.12
-                : progress > 0.72
-                  ? 1 - (progress - 0.72) / 0.28
-                  : 1
-        const normalDrift = particle.isNormalConeDrop
-          ? easeOutQuad(progress)
-          : 0
+          : progress < 0.12
+            ? progress / 0.12
+            : progress > 0.72
+              ? 1 - (progress - 0.72) / 0.28
+              : 1
+        const normalDrift = particle.isNormalConeDrop ? progress ** 0.85 : 0
         const normalFall = particle.isNormalConeDrop
           ? progress ** (particle.fallCurve ?? 1.65)
           : 0
@@ -416,19 +342,11 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
           ? particle.y + particle.dy * normalFall - normalArc
           : particle.y + particle.dy * move
         const rotation = particle.isNormalConeDrop
-          ? (particle.rotate * easeOutQuad(progress) * Math.PI) / 180
+          ? (particle.rotate * progress * Math.PI) / 180
           : (particle.rotate * move * Math.PI) / 180
         const scale = particle.isNormalConeDrop
           ? particle.scale * (1 - progress * 0.08)
-          : particle.scale *
-            (particle.isEmojiExplosion
-              ? 1 + 0.12 * (1 - progress)
-              : 0.9 + 0.18 * (1 - progress))
-        const fontSize = particle.isEmojiExplosion
-          ? 22
-          : particle.isMega
-            ? 25
-            : 20
+          : particle.scale * (0.9 + 0.18 * (1 - progress))
 
         ctx.save()
         ctx.translate(x, y)
@@ -442,15 +360,10 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
         ) {
           ctx.drawImage(imagesRef.current.altCone, -10, -10, 20, 20)
         } else if (particle.iconData) {
-          const targetSize = particle.isEmojiExplosion
-            ? 24
-            : particle.isMega
-              ? 22
-              : 20
           const sprite = getPxlIconSprite(
             textSpriteCacheRef.current,
             particle.iconData,
-            targetSize,
+            20,
           )
           ctx.drawImage(
             sprite.canvas,
@@ -460,17 +373,12 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
             sprite.size,
           )
         } else {
-          const fillStyle = particle.isMega
-            ? 'rgba(255,255,255,0.96)'
-            : '#ffc85c'
-          const fontWeight =
-            particle.isEmojiExplosion || particle.isMega ? 900 : 800
           const sprite = getTextSprite(
             textSpriteCacheRef.current,
             particle.symbol,
-            fontSize,
-            fillStyle,
-            fontWeight,
+            20,
+            '#ffc85c',
+            800,
           )
           ctx.drawImage(
             sprite.canvas,
@@ -481,37 +389,6 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
           )
         }
 
-        ctx.restore()
-      }
-
-      for (const sprite of activeEffects.coneSprites) {
-        const progress = clamp((now - sprite.createdAt) / sprite.lifetime, 0, 1)
-        const move = easeOutCubic(progress)
-        const x = sprite.x + sprite.dx * move
-        const y = sprite.y + sprite.dy * move
-        const rotation =
-          ((sprite.rotateStart +
-            (sprite.rotateEnd - sprite.rotateStart) * move) *
-            Math.PI) /
-          180
-        const scale = sprite.scale * (1 - progress * 0.12)
-        const alpha = progress < 0.12 ? progress / 0.12 : 1 - progress
-        const baseSize = sprite.isMega ? 24 : 18
-
-        if (!imagesRef.current.cone?.complete) continue
-
-        ctx.save()
-        ctx.translate(x, y)
-        ctx.rotate(rotation)
-        ctx.scale(scale, scale)
-        ctx.globalAlpha = clamp(alpha, 0, 1)
-        ctx.drawImage(
-          imagesRef.current.cone,
-          -baseSize / 2,
-          -baseSize / 2,
-          baseSize,
-          baseSize,
-        )
         ctx.restore()
       }
 
@@ -560,7 +437,6 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
         pointerPoint,
         particlePoint,
         burstPoint,
-        shockwavePoint,
       }) {
         const now = Date.now()
         lastSpawnAtRef.current = now
@@ -572,7 +448,6 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
           pointerPoint,
           particlePoint,
           burstPoint,
-          shockwavePoint,
           config: configRef.current,
           now,
           pools: poolsRef.current,
@@ -598,24 +473,6 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
             nextEffects.particles,
             configRef.current.visualEffectCaps.particleCap,
             poolsRef.current.particles,
-          )
-        }
-
-        if (nextEffects.cones.length) {
-          appendWithCapInPlace(
-            effectsRef.current.coneSprites,
-            nextEffects.cones,
-            configRef.current.visualEffectCaps.coneCap,
-            poolsRef.current.coneSprites,
-          )
-        }
-
-        if (nextEffects.shockwaves.length) {
-          appendWithCapInPlace(
-            effectsRef.current.shockwaves,
-            nextEffects.shockwaves,
-            8,
-            poolsRef.current.shockwaves,
           )
         }
 

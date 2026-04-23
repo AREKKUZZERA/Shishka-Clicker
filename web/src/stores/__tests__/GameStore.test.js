@@ -610,6 +610,105 @@ describe('GameStore', () => {
     )
   })
 
+  it('keeps repeated uiPrestige reads stable for the same snapshot', () => {
+    const base = createFreshState()
+    const store = createStore()
+
+    store.importGameSave({
+      ...base,
+      currentRunShishki: 12_345,
+      heavenlyShishki: 4,
+      rebirths: 1,
+      tarLumps: 2,
+    })
+
+    expect(store.uiPrestige).toBe(store.uiPrestige)
+  })
+
+  it('keeps repeated statsBarData reads stable for the same snapshot', () => {
+    const base = createFreshState()
+    const store = createStore()
+
+    store.importGameSave({
+      ...base,
+      shishki: 250,
+      heavenlyShishki: 3,
+      tarLumps: 1,
+    })
+
+    expect(store.statsBarData).toBe(store.statsBarData)
+  })
+
+  it('keeps repeated bottomNavAlerts reads stable for the same snapshot', () => {
+    const store = createStore()
+
+    expect(store.bottomNavAlerts).toBe(store.bottomNavAlerts)
+  })
+
+  it('keeps discord presence source stable for tiny value changes in the same display bucket', () => {
+    const base = createFreshState()
+    const store = createStore()
+
+    store.importGameSave({
+      ...base,
+      shishki: 5_120,
+      heavenlyShishki: 9,
+      tarLumps: 4,
+      buildings: {
+        ...base.buildings,
+        garagePicker: 3,
+      },
+      upgrades: {
+        ...base.upgrades,
+        warehouseRhythm: 1,
+      },
+      market: {
+        ...base.market,
+        positions: {
+          ...base.market.positions,
+          parallelImport: 2,
+        },
+      },
+    })
+
+    const first = store.discordPresenceSource
+    expect(first).toEqual(
+      expect.objectContaining({
+        shishkiText: '5,1K',
+        marketPositionsText: '2',
+        heavenlyShishkiText: '9',
+      }),
+    )
+
+    store.importGameSave({
+      ...store.exportGameSave(),
+      shishki: 5_129,
+    })
+
+    expect(store.discordPresenceSource).toBe(first)
+  })
+
+  it('keeps clicker field item arrays stable when clicks do not change field state', () => {
+    const base = createFreshState()
+    const store = createStore()
+
+    store.importGameSave({
+      ...base,
+      shishki: 10,
+      lifetimeShishkiEarned: 10,
+      currentRunShishki: 10,
+    })
+
+    const before = store.clickerFieldData
+    store.mineShishki()
+    const after = store.clickerFieldData
+
+    expect(after.buildingsFieldItems).toBe(before.buildingsFieldItems)
+    expect(after.marketFieldItems).toBe(before.marketFieldItems)
+    expect(after.upgradesFieldItems).toBe(before.upgradesFieldItems)
+    expect(after.metaFieldItems).toBe(before.metaFieldItems)
+  })
+
   it('resolves chain events through repeated clicks', () => {
     const base = createFreshState()
     const store = createStore()

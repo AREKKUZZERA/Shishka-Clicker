@@ -1,3 +1,5 @@
+import { memo } from 'react'
+
 function getPlaceholderCode(code, label) {
   const source = String(code ?? label ?? '').trim()
 
@@ -25,7 +27,7 @@ function getPlaceholderCode(code, label) {
     .toUpperCase()
 }
 
-export function EntityPlaceholderIcon({
+export const EntityPlaceholderIcon = memo(function EntityPlaceholderIcon({
   code,
   label,
   type,
@@ -52,4 +54,4 @@ export function EntityPlaceholderIcon({
       <span className="entity-placeholder-icon__pip" aria-hidden="true" />
     </span>
   )
-}
+})

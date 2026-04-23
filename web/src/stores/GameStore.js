@@ -26,6 +26,7 @@ import {
   getRunUpgradePurchaseCost,
 } from '../game/economyMath.js'
 import { getEventVisual } from '../game/marketEventVisuals.js'
+import { buildDiscordPresenceSource } from '../lib/discordPresence.js'
 import {
   getPrestigeUpgradeCost,
   getPrestigeStartBonus,
@@ -213,6 +214,131 @@ function buildEventToastPayload(event) {
   }
 }
 
+function arePlainObjectsShallowEqual(left, right) {
+  if (left === right) {
+    return true
+  }
+
+  if (!left || !right) {
+    return false
+  }
+
+  const leftKeys = Object.keys(left)
+  const rightKeys = Object.keys(right)
+
+  if (leftKeys.length !== rightKeys.length) {
+    return false
+  }
+
+  for (const key of leftKeys) {
+    if (left[key] !== right[key]) {
+      return false
+    }
+  }
+
+  return true
+}
+
+function areFieldItemsEqual(left, right) {
+  return (
+    left?.id === right?.id &&
+    left?.title === right?.title &&
+    left?.code === right?.code &&
+    left?.type === right?.type &&
+    left?.state === right?.state &&
+    left?.count === right?.count &&
+    left?.unlocked === right?.unlocked
+  )
+}
+
+function reuseFieldItemArray(previousItems, nextItems) {
+  if (!Array.isArray(previousItems) || previousItems.length !== nextItems.length) {
+    return nextItems
+  }
+
+  let changed = false
+  const mergedItems = nextItems.map((nextItem, index) => {
+    const previousItem = previousItems[index]
+    if (areFieldItemsEqual(previousItem, nextItem)) {
+      return previousItem
+    }
+
+    changed = true
+    return nextItem
+  })
+
+  return changed ? mergedItems : previousItems
+}
+
+function reusePlainObject(previousValue, nextValue) {
+  return arePlainObjectsShallowEqual(previousValue, nextValue)
+    ? previousValue
+    : nextValue
+}
+
+function reuseClickerFieldData(previousValue, nextValue) {
+  if (!previousValue) {
+    return nextValue
+  }
+
+  const buildingsFieldItems = reuseFieldItemArray(
+    previousValue.buildingsFieldItems,
+    nextValue.buildingsFieldItems,
+  )
+  const marketFieldItems = reuseFieldItemArray(
+    previousValue.marketFieldItems,
+    nextValue.marketFieldItems,
+  )
+  const upgradesFieldItems = reuseFieldItemArray(
+    previousValue.upgradesFieldItems,
+    nextValue.upgradesFieldItems,
+  )
+  const metaFieldItems = reuseFieldItemArray(
+    previousValue.metaFieldItems,
+    nextValue.metaFieldItems,
+  )
+  const summary = reusePlainObject(previousValue.summary, nextValue.summary)
+  const deckLocks = {
+    buildings: reusePlainObject(
+      previousValue.deckLocks?.buildings,
+      nextValue.deckLocks.buildings,
+    ),
+    market: reusePlainObject(
+      previousValue.deckLocks?.market,
+      nextValue.deckLocks.market,
+    ),
+    upgrades: reusePlainObject(
+      previousValue.deckLocks?.upgrades,
+      nextValue.deckLocks.upgrades,
+    ),
+    meta: reusePlainObject(previousValue.deckLocks?.meta, nextValue.deckLocks.meta),
+  }
+
+  if (
+    buildingsFieldItems === previousValue.buildingsFieldItems &&
+    marketFieldItems === previousValue.marketFieldItems &&
+    upgradesFieldItems === previousValue.upgradesFieldItems &&
+    metaFieldItems === previousValue.metaFieldItems &&
+    summary === previousValue.summary &&
+    deckLocks.buildings === previousValue.deckLocks?.buildings &&
+    deckLocks.market === previousValue.deckLocks?.market &&
+    deckLocks.upgrades === previousValue.deckLocks?.upgrades &&
+    deckLocks.meta === previousValue.deckLocks?.meta
+  ) {
+    return previousValue
+  }
+
+  return {
+    ...nextValue,
+    buildingsFieldItems,
+    marketFieldItems,
+    upgradesFieldItems,
+    metaFieldItems,
+    summary,
+    deckLocks,
+  }
+}
+
 export default class GameStore {
   rootStore
   _state = createFreshState()
@@ -231,6 +357,10 @@ export default class GameStore {
   uiEconomyCache = { state: null, derived: null, value: null }
   clickerFieldCache = { state: null, value: null }
   devResourcesCache = { state: null, value: null }
+  uiPrestigeCache = { state: null, value: null }
+  statsBarCache = { state: null, derived: null, value: null }
+  bottomNavAlertsCache = { value: null }
+  discordPresenceSourceCache = { state: null, derived: null, value: null }
 
   constructor(rootStore) {
     this.rootStore = rootStore
@@ -249,6 +379,10 @@ export default class GameStore {
         uiEconomyCache: false,
         clickerFieldCache: false,
         devResourcesCache: false,
+        uiPrestigeCache: false,
+        statsBarCache: false,
+        bottomNavAlertsCache: false,
+        discordPresenceSourceCache: false,
         achievementQueue: false,
         state: computed.struct,
         uiState: computed.struct,
@@ -258,6 +392,7 @@ export default class GameStore {
         bottomNavAlerts: computed.struct,
         clickerMetrics: computed.struct,
         clickerFieldData: computed.struct,
+        discordPresenceSource: computed.struct,
         devConsoleResources: computed.struct,
       },
       { autoBind: true },
@@ -345,9 +480,16 @@ export default class GameStore {
 
   get uiPrestige() {
     const resolvedState = this.getResolvedUiState()
+    if (
+      this.uiPrestigeCache.state === resolvedState &&
+      this.uiPrestigeCache.value
+    ) {
+      return this.uiPrestigeCache.value
+    }
+
     const quota = getQuotaPreview(resolvedState)
 
-    return {
+    const value = {
       currentRunShishki: resolvedState.currentRunShishki,
       currentQuotaTarget: quota.current,
       nextQuotaTarget: quota.next,
@@ -356,6 +498,8 @@ export default class GameStore {
       rebirths: resolvedState.rebirths,
       tarLumps: resolvedState.tarLumps,
     }
+    this.uiPrestigeCache = { state: resolvedState, value }
+    return value
   }
 
   get economy() {
@@ -391,36 +535,46 @@ export default class GameStore {
   }
 
   get statsBarData() {
-    const activeEvent = this.uiState.activeEvent ?? null
+    const uiState = this.getResolvedUiState()
+    const uiDerived = this.uiDerived
+    if (
+      this.statsBarCache.state === uiState &&
+      this.statsBarCache.derived === uiDerived &&
+      this.statsBarCache.value
+    ) {
+      return this.statsBarCache.value
+    }
+
+    const activeEvent = uiState.activeEvent ?? null
     const eventVisual = getEventVisual(activeEvent)
     const eventDescription = activeEvent
       ? getEventPresentation(activeEvent.id)
       : 'Спокойный рынок без всплесков.'
 
-    return [
+    const value = [
       {
         icon: 'cone',
         label: 'Шишки',
-        value: this.uiState.shishki,
-        hint: `+${this.uiDerived.shishkiPerSecond}/сек`,
+        value: uiState.shishki,
+        hint: `+${uiDerived.shishkiPerSecond}/сек`,
       },
       {
         icon: 'rebirth',
         label: 'Небесные',
-        value: this.uiState.heavenlyShishki,
+        value: uiState.heavenlyShishki,
         hint: 'за всё время',
       },
       {
         icon: 'knowledge',
         label: 'Комочки',
-        value: this.uiState.tarLumps,
+        value: uiState.tarLumps,
         hint: 'редкий ресурс',
       },
       {
         icon: 'power',
         label: 'Клик',
-        value: this.uiDerived.clickPower,
-        hint: `${this.uiState.manualClicks} кликов`,
+        value: uiDerived.clickPower,
+        hint: `${uiState.manualClicks} кликов`,
       },
       {
         label: 'Ивент',
@@ -431,25 +585,33 @@ export default class GameStore {
           `stat-card--market-event stat-card--market-event--${eventVisual.tone}`.trim(),
       },
     ]
+    this.statsBarCache = {
+      state: uiState,
+      derived: uiDerived,
+      value,
+    }
+    return value
   }
 
   get bottomNavAlerts() {
-    return {
+    if (this.bottomNavAlertsCache.value) {
+      return this.bottomNavAlertsCache.value
+    }
+
+    const value = {
       purchases: { count: 0, hasReady: false },
       market: { count: 0, hasReady: false },
       meta: { count: 0, hasReady: false },
       settings: { count: 0, hasReady: false },
       clicker: { count: 0, hasReady: false },
     }
+    this.bottomNavAlertsCache = { value }
+    return value
   }
 
   get clickerMetrics() {
     return {
       clickPowerText: String(this.state.clickPower),
-      megaClickChanceText: '0%',
-      megaClickStreak: 0,
-      emojiMegaChanceText: '0%',
-      emojiBurstStreak: 0,
     }
   }
 
@@ -466,9 +628,35 @@ export default class GameStore {
       return cache.value
     }
 
-    const value = buildClickerFieldData(resolvedState)
+    const nextValue = buildClickerFieldData(resolvedState)
+    const value = reuseClickerFieldData(cache.value, nextValue)
     if (this.clickerFieldCache) {
       this.clickerFieldCache = { state: resolvedState, value }
+    }
+    return value
+  }
+
+  get discordPresenceSource() {
+    const previousValue = this.discordPresenceSourceCache.value
+    if (
+      this.discordPresenceSourceCache.state === this._state &&
+      this.discordPresenceSourceCache.derived === this.derived &&
+      previousValue
+    ) {
+      return previousValue
+    }
+
+    const nextValue = buildDiscordPresenceSource({
+      gameState: this._state,
+      economy: this.derived,
+    })
+    const value = arePlainObjectsShallowEqual(previousValue, nextValue)
+      ? previousValue
+      : nextValue
+    this.discordPresenceSourceCache = {
+      state: this._state,
+      derived: this.derived,
+      value,
     }
     return value
   }
@@ -608,8 +796,6 @@ export default class GameStore {
       amount: clickValue,
       particleCount: Math.max(1, Math.round(clickValue)),
       symbols: ['🌰', '✨'],
-      isMega: false,
-      isEmojiExplosion: false,
     }
   }
 

@@ -1,6 +1,7 @@
+import { memo } from 'react'
 import { EntityPlaceholderIcon } from '../ui/EntityPlaceholderIcon.jsx'
 
-export function ProgressSprite({ item }) {
+export const ProgressSprite = memo(function ProgressSprite({ item }) {
   const count = Math.max(0, item.count ?? 0)
 
   return (
@@ -24,4 +25,4 @@ export function ProgressSprite({ item }) {
       </div>
     </article>
   )
-}
+})

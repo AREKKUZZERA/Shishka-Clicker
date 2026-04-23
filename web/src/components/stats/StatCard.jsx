@@ -70,7 +70,7 @@ function buildAnimatedDigits(previousValue, nextValue) {
   })
 }
 
-function getChangedDigitIndexes(previousValue, nextValue) {
+export function getChangedDigitIndexes(previousValue, nextValue) {
   return buildAnimatedDigits(previousValue, nextValue)
     .map((entry, index) => (entry.changed ? index : -1))
     .filter((index) => index >= 0)
@@ -100,56 +100,76 @@ export const StatCard = memo(function StatCard({
   const valueAnimationTimerRef = useRef(null)
   const isRenderablePrimitive =
     typeof value === 'string' || typeof value === 'number'
-  const displayValue = formatValue ? formatNumber(value) : value
+  const displayValue = useMemo(
+    () => (formatValue ? formatNumber(value) : value),
+    [formatValue, value],
+  )
   const shouldAnimateValue =
     isRenderablePrimitive && !isValidElement(displayValue)
-  const resolvedIcon =
-    typeof icon === 'string'
-      ? (ICON_MAP[icon] ?? icon)
-      : (icon ?? (iconKey ? (ICON_MAP[iconKey] ?? iconKey) : null))
-  const resolvedPixelIcon =
-    pixelIcon ?? (iconKey ? (PIXEL_ICON_MAP[iconKey] ?? null) : null)
-  const iconNode =
-    variant === 'pixel' && resolvedPixelIcon ? (
-      isAnimatedIcon(resolvedPixelIcon) ? (
-        <AnimatedPxlKitIcon
-          icon={resolvedPixelIcon}
-          size={18}
-          colorful
-          className="stat-card__pixel-icon"
-          aria-label={label ?? iconKey}
-        />
+  const resolvedIcon = useMemo(
+    () =>
+      typeof icon === 'string'
+        ? (ICON_MAP[icon] ?? icon)
+        : (icon ?? (iconKey ? (ICON_MAP[iconKey] ?? iconKey) : null)),
+    [icon, iconKey],
+  )
+  const resolvedPixelIcon = useMemo(
+    () => pixelIcon ?? (iconKey ? (PIXEL_ICON_MAP[iconKey] ?? null) : null),
+    [iconKey, pixelIcon],
+  )
+  const iconNode = useMemo(() => {
+    if (variant === 'pixel' && resolvedPixelIcon) {
+      const sharedProps = {
+        icon: resolvedPixelIcon,
+        size: 18,
+        colorful: true,
+        className: 'stat-card__pixel-icon',
+        'aria-label': label ?? iconKey,
+      }
+
+      return isAnimatedIcon(resolvedPixelIcon) ? (
+        <AnimatedPxlKitIcon {...sharedProps} />
       ) : (
-        <PxlKitIcon
-          icon={resolvedPixelIcon}
-          size={18}
-          colorful
-          className="stat-card__pixel-icon"
-          aria-label={label ?? iconKey}
-        />
+        <PxlKitIcon {...sharedProps} />
       )
-    ) : (
-      resolvedIcon
-    )
-  const items = compact
-    ? (contributions?.items?.slice(0, 3) ?? [])
-    : (contributions?.items ?? [])
-  const total = items.reduce((sum, entry) => sum + entry.value, 0) ?? 0
-  const topContributors = compact ? items.slice(0, 3) : []
-  const cardClassName = [
-    'stat-card',
-    `stat-card--${variant}`,
-    compact ? 'stat-card--compact' : '',
-    className,
-  ]
-    .filter(Boolean)
-    .join(' ')
-  const valueClasses = ['stat-card__value', valueClassName]
-    .filter(Boolean)
-    .join(' ')
-  const hintClasses = ['stat-card__hint', hintClassName]
-    .filter(Boolean)
-    .join(' ')
+    }
+
+    return resolvedIcon
+  }, [iconKey, label, resolvedIcon, resolvedPixelIcon, variant])
+  const items = useMemo(
+    () =>
+      compact ? (contributions?.items?.slice(0, 3) ?? []) : (contributions?.items ?? []),
+    [compact, contributions?.items],
+  )
+  const total = useMemo(
+    () => items.reduce((sum, entry) => sum + entry.value, 0) ?? 0,
+    [items],
+  )
+  const topContributors = useMemo(
+    () => (compact ? items.slice(0, 3) : []),
+    [compact, items],
+  )
+  const cardClassName = useMemo(
+    () =>
+      [
+        'stat-card',
+        `stat-card--${variant}`,
+        compact ? 'stat-card--compact' : '',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' '),
+    [className, compact, variant],
+  )
+  const valueClasses = useMemo(
+    () => ['stat-card__value', valueClassName].filter(Boolean).join(' '),
+    [valueClassName],
+  )
+  const hintClasses = useMemo(
+    () => ['stat-card__hint', hintClassName].filter(Boolean).join(' '),
+    [hintClassName],
+  )
+  const cardStyle = useMemo(() => ({ animationDelay: `${delay * 60}ms` }), [delay])
   const animatedDigits = useMemo(
     () =>
       shouldAnimateValue ? buildAnimatedDigits(displayValue, displayValue) : [],
@@ -166,38 +186,44 @@ export const StatCard = memo(function StatCard({
     const nextIndexes = getChangedDigitIndexes(previousValue, displayValue)
     const cardNode = cardRef.current
     const valueTrackNode = valueTrackRef.current
-    const nodes = valueTrackRef.current?.querySelectorAll('.stat-card__digit')
+    const nodes = valueTrackNode?.children
 
-    if (nodes?.length) {
-      nodes.forEach((node) =>
-        node.classList.remove('stat-card__digit--changed'),
-      )
-
-      if (nextIndexes.length) {
-        cardNode?.classList.remove('stat-card--updated')
-        valueTrackNode?.classList.remove('stat-card__value-track--changed')
-
-        nextIndexes.forEach((index) => {
-          const node = nodes[index]
-          if (!node) return
-          void node.offsetWidth
-          node.classList.add('stat-card__digit--changed')
-        })
-
-        void cardNode?.offsetWidth
-        cardNode?.classList.add('stat-card--updated')
-        valueTrackNode?.classList.add('stat-card__value-track--changed')
-
-        window.clearTimeout(valueAnimationTimerRef.current)
-        valueAnimationTimerRef.current = window.setTimeout(() => {
-          cardNode?.classList.remove('stat-card--updated')
-          valueTrackNode?.classList.remove('stat-card__value-track--changed')
-          nodes.forEach((node) =>
-            node.classList.remove('stat-card__digit--changed'),
-          )
-        }, 260)
-      }
+    if (!nodes?.length) {
+      prevValueRef.current = displayValue
+      return
     }
+
+    for (const node of nodes) {
+      node.classList.remove('stat-card__digit--changed')
+    }
+
+    if (!nextIndexes.length) {
+      prevValueRef.current = displayValue
+      return
+    }
+
+    cardNode?.classList.remove('stat-card--updated')
+    valueTrackNode?.classList.remove('stat-card__value-track--changed')
+
+    nextIndexes.forEach((index) => {
+      const node = nodes[index]
+      if (!node) return
+      void node.offsetWidth
+      node.classList.add('stat-card__digit--changed')
+    })
+
+    void cardNode?.offsetWidth
+    cardNode?.classList.add('stat-card--updated')
+    valueTrackNode?.classList.add('stat-card__value-track--changed')
+
+    window.clearTimeout(valueAnimationTimerRef.current)
+    valueAnimationTimerRef.current = window.setTimeout(() => {
+      cardNode?.classList.remove('stat-card--updated')
+      valueTrackNode?.classList.remove('stat-card__value-track--changed')
+      for (const node of nodes) {
+        node.classList.remove('stat-card__digit--changed')
+      }
+    }, 260)
 
     prevValueRef.current = displayValue
   }, [displayValue, shouldAnimateValue])
@@ -212,7 +238,7 @@ export const StatCard = memo(function StatCard({
     <div
       ref={cardRef}
       className={cardClassName}
-      style={{ animationDelay: `${delay * 60}ms` }}
+      style={cardStyle}
     >
       {(resolvedIcon || label) && (
         <div className="stat-card__head">

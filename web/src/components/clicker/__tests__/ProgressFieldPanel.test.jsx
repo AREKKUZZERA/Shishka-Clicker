@@ -157,10 +157,6 @@ describe('ProgressFieldPanel', () => {
         },
         clickerMetrics: {
           clickPowerText: '12',
-          megaClickChanceText: '0%',
-          megaClickStreak: 0,
-          emojiMegaChanceText: '0%',
-          emojiBurstStreak: 0,
         },
         uiEconomy: { shishkiPerSecond: 12 },
         uiPrestige: {
@@ -182,8 +178,6 @@ describe('ProgressFieldPanel', () => {
           amount: 12,
           particleCount: 12,
           symbols: ['🌰'],
-          isMega: false,
-          isEmojiExplosion: false,
         }),
         markAutoClicker: () => {},
       },

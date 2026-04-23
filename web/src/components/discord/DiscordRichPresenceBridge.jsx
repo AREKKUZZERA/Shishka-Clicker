@@ -1,9 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useDiscordPresence } from '../../context/DiscordActivityContext.jsx'
 import { useGameStore } from '../../stores/StoresProvider.jsx'
 import { useNav } from '../../context/NavContext.jsx'
-import { deriveEconomy } from '../../game/config.js'
 import { buildDiscordRichPresence } from '../../lib/discordPresence.js'
 
 const PRESENCE_RETRY_DELAY_MS = 250
@@ -16,15 +15,17 @@ export const DiscordRichPresenceBridge = observer(
     const { isActivity, status, updateRichPresence, markPresenceBridgeMounted } =
       useDiscordPresence()
     const startedAtRef = useRef(Math.floor(Date.now() / 1000))
-    const gameState = game._state
-    const economy = deriveEconomy(gameState)
+    const presenceSource = game.discordPresenceSource
 
-    const presence = buildDiscordRichPresence({
-      activeTab,
-      gameState,
-      economy,
-      startedAt: startedAtRef.current,
-    })
+    const presence = useMemo(
+      () =>
+        buildDiscordRichPresence({
+          activeTab,
+          presenceSource,
+          startedAt: startedAtRef.current,
+        }),
+      [activeTab, presenceSource],
+    )
 
     useEffect(() => {
       markPresenceBridgeMounted()

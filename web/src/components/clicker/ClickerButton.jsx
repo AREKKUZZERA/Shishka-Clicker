@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { memo, useEffect, useRef, useState } from 'react'
 import { observer } from 'mobx-react-lite'
 import { useGameStore } from '../../stores/StoresProvider.jsx'
 import { useSettingsVisuals } from '../../context/SettingsContext'
@@ -13,6 +13,7 @@ import { buildClickEffectPoints } from './clickEffects'
 import { ClickerEffectsOverlay } from './ClickerEffectsOverlay.jsx'
 import {
   getRandomInt,
+  getVisualStateForResult,
   getTierForTps,
   GREETING_LABELS,
   IDLE_LABELS,
@@ -23,6 +24,68 @@ import {
   TAP_SPEED_TIERS,
   VISUAL_DURATIONS,
 } from './clickerButtonContent.js'
+
+const ClickerSceneLayers = memo(function ClickerSceneLayers() {
+  return (
+    <div className="clicker-wrap__scene" aria-hidden="true">
+      <span className="clicker-wrap__scene-layer clicker-wrap__scene-layer--clouds">
+        <span className="clicker-wrap__cloud-band">
+          <img
+            src={behindCloudsImage}
+            alt=""
+            className="clicker-wrap__scene-image clicker-wrap__scene-image--clouds"
+            draggable={false}
+          />
+          <img
+            src={behindCloudsImage}
+            alt=""
+            className="clicker-wrap__scene-image clicker-wrap__scene-image--clouds"
+            draggable={false}
+          />
+        </span>
+      </span>
+      <span className="clicker-wrap__scene-layer clicker-wrap__scene-layer--mid">
+        <img
+          src={secondLayerImage}
+          alt=""
+          className="clicker-wrap__scene-image clicker-wrap__scene-image--mid"
+          draggable={false}
+        />
+      </span>
+      <span className="clicker-wrap__scene-layer clicker-wrap__scene-layer--front">
+        <img
+          src={firstLayerImage}
+          alt=""
+          className="clicker-wrap__scene-image clicker-wrap__scene-image--front"
+          draggable={false}
+        />
+      </span>
+    </div>
+  )
+})
+
+const ClickerPixelCorners = memo(function ClickerPixelCorners() {
+  return (
+    <>
+      <span
+        className="clicker-btn__pixel-corner clicker-btn__pixel-corner--tl"
+        aria-hidden="true"
+      />
+      <span
+        className="clicker-btn__pixel-corner clicker-btn__pixel-corner--tr"
+        aria-hidden="true"
+      />
+      <span
+        className="clicker-btn__pixel-corner clicker-btn__pixel-corner--bl"
+        aria-hidden="true"
+      />
+      <span
+        className="clicker-btn__pixel-corner clicker-btn__pixel-corner--br"
+        aria-hidden="true"
+      />
+    </>
+  )
+})
 
 export const ClickerButton = observer(function ClickerButton() {
   const [visualState, setVisualState] = useState('idle')
@@ -153,11 +216,7 @@ export const ClickerButton = observer(function ClickerButton() {
     play()
 
     const result = mineShishki()
-    const nextVisualState = result.isEmojiExplosion
-      ? 'prism'
-      : result.isMega
-        ? 'mega'
-        : 'tap'
+    const nextVisualState = getVisualStateForResult(result)
     setHeroFacing((current) => current * -1)
 
     if (visualEffectToggles.clickAnimations) {
@@ -186,57 +245,8 @@ export const ClickerButton = observer(function ClickerButton() {
         onKeyUp={blockKeyboardActivation}
         aria-label="Добыть шишки"
       >
-        <div className="clicker-wrap__scene" aria-hidden="true">
-          <span className="clicker-wrap__scene-layer clicker-wrap__scene-layer--clouds">
-            <span className="clicker-wrap__cloud-band">
-              <img
-                src={behindCloudsImage}
-                alt=""
-                className="clicker-wrap__scene-image clicker-wrap__scene-image--clouds"
-                draggable={false}
-              />
-              <img
-                src={behindCloudsImage}
-                alt=""
-                className="clicker-wrap__scene-image clicker-wrap__scene-image--clouds"
-                draggable={false}
-              />
-            </span>
-          </span>
-          <span className="clicker-wrap__scene-layer clicker-wrap__scene-layer--mid">
-            <img
-              src={secondLayerImage}
-              alt=""
-              className="clicker-wrap__scene-image clicker-wrap__scene-image--mid"
-              draggable={false}
-            />
-          </span>
-          <span className="clicker-wrap__scene-layer clicker-wrap__scene-layer--front">
-            <img
-              src={firstLayerImage}
-              alt=""
-              className="clicker-wrap__scene-image clicker-wrap__scene-image--front"
-              draggable={false}
-            />
-          </span>
-        </div>
-
-        <span
-          className="clicker-btn__pixel-corner clicker-btn__pixel-corner--tl"
-          aria-hidden="true"
-        />
-        <span
-          className="clicker-btn__pixel-corner clicker-btn__pixel-corner--tr"
-          aria-hidden="true"
-        />
-        <span
-          className="clicker-btn__pixel-corner clicker-btn__pixel-corner--bl"
-          aria-hidden="true"
-        />
-        <span
-          className="clicker-btn__pixel-corner clicker-btn__pixel-corner--br"
-          aria-hidden="true"
-        />
+        <ClickerSceneLayers />
+        <ClickerPixelCorners />
 
         <div className="clicker-btn__core">
           <span className="clicker-btn__hero-motion">
