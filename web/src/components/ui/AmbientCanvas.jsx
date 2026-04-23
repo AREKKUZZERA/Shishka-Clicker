@@ -3,6 +3,7 @@ import { memo, useEffect, useRef } from 'react'
 const MAX_DPR = 1.25
 const PIXEL_SCALE = 6
 const NOISE_CELL = 2
+const NOISE_DENSITY = 0.06
 
 function resizeCanvas(canvas, ctx, buffer, width, height) {
   const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
@@ -35,11 +36,19 @@ function drawBlob(ctx, width, height, blob, time) {
   ctx.fill()
 }
 
-function drawNoise(ctx, width, height) {
+function drawNoise(ctx, width, height, noiseCanvas) {
+  ctx.drawImage(noiseCanvas, 0, 0, width, height)
+}
+
+function populateNoiseBuffer(canvas) {
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
   ctx.fillStyle = 'rgba(255,255,255,0.05)'
-  for (let y = 0; y < height; y += NOISE_CELL) {
-    for (let x = 0; x < width; x += NOISE_CELL) {
-      if (Math.random() > 0.06) continue
+  for (let y = 0; y < canvas.height; y += NOISE_CELL) {
+    for (let x = 0; x < canvas.width; x += NOISE_CELL) {
+      if (Math.random() > NOISE_DENSITY) continue
       ctx.fillRect(x, y, NOISE_CELL, NOISE_CELL)
     }
   }
@@ -52,6 +61,7 @@ export const AmbientCanvas = memo(function AmbientCanvas({
   const canvasRef = useRef(null)
   const frameRef = useRef(0)
   const bufferCanvasRef = useRef(null)
+  const noiseCanvasRef = useRef(null)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -66,9 +76,11 @@ export const AmbientCanvas = memo(function AmbientCanvas({
     const ctx = canvas.getContext('2d')
     const bufferCanvas = document.createElement('canvas')
     const bufferCtx = bufferCanvas.getContext('2d')
+    const noiseCanvas = document.createElement('canvas')
     if (!ctx || !bufferCtx) return undefined
 
     bufferCanvasRef.current = bufferCanvas
+    noiseCanvasRef.current = noiseCanvas
 
     const blobs = [
       {
@@ -114,6 +126,11 @@ export const AmbientCanvas = memo(function AmbientCanvas({
         window.innerWidth,
         window.innerHeight,
       )
+      noiseCanvas.width = bufferCanvas.width
+      noiseCanvas.height = bufferCanvas.height
+      if (showNoise) {
+        populateNoiseBuffer(noiseCanvas)
+      }
     }
 
     const draw = (time) => {
@@ -133,7 +150,21 @@ export const AmbientCanvas = memo(function AmbientCanvas({
       }
 
       if (showNoise) {
-        drawNoise(bufferCtx, bufferWidth, bufferHeight)
+        if (
+          noiseCanvas.width !== bufferWidth ||
+          noiseCanvas.height !== bufferHeight
+        ) {
+          noiseCanvas.width = bufferWidth
+          noiseCanvas.height = bufferHeight
+          populateNoiseBuffer(noiseCanvas)
+        }
+
+        drawNoise(
+          bufferCtx,
+          bufferWidth,
+          bufferHeight,
+          noiseCanvas,
+        )
       }
 
       ctx.clearRect(0, 0, width, height)
@@ -152,6 +183,7 @@ export const AmbientCanvas = memo(function AmbientCanvas({
         frameRef.current = 0
       }
       bufferCanvasRef.current = null
+      noiseCanvasRef.current = null
     }
   }, [showAmbient, showNoise])
 

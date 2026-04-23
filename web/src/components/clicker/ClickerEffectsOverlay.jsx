@@ -16,6 +16,7 @@ import {
   buildClickSpawnState,
   easeOutCubic,
   easeOutQuad,
+  hasActiveCanvasEffects,
   MAX_CANVAS_DPR,
   pruneExpiredInPlace,
 } from './clickEffects'
@@ -273,11 +274,7 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
       hideTimeoutRef.current = 0
 
       const activeEffects = effectsRef.current
-      const hasCanvasEffects =
-        activeEffects.particles.length > 0 ||
-        activeEffects.coneSprites.length > 0 ||
-        activeEffects.shockwaves.length > 0 ||
-        activeEffects.bursts.length > 0
+      const hasCanvasEffects = hasActiveCanvasEffects(activeEffects)
 
       if (hasCanvasEffects) {
         scheduleDrawRef.current()
@@ -522,11 +519,7 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
         drawCanvasBurst(ctx, burst, now)
       }
 
-      const hasCanvasEffects =
-        activeEffects.particles.length > 0 ||
-        activeEffects.coneSprites.length > 0 ||
-        activeEffects.shockwaves.length > 0 ||
-        activeEffects.bursts.length > 0
+      const hasCanvasEffects = hasActiveCanvasEffects(activeEffects)
 
       if (hasCanvasEffects) {
         rafRef.current = window.requestAnimationFrame(drawFrame)
@@ -552,11 +545,7 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
   useEffect(() => {
     if (!isVisible) return
 
-    const hasCanvasEffects =
-      effectsRef.current.particles.length > 0 ||
-      effectsRef.current.coneSprites.length > 0 ||
-      effectsRef.current.shockwaves.length > 0 ||
-      effectsRef.current.bursts.length > 0
+    const hasCanvasEffects = hasActiveCanvasEffects(effectsRef.current)
 
     if (hasCanvasEffects) {
       scheduleDraw()
@@ -630,11 +619,7 @@ const ClickerEffectsOverlayInner = forwardRef(function ClickerEffectsOverlay(
           )
         }
 
-        const hasCanvasEffects =
-          effectsRef.current.particles.length > 0 ||
-          effectsRef.current.coneSprites.length > 0 ||
-          effectsRef.current.shockwaves.length > 0 ||
-          effectsRef.current.bursts.length > 0
+        const hasCanvasEffects = hasActiveCanvasEffects(effectsRef.current)
 
         if (hasCanvasEffects) {
           scheduleDraw()

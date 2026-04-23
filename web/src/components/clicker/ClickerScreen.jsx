@@ -47,19 +47,12 @@ export const ClickerScreen = observer(function ClickerScreen() {
   const [activeDeckTab, setActiveDeckTab] = useState('buildings')
   const activeEvent = uiState?.activeEvent ?? null
   const activeCampaign = uiState?.activeCampaign ?? null
-  const buildingCount = clickerFieldData.buildingsFieldItems.filter(
-    (item) => item.count > 0,
-  ).length
-  const upgradeCount = clickerFieldData.upgradesFieldItems.filter(
-    (item) => item.count > 0,
-  ).length
-  const metaCount = clickerFieldData.metaFieldItems.filter(
-    (item) => item.count > 0,
-  ).length
-  const marketExposure = clickerFieldData.marketFieldItems.filter(
-    (item) => item.count > 0,
-  ).length
-
+  const {
+    buildingCount = 0,
+    upgradeCount = 0,
+    metaCount = 0,
+    marketExposure = 0,
+  } = clickerFieldData.summary ?? {}
   const deckLocks = clickerFieldData.deckLocks
   const safeActiveDeckTab = useMemo(() => {
     if (deckLocks[activeDeckTab]?.unlocked) {

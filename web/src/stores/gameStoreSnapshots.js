@@ -306,6 +306,54 @@ function getCampaignUnlockRule(state, item) {
   }
 }
 
+function countItemsWithPositiveCount(items) {
+  let count = 0
+
+  for (const item of items) {
+    if ((item?.count ?? 0) > 0) {
+      count += 1
+    }
+  }
+
+  return count
+}
+
+function getMarketScreenSummary(state, buildings) {
+  const resaleStall = buildings.find((item) => item.id === 'resaleStall')
+  const lifetimeShishki = getLifetimeProgress(state)
+  const resaleUnlockTarget = Math.max(
+    0,
+    Number(resaleStall?.unlockRule?.shishki ?? 0),
+  )
+  const shishkiRemainingToUnlock = Math.max(
+    0,
+    resaleUnlockTarget - lifetimeShishki,
+  )
+  const resaleStallIndex = buildings.findIndex((item) => item.id === 'resaleStall')
+  const buildingUnlockGoal = resaleStallIndex >= 0 ? resaleStallIndex + 1 : 0
+  const buildingUnlockProgress =
+    resaleStallIndex >= 0
+      ? buildings.slice(0, resaleStallIndex + 1).filter((item) => item.unlocked)
+          .length
+      : 0
+  const unlockProgressPercent =
+    resaleUnlockTarget > 0
+      ? Math.min(
+          100,
+          (Math.min(lifetimeShishki, resaleUnlockTarget) / resaleUnlockTarget) *
+            100,
+        )
+      : 0
+
+  return {
+    unlockPrice: resaleStall ? formatNumber(resaleStall.cost) : '28 000',
+    shishkiRemainingToUnlock,
+    buildingUnlockGoal,
+    buildingUnlockProgress,
+    unlockProgressPercent,
+  }
+}
+
 export function buildEconomySnapshot(state, derived) {
   const buildings = BUILDINGS.map((item, index) => {
     const owned = state.buildings[item.id] ?? 0
@@ -372,6 +420,7 @@ export function buildEconomySnapshot(state, derived) {
     prestigeUpgrades: getPrestigeUpgradeCards(state),
     marketGoods,
     campaigns,
+    marketScreen: getMarketScreenSummary(state, buildings),
     brokerLevel: getEffectiveBrokerLevel(state),
     shishkiPerSecond: derived.shishkiPerSecond,
     clickPower: derived.clickPower,
@@ -383,87 +432,94 @@ export function buildClickerFieldData(state) {
   const lifetime = getLifetimeProgress(state)
   const firstQuota = QUOTA_RULES.baseQuota
 
-  return {
-    buildingsFieldItems: BUILDINGS.map((item, index) => {
-      const count = Math.max(0, state.buildings[item.id] ?? 0)
-      const unlock = getBuildingUnlockRule(state, item, index)
+  const buildingsFieldItems = BUILDINGS.map((item, index) => {
+    const count = Math.max(0, state.buildings[item.id] ?? 0)
+    const unlock = getBuildingUnlockRule(state, item, index)
+
+    return {
+      id: item.id,
+      title: item.title,
+      code: item.fieldCode,
+      type: 'building',
+      state: !unlock.unlocked ? 'locked' : count > 0 ? 'owned' : 'available',
+      count,
+      unlocked: unlock.unlocked,
+    }
+  })
+  const marketFieldItems = [
+    ...MARKET_GOODS.map((item) => {
+      const count = Math.max(0, state.market.positions[item.id] ?? 0)
+      const unlock = getMarketGoodUnlockRule(state, item)
 
       return {
         id: item.id,
         title: item.title,
         code: item.fieldCode,
-        type: 'building',
-        state: !unlock.unlocked ? 'locked' : count > 0 ? 'owned' : 'available',
-        count,
-        unlocked: unlock.unlocked,
-      }
-    }),
-    marketFieldItems: [
-      ...MARKET_GOODS.map((item) => {
-        const count = Math.max(0, state.market.positions[item.id] ?? 0)
-        const unlock = getMarketGoodUnlockRule(state, item)
-
-        return {
-          id: item.id,
-          title: item.title,
-          code: item.fieldCode,
-          type: 'market',
-          state: !unlock.unlocked
-            ? 'locked'
-            : count > 0
-              ? 'owned'
-              : 'available',
-          count,
-          unlocked: unlock.unlocked,
-        }
-      }),
-      ...RAP_CAMPAIGNS.map((item) => {
-        const unlock = getCampaignUnlockRule(state, item)
-
-        return {
-          id: item.id,
-          title: item.title,
-          code: item.fieldCode,
-          type: 'campaign',
-          state: !unlock.unlocked
-            ? 'locked'
-            : state.activeCampaign?.id === item.id
-              ? 'active'
-              : 'available',
-          count: state.activeCampaign?.id === item.id ? 1 : 0,
-          unlocked: unlock.unlocked,
-        }
-      }),
-    ],
-    upgradesFieldItems: RUN_UPGRADES.map((item) => {
-      const count = Math.max(0, state.upgrades[item.id] ?? 0)
-      const unlock = getUpgradeUnlockRule(state, item)
-
-      return {
-        id: item.id,
-        title: item.title,
-        code: item.fieldCode,
-        type: 'upgrade',
+        type: 'market',
         state: !unlock.unlocked
           ? 'locked'
           : count > 0
-            ? 'upgraded'
+            ? 'owned'
             : 'available',
         count,
         unlocked: unlock.unlocked,
       }
     }),
-    metaFieldItems: getPrestigeUpgradeCards(state).map((item) => ({
+    ...RAP_CAMPAIGNS.map((item) => {
+      const unlock = getCampaignUnlockRule(state, item)
+
+      return {
+        id: item.id,
+        title: item.title,
+        code: item.fieldCode,
+        type: 'campaign',
+        state: !unlock.unlocked
+          ? 'locked'
+          : state.activeCampaign?.id === item.id
+            ? 'active'
+            : 'available',
+        count: state.activeCampaign?.id === item.id ? 1 : 0,
+        unlocked: unlock.unlocked,
+      }
+    }),
+  ]
+  const upgradesFieldItems = RUN_UPGRADES.map((item) => {
+    const count = Math.max(0, state.upgrades[item.id] ?? 0)
+    const unlock = getUpgradeUnlockRule(state, item)
+
+    return {
       id: item.id,
       title: item.title,
       code: item.fieldCode,
-      type: 'meta',
-      state: item.level > 0 ? 'upgraded' : 'locked',
-      count: item.level,
-      unlocked:
-        (state.totalHeavenlyShishkiEarned ?? 0) > 0 ||
-        (state.currentRunShishki ?? 0) >= firstQuota,
-    })),
+      type: 'upgrade',
+      state: !unlock.unlocked ? 'locked' : count > 0 ? 'upgraded' : 'available',
+      count,
+      unlocked: unlock.unlocked,
+    }
+  })
+  const metaFieldItems = getPrestigeUpgradeCards(state).map((item) => ({
+    id: item.id,
+    title: item.title,
+    code: item.fieldCode,
+    type: 'meta',
+    state: item.level > 0 ? 'upgraded' : 'locked',
+    count: item.level,
+    unlocked:
+      (state.totalHeavenlyShishkiEarned ?? 0) > 0 ||
+      (state.currentRunShishki ?? 0) >= firstQuota,
+  }))
+
+  return {
+    buildingsFieldItems,
+    marketFieldItems,
+    upgradesFieldItems,
+    metaFieldItems,
+    summary: {
+      buildingCount: countItemsWithPositiveCount(buildingsFieldItems),
+      upgradeCount: countItemsWithPositiveCount(upgradesFieldItems),
+      metaCount: countItemsWithPositiveCount(metaFieldItems),
+      marketExposure: countItemsWithPositiveCount(marketFieldItems),
+    },
     deckLocks: {
       buildings: {
         unlocked: true,

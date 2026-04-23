@@ -18,23 +18,7 @@ function getBrokerTone(level) {
   return 'common'
 }
 
-export const MarketScreen = observer(function MarketScreen() {
-  const {
-    uiEconomy,
-    uiState,
-    buyMarketGood,
-    sellMarketGood,
-    activateCampaign,
-  } = useGameStore()
-  const isUnlocked = Boolean(uiState?.market?.unlocked)
-  const goods = uiEconomy?.marketGoods ?? []
-  const campaigns = uiEconomy?.campaigns ?? []
-  const buildings = uiEconomy?.buildings ?? []
-  const shishki = uiState?.shishki ?? 0
-  const brokerLevel = uiEconomy?.brokerLevel ?? 0
-  const activeEvent = uiState?.activeEvent ?? null
-  const activeCampaign = uiState?.activeCampaign ?? null
-  const feeRate = getMarketFeeRate(uiState)
+function getMarketScreenFallback(buildings, uiState) {
   const resaleStall = buildings.find((item) => item.id === 'resaleStall')
   const unlockPrice = resaleStall ? formatNumber(resaleStall.cost) : '28 000'
   const lifetimeShishki = Math.max(
@@ -64,8 +48,45 @@ export const MarketScreen = observer(function MarketScreen() {
       : 0
   const unlockProgressPercent =
     resaleUnlockTarget > 0
-      ? Math.min(100, (Math.min(lifetimeShishki, resaleUnlockTarget) / resaleUnlockTarget) * 100)
+      ? Math.min(
+          100,
+          (Math.min(lifetimeShishki, resaleUnlockTarget) / resaleUnlockTarget) *
+            100,
+        )
       : 0
+
+  return {
+    unlockPrice,
+    shishkiRemainingToUnlock,
+    buildingUnlockGoal,
+    buildingUnlockProgress,
+    unlockProgressPercent,
+  }
+}
+
+export const MarketScreen = observer(function MarketScreen() {
+  const {
+    uiEconomy,
+    uiState,
+    buyMarketGood,
+    sellMarketGood,
+    activateCampaign,
+  } = useGameStore()
+  const isUnlocked = Boolean(uiState?.market?.unlocked)
+  const goods = uiEconomy?.marketGoods ?? []
+  const campaigns = uiEconomy?.campaigns ?? []
+  const buildings = uiEconomy?.buildings ?? []
+  const marketScreen = uiEconomy?.marketScreen ?? getMarketScreenFallback(buildings, uiState)
+  const shishki = uiState?.shishki ?? 0
+  const brokerLevel = uiEconomy?.brokerLevel ?? 0
+  const activeEvent = uiState?.activeEvent ?? null
+  const activeCampaign = uiState?.activeCampaign ?? null
+  const feeRate = getMarketFeeRate(uiState)
+  const unlockPrice = marketScreen.unlockPrice ?? '28 000'
+  const shishkiRemainingToUnlock = marketScreen.shishkiRemainingToUnlock ?? 0
+  const buildingUnlockGoal = marketScreen.buildingUnlockGoal ?? 0
+  const buildingUnlockProgress = marketScreen.buildingUnlockProgress ?? 0
+  const unlockProgressPercent = marketScreen.unlockProgressPercent ?? 0
   const brokerTone = getBrokerTone(brokerLevel)
   const hasActiveWindow = Boolean(activeEvent)
   const hasActiveCampaign = Boolean(activeCampaign)

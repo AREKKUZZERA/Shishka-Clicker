@@ -125,6 +125,15 @@ export function pruneExpiredInPlace(current, now, pool) {
   return current
 }
 
+export function hasActiveCanvasEffects(effects) {
+  return (
+    (effects?.particles?.length ?? 0) > 0 ||
+    (effects?.coneSprites?.length ?? 0) > 0 ||
+    (effects?.shockwaves?.length ?? 0) > 0 ||
+    (effects?.bursts?.length ?? 0) > 0
+  )
+}
+
 function createParticles(
   localX,
   localY,

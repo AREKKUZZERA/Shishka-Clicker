@@ -112,6 +112,20 @@ function clearExpiredEvent(state, now = Date.now()) {
   }
 }
 
+function getUiExpirationAt(state) {
+  const campaignEndsAt = Number(state?.activeCampaign?.endsAt ?? 0)
+  const eventEndsAt = Number(state?.activeEvent?.endsAt ?? 0)
+  const candidates = [campaignEndsAt, eventEndsAt].filter(
+    (value) => Number.isFinite(value) && value > 0,
+  )
+
+  if (!candidates.length) {
+    return 0
+  }
+
+  return Math.min(...candidates)
+}
+
 function getEventMarketPayload(eventId) {
   switch (eventId) {
     case 'districtHype':
@@ -210,6 +224,13 @@ export default class GameStore {
   lastTickAt = 0
   clientRevision = 0
   lastMutationAt = null
+  derivedCache = { state: null, value: null }
+  uiResolvedCache = { state: null, value: null, expiresAt: 0 }
+  uiDerivedCache = { state: null, value: null }
+  economyCache = { state: null, derived: null, value: null }
+  uiEconomyCache = { state: null, derived: null, value: null }
+  clickerFieldCache = { state: null, value: null }
+  devResourcesCache = { state: null, value: null }
 
   constructor(rootStore) {
     this.rootStore = rootStore
@@ -221,6 +242,13 @@ export default class GameStore {
         tickTimeoutId: false,
         initialized: false,
         lastTickAt: false,
+        derivedCache: false,
+        uiResolvedCache: false,
+        uiDerivedCache: false,
+        economyCache: false,
+        uiEconomyCache: false,
+        clickerFieldCache: false,
+        devResourcesCache: false,
         achievementQueue: false,
         state: computed.struct,
         uiState: computed.struct,
@@ -238,12 +266,53 @@ export default class GameStore {
     this.start()
   }
 
+  getDerivedForState(state) {
+    if (this.derivedCache.state === state && this.derivedCache.value) {
+      return this.derivedCache.value
+    }
+
+    const value = deriveProduction(state)
+    this.derivedCache = { state, value }
+    return value
+  }
+
+  getResolvedUiState() {
+    const currentState = this.uiSnapshotState
+    const now = Date.now()
+
+    if (
+      this.uiResolvedCache.state === currentState &&
+      this.uiResolvedCache.value &&
+      (this.uiResolvedCache.expiresAt <= 0 || now < this.uiResolvedCache.expiresAt)
+    ) {
+      return this.uiResolvedCache.value
+    }
+
+    const value = resolveUiState(currentState)
+    this.uiResolvedCache = {
+      state: currentState,
+      value,
+      expiresAt: getUiExpirationAt(value),
+    }
+    return value
+  }
+
+  getUiDerivedForState(state) {
+    if (this.uiDerivedCache.state === state && this.uiDerivedCache.value) {
+      return this.uiDerivedCache.value
+    }
+
+    const value = deriveProduction(state)
+    this.uiDerivedCache = { state, value }
+    return value
+  }
+
   get derived() {
-    return deriveProduction(this._state)
+    return this.getDerivedForState(this._state)
   }
 
   get uiDerived() {
-    return deriveProduction(resolveUiState(this.uiSnapshotState))
+    return this.getUiDerivedForState(this.getResolvedUiState())
   }
 
   get state() {
@@ -255,7 +324,7 @@ export default class GameStore {
 
   get uiState() {
     return {
-      ...resolveUiState(this.uiSnapshotState),
+      ...this.getResolvedUiState(),
       ...this.uiDerived,
     }
   }
@@ -275,7 +344,7 @@ export default class GameStore {
   }
 
   get uiPrestige() {
-    const resolvedState = resolveUiState(this.uiSnapshotState)
+    const resolvedState = this.getResolvedUiState()
     const quota = getQuotaPreview(resolvedState)
 
     return {
@@ -290,11 +359,35 @@ export default class GameStore {
   }
 
   get economy() {
-    return buildEconomySnapshot(this._state, this.derived)
+    if (
+      this.economyCache.state === this._state &&
+      this.economyCache.derived === this.derived &&
+      this.economyCache.value
+    ) {
+      return this.economyCache.value
+    }
+
+    const value = buildEconomySnapshot(this._state, this.derived)
+    this.economyCache = { state: this._state, derived: this.derived, value }
+    return value
   }
 
   get uiEconomy() {
-    return buildEconomySnapshot(this.uiSnapshotState, this.uiDerived)
+    if (
+      this.uiEconomyCache.state === this.uiSnapshotState &&
+      this.uiEconomyCache.derived === this.uiDerived &&
+      this.uiEconomyCache.value
+    ) {
+      return this.uiEconomyCache.value
+    }
+
+    const value = buildEconomySnapshot(this.uiSnapshotState, this.uiDerived)
+    this.uiEconomyCache = {
+      state: this.uiSnapshotState,
+      derived: this.uiDerived,
+      value,
+    }
+    return value
   }
 
   get statsBarData() {
@@ -361,11 +454,36 @@ export default class GameStore {
   }
 
   get clickerFieldData() {
-    return buildClickerFieldData(resolveUiState(this.uiSnapshotState))
+    const resolvedState =
+      typeof this.getResolvedUiState === 'function'
+        ? this.getResolvedUiState()
+        : resolveUiState(this.uiSnapshotState)
+    const cache = this.clickerFieldCache ?? { state: null, value: null }
+    if (
+      cache.state === resolvedState &&
+      cache.value
+    ) {
+      return cache.value
+    }
+
+    const value = buildClickerFieldData(resolvedState)
+    if (this.clickerFieldCache) {
+      this.clickerFieldCache = { state: resolvedState, value }
+    }
+    return value
   }
 
   get devConsoleResources() {
-    return buildDevConsoleResources(this._state)
+    if (
+      this.devResourcesCache.state === this._state &&
+      this.devResourcesCache.value
+    ) {
+      return this.devResourcesCache.value
+    }
+
+    const value = buildDevConsoleResources(this._state)
+    this.devResourcesCache = { state: this._state, value }
+    return value
   }
 
   start() {
