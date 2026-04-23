@@ -1,8 +1,5 @@
-import { resolveDiscordRedirectUri } from '../../shared/discordOAuth.js'
-
 const DISCORD_CLIENT_ID =
   import.meta.env.VITE_CLIENT_ID ?? import.meta.env.VITE_DISCORD_CLIENT_ID
-const DISCORD_REDIRECT_URI = resolveDiscordRedirectUri(import.meta.env)
 const DISCORD_ACTIVITY_SCOPES = ['identify', 'rpc.activities.write']
 const DISCORD_READY_TIMEOUT_MS = 5000
 const DISCORD_AUTHORIZE_TIMEOUT_MS = 10000
@@ -50,6 +47,16 @@ export function formatDiscordCommandError(error) {
 function toDiscordError(stage, error) {
   const message = formatDiscordCommandError(error)
   return new Error(`${stage}: ${message}`)
+}
+
+export function buildDiscordAuthorizeParams({ clientId = DISCORD_CLIENT_ID }) {
+  return {
+    client_id: clientId,
+    response_type: 'code',
+    state: 'discord-activity',
+    prompt: 'none',
+    scope: DISCORD_ACTIVITY_SCOPES,
+  }
 }
 
 function withTimeout(promise, timeoutMs, label) {
@@ -117,14 +124,11 @@ export async function setupDiscord() {
     })
 
     const { code } = await withTimeout(
-      discordSdk.commands.authorize({
-        client_id: DISCORD_CLIENT_ID,
-        response_type: 'code',
-        redirect_uri: DISCORD_REDIRECT_URI,
-        state: 'discord-activity',
-        prompt: 'none',
-        scope: DISCORD_ACTIVITY_SCOPES,
-      }),
+      discordSdk.commands.authorize(
+        buildDiscordAuthorizeParams({
+          clientId: DISCORD_CLIENT_ID,
+        }),
+      ),
       DISCORD_AUTHORIZE_TIMEOUT_MS,
       'discord_authorize',
     ).catch((error) => {
