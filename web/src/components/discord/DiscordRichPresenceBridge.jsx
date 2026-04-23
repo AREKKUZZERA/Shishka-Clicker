@@ -10,7 +10,8 @@ export const DiscordRichPresenceBridge = observer(
   function DiscordRichPresenceBridge() {
     const { activeTab } = useNav()
     const game = useGameStore()
-    const { isActivity, status, updateRichPresence } = useDiscordPresence()
+    const { isActivity, status, updateRichPresence, markPresenceBridgeMounted } =
+      useDiscordPresence()
     const startedAtRef = useRef(Math.floor(Date.now() / 1000))
     const gameState = game._state
     const economy = deriveEconomy(gameState)
@@ -21,6 +22,10 @@ export const DiscordRichPresenceBridge = observer(
       economy,
       startedAt: startedAtRef.current,
     })
+
+    useEffect(() => {
+      markPresenceBridgeMounted()
+    }, [markPresenceBridgeMounted])
 
     useEffect(() => {
       if (!isActivity || status !== 'ready') {

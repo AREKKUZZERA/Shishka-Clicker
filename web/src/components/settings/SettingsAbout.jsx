@@ -1,6 +1,8 @@
 import { memo } from 'react'
 import { Coin, Gem, PxlKitIcon, Trophy, Community } from '../../lib/pxlkit'
 import {
+  APP_BUILD_ID,
+  APP_BUILD_TIME,
   APP_VERSION,
   CHANGELOG_URL,
   PRIVACY_URL,
@@ -54,6 +56,10 @@ export const SettingsAbout = memo(function SettingsAbout({ resetGame }) {
             }
           />
         </div>
+
+        <p className="settings-card__hint settings-card__hint--block">
+          Build: {APP_BUILD_ID} • {new Date(APP_BUILD_TIME).toLocaleString('ru-RU')}
+        </p>
       </article>
 
       <article className="settings-card">

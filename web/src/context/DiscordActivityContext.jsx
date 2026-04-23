@@ -806,6 +806,20 @@ export function DiscordActivityProvider({ children }) {
     }
   }, [state.isActivity, state.offlineMode, state.playerId, synchronizeNow])
 
+  const markPresenceBridgeMounted = useCallback(() => {
+    setState((current) => {
+      if (current.presenceState !== 'idle') {
+        return current
+      }
+
+      return {
+        ...current,
+        presenceState: 'syncing',
+        presenceError: 'presence_bridge_mounted',
+      }
+    })
+  }, [])
+
   const value = useMemo(
     () => ({
       ...state,
@@ -831,8 +845,9 @@ export function DiscordActivityProvider({ children }) {
       isActivity: state.isActivity,
       status: state.status,
       updateRichPresence,
+      markPresenceBridgeMounted,
     }),
-    [state.isActivity, state.status, updateRichPresence],
+    [markPresenceBridgeMounted, state.isActivity, state.status, updateRichPresence],
   )
 
   return (
