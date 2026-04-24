@@ -254,8 +254,7 @@ export function DiscordActivityProvider({ children }) {
 
   const enterOfflineMode = useCallback(() => {
     offlineModeRef.current = true
-    const offlinePlayerId =
-      playerIdRef.current ?? state.playerId ?? resolvePlayerId(null)
+    const offlinePlayerId = playerIdRef.current ?? resolvePlayerId(null)
     playerIdRef.current = offlinePlayerId
     websocketStore.start()
     void websocketStore.refreshLeaderboard()
@@ -270,7 +269,7 @@ export function DiscordActivityProvider({ children }) {
       syncError: null,
       lastSyncedAt: null,
     }))
-  }, [state.playerId, websocketStore])
+  }, [websocketStore])
 
   const getLocalSnapshot = useCallback(() => {
     const meta = gameStore.getSaveMeta()
@@ -345,8 +344,8 @@ export function DiscordActivityProvider({ children }) {
     } = {}) => {
       if (offlineModeRef.current) return false
       const syncPlayerId = resolveSyncPlayerId({
-        statePlayerId: state.playerId,
-        playerIdOverride: playerIdOverride ?? playerIdRef.current,
+        statePlayerId: playerIdRef.current,
+        playerIdOverride,
       })
       if (!syncPlayerId) return false
 
@@ -404,7 +403,7 @@ export function DiscordActivityProvider({ children }) {
 
       return true
     },
-    [getLocalSnapshot, markSynced, setSyncState, state.playerId],
+    [getLocalSnapshot, markSynced, setSyncState],
   )
 
   const flushLatestSaveOnExit = useCallback(() => {
@@ -449,8 +448,8 @@ export function DiscordActivityProvider({ children }) {
       if (offlineModeRef.current) return false
 
       const syncPlayerId = resolveSyncPlayerId({
-        statePlayerId: state.playerId,
-        playerIdOverride: playerIdOverride ?? playerIdRef.current,
+        statePlayerId: playerIdRef.current,
+        playerIdOverride,
       })
       if (!syncPlayerId) return false
 
@@ -591,7 +590,6 @@ export function DiscordActivityProvider({ children }) {
       getLocalSnapshot,
       markSynced,
       setSyncState,
-      state.playerId,
       uploadLatestSave,
     ],
   )
