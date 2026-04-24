@@ -1,7 +1,6 @@
 import { isValidElement, memo, useEffect, useMemo, useRef } from 'react'
 import {
   AnimatedPxlKitIcon,
-  Coin,
   Gem,
   isAnimatedIcon,
   Lightning,
@@ -10,7 +9,6 @@ import {
   Sword,
   Trophy,
   Community,
-  Robot,
 } from '../../lib/pxlkit'
 import { formatNumber } from '../../lib/format'
 import { ContributionBar } from './ContributionBar.jsx'
@@ -28,11 +26,8 @@ const renderPxlIcon = (icon, label, size = 18) => (
 
 const ICON_MAP = {
   cone: <ConeIcon />,
-  money: renderPxlIcon(Coin, 'money'),
   knowledge: renderPxlIcon(Scroll, 'knowledge'),
   power: renderPxlIcon(Sword, 'power'),
-  robot: renderPxlIcon(Robot, 'robot'),
-  prize: renderPxlIcon(Trophy, 'prize'),
   mega: renderPxlIcon(Lightning, 'mega'),
   rebirth: renderPxlIcon(Community, 'rebirth'),
   shards: renderPxlIcon(Gem, 'shards'),
@@ -40,15 +35,12 @@ const ICON_MAP = {
 }
 
 const PIXEL_ICON_MAP = {
-  money: Coin,
   knowledge: Scroll,
   power: Sword,
   mega: Lightning,
-  prize: Trophy,
   rebirth: Community,
   shards: Gem,
   reward: Trophy,
-  robot: Robot,
 }
 
 function buildAnimatedDigits(previousValue, nextValue) {

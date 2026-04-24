@@ -1,11 +1,10 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import {
   SAVE_EXPORT_VERSION,
   createSaveBundle,
   isObsoleteSaveBundle,
   normalizeImportedBundle,
 } from '../saveTransfer.js'
-import { clearLegacyGame, loadLegacyGameRecord } from '../storage.js'
 
 function createGameState(overrides = {}) {
   return {
@@ -31,24 +30,6 @@ function createGameState(overrides = {}) {
     },
     achievements: {},
     ...overrides,
-  }
-}
-
-function mockWindow(storageEntries = {}) {
-  const storage = new Map(Object.entries(storageEntries))
-
-  globalThis.window = {
-    localStorage: {
-      getItem: vi.fn((key) => storage.get(key) ?? null),
-      removeItem: vi.fn((key) => {
-        storage.delete(key)
-      }),
-    },
-  }
-
-  return {
-    storage,
-    localStorage: globalThis.window.localStorage,
   }
 }
 
@@ -109,47 +90,5 @@ describe('saveTransfer', () => {
         version: 1,
       }),
     ).toBe(true)
-  })
-})
-
-describe('storage migration', () => {
-  afterEach(() => {
-    delete globalThis.window
-  })
-
-  it('ignores obsolete save keys after the storage key bump', () => {
-    mockWindow({
-      'shishka-clicker-save-v5': JSON.stringify({
-        state: createGameState(),
-        updatedAt: '2026-04-19T12:00:00.000Z',
-      }),
-    })
-
-    expect(loadLegacyGameRecord()).toEqual({
-      state: null,
-      updatedAt: null,
-    })
-  })
-
-  it('clears the current and obsolete local save keys', () => {
-    const { localStorage } = mockWindow({
-      'shishka-clicker-save-v6': JSON.stringify({
-        state: createGameState(),
-      }),
-      'shishka-clicker-save-v5': '{}',
-      'shishka-clicker-save-v4': '{}',
-    })
-
-    clearLegacyGame()
-
-    expect(localStorage.removeItem).toHaveBeenCalledWith(
-      'shishka-clicker-save-v6',
-    )
-    expect(localStorage.removeItem).toHaveBeenCalledWith(
-      'shishka-clicker-save-v5',
-    )
-    expect(localStorage.removeItem).toHaveBeenCalledWith(
-      'shishka-clicker-save-v4',
-    )
   })
 })

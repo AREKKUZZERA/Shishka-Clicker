@@ -280,14 +280,6 @@
   transition: opacity 180ms steps(2, end);
 }
 
-.shop-card--money {
-  --card-tone-rgb: var(--accent-emerald-rgb);
-}
-
-.shop-card--knowledge {
-  --card-tone-rgb: var(--accent-cyan-rgb);
-}
-
 .shop-card--shishki {
   --card-tone-rgb: var(--accent-primary-rgb);
 }
