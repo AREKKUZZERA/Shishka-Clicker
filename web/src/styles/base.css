@@ -105,14 +105,19 @@ body {
   background-color: var(--color-bg);
   background-image:
     radial-gradient(
-      ellipse at 20% 0%,
-      rgb(var(--accent-primary-rgb) / 0.08),
-      transparent 50%
+      ellipse at 12% 0%,
+      rgb(var(--accent-cyan-rgb) / 0.13),
+      transparent 46%
     ),
     radial-gradient(
-      ellipse at 80% 100%,
-      rgb(var(--accent-fuchsia-rgb) / 0.06),
-      transparent 50%
+      ellipse at 88% 12%,
+      rgb(var(--accent-fuchsia-rgb) / 0.12),
+      transparent 42%
+    ),
+    radial-gradient(
+      ellipse at 46% 100%,
+      rgb(var(--accent-primary-rgb) / 0.08),
+      transparent 48%
     ),
     linear-gradient(
       rgb(255 255 255 / var(--fx-grid-opacity)) 1px,
@@ -126,6 +131,7 @@ body {
     linear-gradient(180deg, var(--color-bg-elevated), var(--color-bg));
   background-position:
     top left,
+    top right,
     bottom right,
     center,
     center,
@@ -133,23 +139,24 @@ body {
   background-size:
     auto,
     auto,
+    auto,
     var(--fx-grid-size) var(--fx-grid-size),
     var(--fx-grid-size) var(--fx-grid-size),
     auto;
-  background-repeat: no-repeat, no-repeat, repeat, repeat, no-repeat;
+  background-repeat: no-repeat, no-repeat, no-repeat, repeat, repeat, no-repeat;
   background-attachment: fixed;
 }
 
 :root[data-fx-safe-mode='true'] body {
   background-image:
     radial-gradient(
-      ellipse at 20% 0%,
-      rgb(var(--accent-primary-rgb) / 0.05),
+      ellipse at 12% 0%,
+      rgb(var(--accent-cyan-rgb) / 0.07),
       transparent 42%
     ),
     radial-gradient(
-      ellipse at 80% 100%,
-      rgb(var(--accent-fuchsia-rgb) / 0.04),
+      ellipse at 88% 12%,
+      rgb(var(--accent-fuchsia-rgb) / 0.06),
       transparent 42%
     ),
     linear-gradient(180deg, var(--color-bg-elevated), var(--color-bg));
@@ -215,8 +222,9 @@ button:not(:disabled) {
 
 button:disabled,
 button[aria-disabled='true'],
-[role='button'][aria-disabled='true']{
-  cursor: url('../assets/dark-cur_ani_files/unavailable.cur'), not-allowed !important;
+[role='button'][aria-disabled='true'] {
+  cursor:
+    url('../assets/dark-cur_ani_files/unavailable.cur'), not-allowed !important;
 }
 
 a {
@@ -281,29 +289,29 @@ input[type='range'] {
   background: rgb(var(--accent-primary-rgb) / 0.52);
 }
 
-[data-cursor='zoom']{
+[data-cursor='zoom'] {
   cursor: url('../assets/dark-cur_ani_files/precision.cur'), zoom-in;
 }
 
-[data-cursor='resize-ew']{
+[data-cursor='resize-ew'] {
   cursor: url('../assets/dark-cur_ani_files/dgn1.cur'), ew-resize;
 }
 
-[data-cursor='resize-ns']{
+[data-cursor='resize-ns'] {
   cursor: url('../assets/dark-cur_ani_files/dgn2.cur'), ns-resize;
 }
 
 @media (pointer: coarse) {
   html,
-body,
-button:not(:disabled),
-a,
-input,
-textarea,
-[contenteditable='true'],
-[data-cursor='zoom'],
-[data-cursor='resize-ew'],
-[data-cursor='resize-ns']{
+  body,
+  button:not(:disabled),
+  a,
+  input,
+  textarea,
+  [contenteditable='true'],
+  [data-cursor='zoom'],
+  [data-cursor='resize-ew'],
+  [data-cursor='resize-ns'] {
     cursor: auto !important;
   }
 }

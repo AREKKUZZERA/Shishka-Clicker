@@ -14,16 +14,22 @@
   --font-mono: 'Space Mono', 'SFMono-Regular', ui-monospace, monospace;
 
   /* ── Background ─────────────────────────── */
-  --color-bg: #07070e;
-  --color-bg-elevated: #0e0e1a;
-  --color-bg-rgb: 7 7 14;
-  --color-bg-elevated-rgb: 14 14 26;
+  --arcade-bg-rgb: 5 7 18;
+  --arcade-surface-rgb: 16 19 42;
+  --arcade-neon-rgb: 36 231 255;
+  --arcade-pop-rgb: 255 79 216;
+  --arcade-gold-rgb: 255 178 56;
+
+  --color-bg: #050712;
+  --color-bg-elevated: #10132a;
+  --color-bg-rgb: var(--arcade-bg-rgb);
+  --color-bg-elevated-rgb: var(--arcade-surface-rgb);
 
   /* ── Surfaces (layered cards / panels) ──── */
-  --surface-1-rgb: 14 14 24;
-  --surface-2-rgb: 20 20 34;
-  --surface-3-rgb: 28 28 48;
-  --surface-strong-rgb: 22 22 38;
+  --surface-1-rgb: 11 13 30;
+  --surface-2-rgb: 17 20 45;
+  --surface-3-rgb: 27 30 66;
+  --surface-strong-rgb: 20 23 52;
 
   --surface-1: rgb(var(--surface-1-rgb) / 0.92);
   --surface-2: rgb(var(--surface-2-rgb) / 0.96);
@@ -32,54 +38,68 @@
   --surface-frost: rgb(255 255 255 / 0.035);
 
   /* ── Text ────────────────────────────────── */
-  --text-strong: #f0f0f8;
-  --text-base: #c8c8d8;
-  --text-muted: #8888a4;
-  --text-faint: #5c5c76;
+  --text-strong: #f8fbff;
+  --text-base: #d4daf7;
+  --text-muted: #96a0c8;
+  --text-faint: #667096;
 
   /* ── Primitives ─────────────────────────── */
   --white-rgb: 255 255 255;
   --black-rgb: 0 0 0;
 
   /* ── Accent: Primary (amber / orange) ──── */
-  --accent-primary: #f5a623;
-  --accent-primary-rgb: 245 166 35;
-  --accent-primary-strong: #ffc85c;
+  --accent-primary: #ffb238;
+  --accent-primary-rgb: var(--arcade-gold-rgb);
+  --accent-primary-strong: #ffd166;
 
   /* ── Accent: Emerald ────────────────────── */
-  --accent-emerald: #34d399;
-  --accent-emerald-rgb: 52 211 153;
+  --accent-emerald: #39ff9c;
+  --accent-emerald-rgb: 57 255 156;
 
   /* ── Accent: Cyan ───────────────────────── */
-  --accent-cyan: #22d3ee;
-  --accent-cyan-rgb: 34 211 238;
+  --accent-cyan: #24e7ff;
+  --accent-cyan-rgb: var(--arcade-neon-rgb);
 
   /* ── Accent: Fuchsia ────────────────────── */
-  --accent-fuchsia: #c084fc;
-  --accent-fuchsia-rgb: 192 132 252;
+  --accent-fuchsia: #ff4fd8;
+  --accent-fuchsia-rgb: var(--arcade-pop-rgb);
 
   /* ── Accent: Violet ─────────────────────── */
-  --accent-violet: #a78bfa;
-  --accent-violet-rgb: 167 139 250;
+  --accent-violet: #9b5cff;
+  --accent-violet-rgb: 155 92 255;
 
   /* ── Accent: Rose ───────────────────────── */
-  --accent-rose: #fb7185;
-  --accent-rose-rgb: 251 113 133;
+  --accent-rose: #ff5c8a;
+  --accent-rose-rgb: 255 92 138;
 
   /* ── Accent: Danger ─────────────────────── */
-  --accent-danger: #f87171;
-  --accent-danger-rgb: 248 113 113;
+  --accent-danger: #ff4b5f;
+  --accent-danger-rgb: 255 75 95;
 
   /* ── Borders ────────────────────────────── */
-  --border-soft: rgb(255 255 255 / 0.07);
-  --border-strong: rgb(255 255 255 / 0.12);
-  --border-accent: rgb(var(--accent-primary-rgb) / 0.22);
+  --border-soft: rgb(185 210 255 / 0.09);
+  --border-strong: rgb(185 210 255 / 0.15);
+  --border-accent: rgb(var(--accent-cyan-rgb) / 0.26);
 
   /* ── Shadows ────────────────────────────── */
   --shadow-sm: 0 4px 16px rgb(0 0 0 / 0.2);
   --shadow-md: 0 12px 32px rgb(0 0 0 / 0.3);
   --shadow-lg: 0 24px 64px rgb(0 0 0 / 0.4);
-  --shadow-glow: 0 0 40px rgb(var(--accent-primary-rgb) / 0.12);
+  --shadow-pixel:
+    inset 0 0 0 2px rgb(var(--black-rgb) / 0.2),
+    5px 5px 0 0 rgb(var(--black-rgb) / 0.24),
+    0 0 20px rgb(var(--screen-accent-rgb) / 0.045);
+  --shadow-pixel-accent:
+    inset 0 0 0 2px rgb(var(--black-rgb) / 0.2),
+    5px 5px 0 0 rgb(var(--black-rgb) / 0.24),
+    0 0 22px rgb(var(--screen-accent-rgb) / 0.08);
+  --shadow-pixel-hover:
+    inset 0 0 0 2px rgb(var(--black-rgb) / 0.2),
+    6px 6px 0 0 rgb(var(--black-rgb) / 0.26),
+    0 0 26px rgb(var(--screen-accent-rgb) / 0.1);
+  --shadow-glow:
+    0 0 34px rgb(var(--accent-cyan-rgb) / 0.12),
+    0 0 46px rgb(var(--accent-fuchsia-rgb) / 0.08);
 
   /* ── Radii ──────────────────────────────── */
   --radius-sm: 0.625rem;
@@ -147,8 +167,13 @@
   --fx-firework-scale: 0.72;
 
   /* ── Contextual aliases ─────────────────── */
-  --screen-accent-rgb: var(--accent-primary-rgb);
-  --btn-accent-rgb: var(--accent-primary-rgb);
+  --screen-clicker-rgb: var(--arcade-gold-rgb);
+  --screen-shop-rgb: var(--arcade-gold-rgb);
+  --screen-market-rgb: var(--arcade-neon-rgb);
+  --screen-meta-rgb: var(--arcade-pop-rgb);
+  --screen-settings-rgb: var(--accent-cyan-rgb);
+  --screen-accent-rgb: var(--screen-clicker-rgb);
+  --btn-accent-rgb: var(--screen-clicker-rgb);
 }
 
 @media (max-width: 960px) {

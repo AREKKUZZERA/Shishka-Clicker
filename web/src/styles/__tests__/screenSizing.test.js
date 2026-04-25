@@ -93,4 +93,36 @@ describe('screen sizing tokens', () => {
     expect(baseCss).toContain('cursor: pointer;')
     expect(baseCss).toContain('cursor: text;')
   })
+
+  it('defines arcade palette tokens and maps screen accents consistently', () => {
+    const themeCss = read('../theme.css')
+    const layoutCss = read('../layout.css')
+    const screensCss = read('../screens.css')
+    const shopCss = read('../shop-screen.css')
+
+    expect(themeCss).toContain('--arcade-bg-rgb:')
+    expect(themeCss).toContain('--arcade-surface-rgb:')
+    expect(themeCss).toContain('--arcade-neon-rgb:')
+    expect(themeCss).toContain('--arcade-pop-rgb:')
+    expect(themeCss).toContain('--arcade-gold-rgb:')
+    expect(themeCss).toContain('--shadow-pixel:')
+    expect(themeCss).toContain('--shadow-pixel-accent:')
+    expect(themeCss).toContain('--screen-shop-rgb: var(--arcade-gold-rgb);')
+    expect(themeCss).toContain('--screen-market-rgb: var(--arcade-neon-rgb);')
+    expect(themeCss).toContain('--screen-meta-rgb: var(--arcade-pop-rgb);')
+    expect(themeCss).toContain('--screen-settings-rgb: var(--accent-cyan-rgb);')
+
+    expect(layoutCss).toContain(
+      '--screen-accent-rgb: var(--screen-clicker-rgb);',
+    )
+    expect(layoutCss).toContain(
+      '--screen-accent-rgb: var(--screen-market-rgb);',
+    )
+    expect(layoutCss).toContain('box-shadow: var(--shadow-pixel) !important;')
+    expect(screensCss).toContain('--screen-accent-rgb: var(--screen-meta-rgb);')
+    expect(screensCss).toContain(
+      '--screen-accent-rgb: var(--screen-settings-rgb);',
+    )
+    expect(shopCss).toContain('--screen-accent-rgb: var(--screen-shop-rgb);')
+  })
 })
