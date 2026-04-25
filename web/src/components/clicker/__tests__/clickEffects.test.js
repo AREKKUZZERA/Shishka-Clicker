@@ -87,4 +87,38 @@ describe('buildClickSpawnState', () => {
       iconData: null,
     })
   })
+
+  it('uses the configured floating number cap without density downscaling', () => {
+    const spawnState = buildClickSpawnState({
+      result: {
+        amount: 12,
+        particleCount: 12,
+        symbols: ['shishka'],
+      },
+      pointerPoint: { x: 100, y: 120 },
+      particlePoint: { x: 100, y: 120 },
+      burstPoint: { x: 100, y: 120 },
+      config: {
+        visualEffectCaps: {
+          burstCap: 6,
+          particleCap: 10,
+        },
+        visualEffectScaling: {
+          burstSpawnScale: 0.5,
+          particleSpawnScale: 1,
+        },
+        visualEffectToggles: {
+          floatingNumbers: true,
+          particles: true,
+        },
+      },
+      now: 1_000,
+      pools: {
+        particles: [],
+        bursts: [],
+      },
+    })
+
+    expect(spawnState.burst?.cap).toBe(6)
+  })
 })

@@ -74,6 +74,16 @@ describe('screen sizing tokens', () => {
     )
   })
 
+  it('pins collapsed clicker scene without transforming the click target', () => {
+    const layoutCss = read('../layout.css')
+
+    expect(layoutCss).toContain(
+      '.clicker-deck-layout__hero--collapsed .clicker-wrap {',
+    )
+    expect(layoutCss).toContain('inset: auto 0 0;')
+    expect(layoutCss).not.toContain('transform: translateY(-50%);')
+  })
+
   it('softens the cursor on small screens and disables it on touch devices', () => {
     const baseCss = read('../base.css')
 

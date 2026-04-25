@@ -173,7 +173,7 @@ export function buildClickSpawnState({
   } = config
 
   const burstLifetime = EFFECT_LIFETIMES.burst
-  const burstCap = Math.round(caps.burstCap * scaling.burstSpawnScale)
+  const burstCap = caps.burstCap
   const particleAmount = Math.max(
     1,
     Math.round(result.particleCount * scaling.particleSpawnScale),
